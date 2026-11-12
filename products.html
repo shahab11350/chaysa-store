@@ -289,27 +289,14 @@ document.addEventListener("DOMContentLoaded", function () {
     return lines.join("\n");
   }
 
-  invoice.querySelector(".share-order").addEventListener("click", async function () {
+  invoice.querySelector(".share-order").addEventListener("click", function () {
     if (cart.size === 0) {
       alert("ابتدا محصولی به فاکتور اضافه کنید.");
       return;
     }
     const message = buildOrderText();
-    const telegramUrl = "https://t.me/reza_shahab_nezam";
-    const telegramTab = window.open(telegramUrl, "_blank");
-    try {
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(message);
-        alert("متن سفارش کپی شد. در تلگرام، گفت‌وگوی مقصد را باز کنید و متن را جای‌گذاری و ارسال کنید.");
-      } else {
-        window.prompt("متن سفارش را کپی کنید؛ سپس در تلگرام جای‌گذاری و ارسال کنید:", message);
-      }
-    } catch (error) {
-      window.prompt("متن سفارش را کپی کنید؛ سپس در تلگرام جای‌گذاری و ارسال کنید:", message);
-    }
-    if (!telegramTab) {
-      window.location.href = telegramUrl;
-    }
+    const telegramUrl = "https://t.me/reza_shahab_nezam?text=" + encodeURIComponent(message);
+    window.location.href = telegramUrl;
   });
 
   invoice.querySelector(".clear-invoice").addEventListener("click", function () {
