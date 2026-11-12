@@ -69,6 +69,14 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .page-nav a{color:white;text-decoration:none;font-size:14px}
 #products{padding-top:24px}
 
+
+.customer-details{margin-top:16px;padding:14px;background:#fbfaf6;border:1px solid #e8dfca;border-radius:12px}
+.customer-details h4{margin:0 0 10px;color:#173b2b;font-size:14px}
+.customer-fields{display:grid;grid-template-columns:1fr;gap:9px}
+.customer-fields input{width:100%;padding:12px;border:1px solid #d9d2c2;border-radius:9px;font-family:inherit;font-size:13px;background:#fff;color:#26372b}
+.customer-fields input:focus{outline:2px solid #b99b55;border-color:#b99b55}
+.customer-help{font-size:11px;color:#777;line-height:1.8;margin:8px 0 0}
+
 /* سبد خرید و فاکتور سفارش */
 .add-to-invoice{border:0;background:#b99b55;color:#fff;border-radius:9px;padding:10px 12px;font-family:inherit;font-size:13px;cursor:pointer}
 .add-to-invoice:active{transform:scale(.98)}
@@ -177,7 +185,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const invoice = document.createElement("section");
   invoice.className = "invoice-box";
-  invoice.innerHTML = '<h3>پیش‌فاکتور سفارش چایسا</h3><div class="invoice-items"><p class="invoice-empty">هنوز محصولی به فاکتور اضافه نشده است.</p></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="invoice-total">۰ تومان</strong></div><p class="order-note">پس از ارسال سفارش، چایسا جزئیات را بررسی می‌کند و برای هماهنگی پرداخت با شما تماس می‌گیرد.</p><div class="invoice-actions"><button type="button" class="share-order">ارسال سفارش برای چایسا</button><button type="button" class="copy-invoice">کپی پیش‌فاکتور</button><button type="button" class="clear-invoice">پاک کردن فاکتور</button></div>';
+  invoice.innerHTML = '<h3>پیش‌فاکتور سفارش چایسا</h3><div class="customer-details"><h4>اطلاعات خریدار</h4><div class="customer-fields"><input class="customer-name" type="text" autocomplete="name" placeholder="نام خریدار (اختیاری)"><input class="customer-contact" type="text" autocomplete="tel" placeholder="شماره تماس یا آیدی تلگرام (ضروری)"></div><p class="customer-help">برای پیگیری سفارش، وارد کردن شماره تماس یا آیدی تلگرام الزامی است.</p></div><div class="invoice-items"><p class="invoice-empty">هنوز محصولی به فاکتور اضافه نشده است.</p></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="invoice-total">۰ تومان</strong></div><p class="order-note">پس از ارسال سفارش، چایسا جزئیات را بررسی می‌کند و برای هماهنگی پرداخت با شما تماس می‌گیرد.</p><div class="invoice-actions"><button type="button" class="share-order">ارسال سفارش برای چایسا</button><button type="button" class="copy-invoice">کپی پیش‌فاکتور</button><button type="button" class="clear-invoice">پاک کردن فاکتور</button></div>';
   const cart = new Map();
   const floatingCart = document.createElement("aside");
   floatingCart.className = "floating-cart";
@@ -279,7 +287,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function buildOrderText() {
-    const lines = ["سفارش جدید چایسا", "--------------------"];
+    const customerName = invoice.querySelector(".customer-name").value.trim();
+    const customerContact = invoice.querySelector(".customer-contact").value.trim();
+    const lines = ["سفارش جدید چایسا", "--------------------", "نام خریدار: " + (customerName || "ثبت نشده"), "راه ارتباطی: " + customerContact, "--------------------"];
     let total = 0;
     cart.forEach(function (item, code) {
       lines.push(item.name + " | شناسه: " + code + " | تعداد: " + item.qty + " | مبلغ: " + (item.price * item.qty).toLocaleString("en-US") + " تومان");
@@ -292,6 +302,12 @@ document.addEventListener("DOMContentLoaded", function () {
   invoice.querySelector(".share-order").addEventListener("click", async function () {
     if (cart.size === 0) {
       alert("ابتدا محصولی به فاکتور اضافه کنید.");
+      return;
+    }
+    const contactInput = invoice.querySelector(".customer-contact");
+    if (!contactInput.value.trim()) {
+      alert("لطفاً شماره تماس یا آیدی تلگرام خریدار را وارد کنید.");
+      contactInput.focus();
       return;
     }
     const button = invoice.querySelector(".share-order");
@@ -323,6 +339,12 @@ document.addEventListener("DOMContentLoaded", function () {
   invoice.querySelector(".copy-invoice").addEventListener("click", function () {
     if (cart.size === 0) {
       alert("ابتدا محصولی به فاکتور اضافه کنید.");
+      return;
+    }
+    const contactInput = invoice.querySelector(".customer-contact");
+    if (!contactInput.value.trim()) {
+      alert("لطفاً شماره تماس یا آیدی تلگرام خریدار را وارد کنید.");
+      contactInput.focus();
       return;
     }
     const text = buildOrderText();
