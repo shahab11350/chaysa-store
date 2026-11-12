@@ -308,11 +308,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const info = row.querySelector(".product-info").cloneNode(true);
         const price = row.querySelector(".product-price").cloneNode(true);
         card.append(info, price);
-        const add = document.createElement("button");
-        add.type = "button";
-        add.className = "add-to-invoice";
-        add.textContent = "افزودن به فاکتور";
-        add.addEventListener("click", function () {
+        function addProductToInvoice() {
           const name = info.querySelector("strong").textContent.trim();
           const codeText = info.querySelector("small").textContent;
           const code = codeText.replace(/[^0-9]/g, "");
@@ -322,6 +318,24 @@ document.addEventListener("DOMContentLoaded", function () {
           else cart.set(code, {name:name, price:priceValue, qty:1});
           renderInvoice();
           invoice.scrollIntoView({behavior:"smooth", block:"start"});
+        }
+        card.style.cursor = "pointer";
+        card.setAttribute("role", "button");
+        card.setAttribute("tabindex", "0");
+        card.addEventListener("click", addProductToInvoice);
+        card.addEventListener("keydown", function(event) {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            addProductToInvoice();
+          }
+        });
+        const add = document.createElement("button");
+        add.type = "button";
+        add.className = "add-to-invoice";
+        add.textContent = "افزودن به فاکتور";
+        add.addEventListener("click", function(event) {
+          event.stopPropagation();
+          addProductToInvoice();
         });
         card.appendChild(add);
         cards.appendChild(card);
