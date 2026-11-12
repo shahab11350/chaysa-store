@@ -36,14 +36,27 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .category-card h3{margin:7px 0}
 .category-card summary p{margin:5px 0;color:#777}
 .category-hint{display:inline-block;margin-top:8px;color:#9a7d3d;font-size:12px}
-.product-list{padding:0 14px 12px}
-.product-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 3px;border-top:1px solid #eee8d8}
-.product-image{display:none;width:58px;height:58px;object-fit:cover;border-radius:10px;border:1px solid #eee8d8;flex:0 0 58px;background:#f7f5ef}\n.product-info{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
-.product-info strong{font-size:13px;font-weight:600;line-height:1.8}
+.product-list{display:none}
+.product-row{display:none}
+.product-image{display:none;width:100%;height:120px;object-fit:cover;border-radius:10px;background:#f7f5ef}
+.product-info{display:flex;flex-direction:column;gap:7px;min-width:0}
+.product-info strong{font-size:14px;font-weight:700;line-height:1.9;color:#26372b}
 .product-info small{font-size:11px;color:#888}
-.product-price{font-size:12px;color:#244b37;white-space:nowrap}
+.product-price{font-size:14px;color:#244b37;white-space:nowrap;font-weight:bold}
 .empty-category{text-align:center;color:#888;font-size:13px;padding:12px}
-@media(max-width:480px){.product-row{align-items:flex-start;flex-direction:column;gap:5px}.product-price{font-size:13px}}
+.product-page{margin-top:18px}
+.product-page-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.product-page-head h3{margin:0;color:#173b2b;font-size:20px}
+.back-products{border:0;background:#244b37;color:#fff;border-radius:9px;padding:10px 15px;font-family:inherit;cursor:pointer}
+.product-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.product-card{background:#fff;border:1px solid #eee8d8;border-radius:14px;padding:12px;box-shadow:0 4px 14px #0000000a;display:flex;flex-direction:column;gap:10px;min-width:0}
+.product-card .product-image{display:none}
+.product-card .product-image[src]{display:block}
+.product-card .product-info{flex:1}
+.product-card .product-price{border-top:1px solid #eee8d8;padding-top:9px}
+.category-card{cursor:pointer}
+@media(min-width:650px){.product-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:360px){.product-cards{grid-template-columns:1fr}}
 
 @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
@@ -134,13 +147,71 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 
 </footer>
 <script>
-/* برای افزودن عکس هر محصول، مسیر تصویر را در data-image همان محصول قرار دهید. */
-document.querySelectorAll(".product-image[data-image]").forEach(function(image){
-  const imagePath = image.dataset.image.trim();
-  if (imagePath) {
-    image.src = imagePath;
-    image.style.display = "block";
-  }
+/* نمایش محصولات هر دسته در صفحه‌ای جداگانه با کارت‌های مستقل */
+document.addEventListener("DOMContentLoaded", function () {
+  const section = document.querySelector("#products");
+  const categoryGrid = section.querySelector(".grid");
+  const page = document.createElement("div");
+  page.className = "product-page";
+  page.hidden = true;
+  section.appendChild(page);
+
+  categoryGrid.querySelectorAll(".category-card").forEach(function (category) {
+    const summary = category.querySelector("summary");
+    summary.addEventListener("click", function (event) {
+      event.preventDefault();
+      const title = summary.querySelector("h3").textContent.trim();
+      const rows = category.querySelectorAll(".product-row");
+      const empty = category.querySelector(".empty-category");
+      categoryGrid.hidden = true;
+      page.hidden = false;
+      page.replaceChildren();
+
+      const head = document.createElement("div");
+      head.className = "product-page-head";
+      const back = document.createElement("button");
+      back.className = "back-products";
+      back.type = "button";
+      back.textContent = "بازگشت به دسته‌ها";
+      back.addEventListener("click", function () {
+        page.hidden = true;
+        categoryGrid.hidden = false;
+        window.scrollTo({top: section.offsetTop, behavior: "smooth"});
+      });
+      const heading = document.createElement("h3");
+      heading.textContent = title;
+      head.append(back, heading);
+      page.appendChild(head);
+
+      if (empty) {
+        const message = document.createElement("p");
+        message.className = "empty-category";
+        message.textContent = empty.textContent;
+        page.appendChild(message);
+        return;
+      }
+
+      const cards = document.createElement("div");
+      cards.className = "product-cards";
+      rows.forEach(function (row) {
+        const card = document.createElement("article");
+        card.className = "product-card";
+        const image = row.querySelector(".product-image");
+        if (image && image.getAttribute("data-image") && image.getAttribute("data-image").trim()) {
+          const picture = image.cloneNode(true);
+          picture.src = image.getAttribute("data-image").trim();
+          picture.style.display = "block";
+          card.appendChild(picture);
+        }
+        const info = row.querySelector(".product-info").cloneNode(true);
+        const price = row.querySelector(".product-price").cloneNode(true);
+        card.append(info, price);
+        cards.appendChild(card);
+      });
+      page.appendChild(cards);
+      window.scrollTo({top: section.offsetTop, behavior: "smooth"});
+    });
+  });
 });
 </script>
 </body>
