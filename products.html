@@ -90,6 +90,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .payment-details strong{color:#244b37}
 .payment-note{font-size:11px;color:#777;margin:8px 0 0}
 .payment-copy{background:#b99b55;color:#fff}
+.finalize-payment{background:#b99b55;color:#fff;font-weight:bold}
 .clear-invoice{background:#f1eee5;color:#665a43}
 .floating-cart{position:fixed;z-index:1000;left:12px;right:12px;bottom:12px;max-width:620px;margin:auto;background:#fff;border:1px solid #d9c99f;border-radius:16px;box-shadow:0 8px 30px #0003;padding:12px 14px;max-height:38vh;display:flex;flex-direction:column;gap:8px}
 .floating-cart[hidden]{display:none}
@@ -180,7 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const invoice = document.createElement("section");
   invoice.className = "invoice-box";
-  invoice.innerHTML = '<h3>فاکتور موقت سفارش چایسا</h3><div class="invoice-items"><p class="invoice-empty">هنوز محصولی به فاکتور اضافه نشده است.</p></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="invoice-total">۰ تومان</strong></div><div class="payment-details"><h4>اطلاعات پرداخت</h4><div>شماره حساب / کارت: <strong>................................</strong></div><div>نام صاحب حساب: <strong>................................</strong></div><p class="payment-note">پس از تکمیل پرداخت و تأیید فروشنده، فاکتور نهایی سفارش صادر می‌شود. این فاکتور تا پیش از تأیید پرداخت، موقت است.</p></div><div class="invoice-actions"><button type="button" class="copy-invoice">کپی فاکتور موقت</button><button type="button" class="clear-invoice">پاک کردن فاکتور</button></div>';
+  invoice.innerHTML = '<h3>فاکتور موقت سفارش چایسا</h3><div class="invoice-items"><p class="invoice-empty">هنوز محصولی به فاکتور اضافه نشده است.</p></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="invoice-total">۰ تومان</strong></div><div class="payment-details"><h4>اطلاعات پرداخت</h4><div>شماره حساب / کارت: <strong>................................</strong></div><div>نام صاحب حساب: <strong>................................</strong></div><p class="payment-note">پس از تکمیل پرداخت و تأیید فروشنده، فاکتور نهایی سفارش صادر می‌شود. این فاکتور تا پیش از تأیید پرداخت، موقت است.</p></div><div class="invoice-actions"><button type="button" class="finalize-payment">پرداخت نهایی و دریافت فاکتور</button><button type="button" class="copy-invoice">کپی فاکتور موقت</button><button type="button" class="clear-invoice">پاک کردن فاکتور</button></div>';
   const cart = new Map();
   const floatingCart = document.createElement("aside");
   floatingCart.className = "floating-cart";
@@ -281,7 +282,7 @@ document.addEventListener("DOMContentLoaded", function () {
     floatingTotal.textContent = "جمع: " + formatMoney(grandTotal);
   }
 
-  invoice.querySelector(".clear-invoice").addEventListener("click", function () {
+  invoice.querySelector(".finalize-payment").addEventListener("click", function () {\n    const payment = invoice.querySelector(".payment-details");\n    payment.scrollIntoView({behavior:"smooth", block:"center"});\n    alert("برای نهایی‌کردن سفارش، ابتدا باید شماره حساب و نام صاحب حساب ثبت شود. پس از پرداخت، رسید را برای فروشنده بفرستید تا پرداخت تأیید و فاکتور اصلی صادر شود.");\n  });\n\n  invoice.querySelector(".clear-invoice").addEventListener("click", function () {
     cart.clear();
     renderInvoice();
   });
