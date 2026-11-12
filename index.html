@@ -3,60 +3,65 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>چایسا | فروشگاه اینترنتی</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f7f5ef;color:#26372b;font-family:Tahoma,Arial,sans-serif}
-header{background:#183b2b;color:white;padding:24px 16px;text-align:center}
-header h1{margin:0;font-size:34px;letter-spacing:2px}
-header p{margin:10px 0 0;color:#e4d6a5}
-nav{display:flex;justify-content:center;gap:22px;padding:15px;background:#e9e5d8;flex-wrap:wrap}
-nav a{color:#254b35;text-decoration:none;font-size:14px}
-.hero{text-align:center;padding:65px 20px;background:#dfe8dc}
-.hero h2{font-size:27px;margin:0 0 15px}
+body{margin:0;font-family:Tahoma,sans-serif;background:#f7f5ef;color:#26372b}
+header{background:#173b2b;color:white;text-align:center;padding:30px 15px}
+.logo{font-size:36px;font-weight:bold;letter-spacing:3px;color:#e6cc85}
+header p{margin-bottom:0;color:#eee3c5}
+nav{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;background:#244b37;padding:16px}
+nav a{color:white;text-decoration:none;font-size:14px}
+.hero{padding:65px 15px;text-align:center;background:linear-gradient(135deg,#e5eadc,#f7f5ef)}
+.hero h2{font-size:26px;color:#173b2b}
 .hero p{line-height:2}
-.section{padding:28px 16px;max-width:1000px;margin:auto}
-.section h2{text-align:center;margin-bottom:25px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:15px}
-.card{background:white;border-radius:14px;padding:22px 12px;text-align:center;box-shadow:0 3px 12px #0000000c}
-.card .symbol{font-size:35px}
+.btn{display:inline-block;background:#b99b55;color:white;padding:12px 25px;border-radius:8px;text-decoration:none;margin-top:12px}
+section{padding:35px 16px;max-width:1000px;margin:auto}
+h2{text-align:center}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{background:white;border-radius:14px;text-align:center;padding:25px 10px;box-shadow:0 3px 12px #0000000b}
+.card .icon{font-size:38px}
 .card h3{font-size:16px}
-.card p{font-size:13px;color:#777}
-footer{text-align:center;background:#183b2b;color:white;padding:25px;line-height:2}
+.card p{font-size:12px;color:#777}
+.about{text-align:center;line-height:2}
+footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height:2}
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
 </head>
 <body>
 <header>
-<h1>CHAYSA</h1>
-<p>چایسا؛ دنیایی از انتخاب‌های تازه</p>
+<div class="logo">CHAYSA</div>
+<h1>چایسا</h1>
+<p>فروشگاهی برای انتخاب‌های تازه</p>
 </header>
 <nav>
 <a href="#">صفحه اصلی</a>
-<a href="#categories">دسته‌بندی محصولات</a>
+<a href="#products">محصولات</a>
 <a href="#about">درباره ما</a>
 <a href="#contact">تماس با ما</a>
 </nav>
-<section class="hero">
-<h2>به فروشگاه چایسا خوش آمدید</h2>
-<p>یک تجربه دلنشین از خرید، انتخاب و کشف محصولات تازه</p>
-</section>
-<section class="section" id="categories">
+<div class="hero">
+<h2>به دنیای چایسا خوش آمدید</h2>
+<p>از عطر چای و دمنوش تا طعم ادویه و شیرینی عسل</p>
+<a class="btn" href="#products">مشاهده محصولات</a>
+</div>
+<section id="products">
 <h2>دسته‌بندی محصولات</h2>
 <div class="grid">
-<div class="card"><div class="symbol">🍵</div><h3>انواع چای</h3><p>عطر و طعم، برای هر سلیقه</p></div>
-<div class="card"><div class="symbol">🌿</div><h3>دمنوش</h3><p>عطر طبیعت، در یک فنجان</p></div>
-<div class="card"><div class="symbol">🧂</div><h3>ادویه</h3><p>هنر آشپزی با عطر ادویه</p></div>
-<div class="card"><div class="symbol">🍯</div><h3>عسل</h3><p>شیرینی طبیعت</p></div>
+<div class="card"><div class="icon">🍵</div><h3>چای</h3><p>عطر و طعم، برای هر سلیقه</p></div>
+<div class="card"><div class="icon">🌿</div><h3>دمنوش</h3><p>عطر طبیعت، در یک فنجان</p></div>
+<div class="card"><div class="icon">🧂</div><h3>ادویه</h3><p>هنر آشپزی با عطر ادویه</p></div>
+<div class="card"><div class="icon">🍯</div><h3>عسل</h3><p>شیرینی طبیعت</p></div>
 </div>
 </section>
-<section class="section" id="about">
+<section id="about" class="about">
 <h2>درباره چایسا</h2>
-<p style="text-align:center;line-height:2">چایسا، فروشگاهی برای انتخاب‌های متنوع امروز و فردا.</p>
+<p>چایسا، فروشگاهی برای انتخاب‌های متنوع امروز و فردا؛ با نگاهی به فرصت‌های تازه در آینده.</p>
 </section>
 <footer id="contact">
 <strong>CHAYSA | چایسا</strong>
-<p>فروشگاه اینترنتی شما</p>
+<p>راهی برای انتخاب‌های تازه</p>
 </footer>
 </body>
 </html>
