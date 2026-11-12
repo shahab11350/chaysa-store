@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>محصولات چایسا</title>
+<style>
+
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,sans-serif;background:#f7f5ef;color:#26372b}
+header{background:#173b2b;color:white;text-align:center;padding:30px 15px}
+.logo{font-size:36px;font-weight:bold;letter-spacing:3px;color:#e6cc85}
+header p{margin-bottom:0;color:#eee3c5}
+nav{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;background:#244b37;padding:16px}
+nav a{color:white;text-decoration:none;font-size:14px}
+.hero{padding:65px 15px;text-align:center;background:linear-gradient(135deg,#e5eadc,#f7f5ef)}
+.hero h2{font-size:26px;color:#173b2b}
+.hero p{line-height:2}
+.btn{display:inline-block;background:#b99b55;color:white;padding:12px 25px;border-radius:8px;text-decoration:none;margin-top:12px}
+section{padding:35px 16px;max-width:1000px;margin:auto}
+h2{text-align:center}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.card{background:white;border-radius:14px;text-align:center;padding:25px 10px;box-shadow:0 3px 12px #0000000b}
+.card .icon{font-size:38px}
+.card h3{font-size:16px}
+.card p{font-size:12px;color:#777}
+.about{text-align:center;line-height:2}
+footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height:2}
+
+.category-card{padding:0;overflow:hidden;text-align:right;border:1px solid #eee8d8}
+.category-card summary{list-style:none;cursor:pointer;padding:20px 16px;position:relative;text-align:center}
+.category-card summary::-webkit-details-marker{display:none}
+.category-card summary:after{content:"＋";display:block;color:#b99b55;font-size:22px;font-weight:bold;margin-top:7px}
+.category-card[open] summary:after{content:"−"}
+.category-card .icon{display:block;margin-bottom:6px}
+.category-card h3{margin:7px 0}
+.category-card summary p{margin:5px 0;color:#777}
+.category-hint{display:inline-block;margin-top:8px;color:#9a7d3d;font-size:12px}
+.product-list{display:none}
+.product-row{display:none}
+.product-image{display:none;width:100%;height:120px;object-fit:cover;border-radius:10px;background:#f7f5ef}
+.product-info{display:flex;flex-direction:column;gap:7px;min-width:0}
+.product-info strong{font-size:14px;font-weight:700;line-height:1.9;color:#26372b}
+.product-info small{font-size:11px;color:#888}
+.product-price{font-size:14px;color:#244b37;white-space:nowrap;font-weight:bold}
+.empty-category{text-align:center;color:#888;font-size:13px;padding:12px}
+.product-page{margin-top:18px}
+.product-page-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.product-page-head h3{margin:0;color:#173b2b;font-size:20px}
+.back-products{border:0;background:#244b37;color:#fff;border-radius:9px;padding:10px 15px;font-family:inherit;cursor:pointer}
+.product-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.product-card{background:#fff;border:1px solid #eee8d8;border-radius:14px;padding:12px;box-shadow:0 4px 14px #0000000a;display:flex;flex-direction:column;gap:10px;min-width:0}
+.product-card .product-image{display:none}
+.product-card .product-image[src]{display:block}
+.product-card .product-info{flex:1}
+.product-card .product-price{border-top:1px solid #eee8d8;padding-top:9px}
+.category-card{cursor:pointer}
+@media(min-width:650px){.product-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:360px){.product-cards{grid-template-columns:1fr}}
+
+@media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
+
+.product-page-shell{max-width:1100px;margin:0 auto}
+.page-top{background:#173b2b;color:white;text-align:center;padding:22px 14px}
+.page-top .logo{font-size:30px;font-weight:bold;letter-spacing:3px;color:#e6cc85}
+.page-top p{margin:8px 0 0;color:#eee3c5}
+.page-nav{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;background:#244b37;padding:13px}
+.page-nav a{color:white;text-decoration:none;font-size:14px}
+#products{padding-top:24px}
+</style>
+</head>
+<body>
+<header class="page-top">
+<div class="logo">CHAYSA</div>
+<h1>محصولات چایسا</h1>
+<p>انتخابی تازه برای هر سلیقه</p>
+</header>
+<nav class="page-nav">
+<a href="index.html">صفحه اصلی</a>
+<a href="#products">دسته‌بندی محصولات</a>
+</nav>
+<section id="products">
+<h2>دسته‌بندی محصولات</h2>
+<div class="grid">
+<details class="card category-card"><summary><span class="icon">🍵</span><h3>چای</h3><p>عطر و طعم، برای هر سلیقه</p><span class="category-hint">25 محصول · مشاهده فهرست</span></summary><div class="product-list"><div class="product-row"><img class="product-image" data-image="" alt="چای نارگیل کیسه‌ای"><div class="product-info"><strong>چای نارگیل کیسه‌ای</strong><small>شناسه کالا: 1401008</small></div><b class="product-price">479,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای کوهی"><div class="product-info"><strong>چای کوهی</strong><small>شناسه کالا: 1401029</small></div><b class="product-price">745,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای سبز و رزماری"><div class="product-info"><strong>چای سبز و رزماری</strong><small>شناسه کالا: 1401034</small></div><b class="product-price">799,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای ماسالا"><div class="product-info"><strong>چای ماسالا</strong><small>شناسه کالا: 1403001</small></div><b class="product-price">890,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای کرن‌بری کیسه‌ای"><div class="product-info"><strong>چای کرن‌بری کیسه‌ای</strong><small>شناسه کالا: 1401025</small></div><b class="product-price">639,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای سبز و زیره کیسه‌ای"><div class="product-info"><strong>چای سبز و زیره کیسه‌ای</strong><small>شناسه کالا: 1401018</small></div><b class="product-price">597,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای سیلان و گل محمدی"><div class="product-info"><strong>چای سیلان و گل محمدی</strong><small>شناسه کالا: 1401028</small></div><b class="product-price">1,100,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای اولانگ"><div class="product-info"><strong>چای اولانگ</strong><small>شناسه کالا: 1401026</small></div><b class="product-price">1,330,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای سبز کیسه‌ای"><div class="product-info"><strong>چای سبز کیسه‌ای</strong><small>شناسه کالا: 1401017</small></div><b class="product-price">239,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای بهارنارنج کیسه‌ای"><div class="product-info"><strong>چای بهارنارنج کیسه‌ای</strong><small>شناسه کالا: 1401016</small></div><b class="product-price">529,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای سفید"><div class="product-info"><strong>چای سفید</strong><small>شناسه کالا: 1401022</small></div><b class="product-price">879,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای قهوه کیسه‌ای"><div class="product-info"><strong>چای قهوه کیسه‌ای</strong><small>شناسه کالا: 1401015</small></div><b class="product-price">845,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="مخلوط چای سفید و سبز"><div class="product-info"><strong>مخلوط چای سفید و سبز</strong><small>شناسه کالا: 1401021</small></div><b class="product-price">849,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای زعفرانی کیسه‌ای"><div class="product-info"><strong>چای زعفرانی کیسه‌ای</strong><small>شناسه کالا: 1401014</small></div><b class="product-price">877,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="مخلوط چای سیاه و گیاه به‌لیمو"><div class="product-info"><strong>مخلوط چای سیاه و گیاه به‌لیمو</strong><small>شناسه کالا: 1401020</small></div><b class="product-price">1,147,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای معطر وانیل کیسه‌ای"><div class="product-info"><strong>چای معطر وانیل کیسه‌ای</strong><small>شناسه کالا: 1401010</small></div><b class="product-price">449,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="مخلوط چای سبز و گیاه نعناع‌فلفلی"><div class="product-info"><strong>مخلوط چای سبز و گیاه نعناع‌فلفلی</strong><small>شناسه کالا: 1401019</small></div><b class="product-price">779,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای سبز"><div class="product-info"><strong>چای سبز</strong><small>شناسه کالا: 1401013</small></div><b class="product-price">599,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای ترش کیسه‌ای"><div class="product-info"><strong>چای ترش کیسه‌ای</strong><small>شناسه کالا: 1401011</small></div><b class="product-price">459,700 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای سیاه کله‌مورچه"><div class="product-info"><strong>چای سیاه کله‌مورچه</strong><small>شناسه کالا: 1401012</small></div><b class="product-price">1,190,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای بلوبری کیسه‌ای"><div class="product-info"><strong>چای بلوبری کیسه‌ای</strong><small>شناسه کالا: 1401009</small></div><b class="product-price">574,900 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای معجون زعفرانی کیسه‌ای"><div class="product-info"><strong>چای معجون زعفرانی کیسه‌ای</strong><small>شناسه کالا: 1401005</small></div><b class="product-price">890,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای زنجبیل کیسه‌ای"><div class="product-info"><strong>چای زنجبیل کیسه‌ای</strong><small>شناسه کالا: 1401006</small></div><b class="product-price">419,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای کلاسیک کیسه‌ای با عطر برگاموت"><div class="product-info"><strong>چای کلاسیک کیسه‌ای با عطر برگاموت</strong><small>شناسه کالا: 1401004</small></div><b class="product-price">249,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="چای هل کیسه‌ای"><div class="product-info"><strong>چای هل کیسه‌ای</strong><small>شناسه کالا: 1401002</small></div><b class="product-price">629,000 تومان</b></div></div></details>
+<details class="card category-card"><summary><span class="icon">🌿</span><h3>دمنوش</h3><p>عطر طبیعت، در یک فنجان</p><span class="category-hint">14 محصول · مشاهده فهرست</span></summary><div class="product-list"><div class="product-row"><img class="product-image" data-image="" alt="دمنوش آکاکلد هرب 012"><div class="product-info"><strong>دمنوش آکاکلد هرب 012</strong><small>شناسه کالا: 1402014</small></div><b class="product-price">697,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش به 013"><div class="product-info"><strong>دمنوش به 013</strong><small>شناسه کالا: 1402012</small></div><b class="product-price">495,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش ژینگو 011"><div class="product-info"><strong>دمنوش ژینگو 011</strong><small>شناسه کالا: 1402011</small></div><b class="product-price">897,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش فنل فیت هرب 015"><div class="product-info"><strong>دمنوش فنل فیت هرب 015</strong><small>شناسه کالا: 1402013</small></div><b class="product-price">579,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش هیکلد هرب 014"><div class="product-info"><strong>دمنوش هیکلد هرب 014</strong><small>شناسه کالا: 1402015</small></div><b class="product-price">669,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش زیرفون 007"><div class="product-info"><strong>دمنوش زیرفون 007</strong><small>شناسه کالا: 1402008</small></div><b class="product-price">639,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش میوه‌های قرمز 008"><div class="product-info"><strong>دمنوش میوه‌های قرمز 008</strong><small>شناسه کالا: 1402007</small></div><b class="product-price">979,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش انرژی‌زا 002"><div class="product-info"><strong>دمنوش انرژی‌زا 002</strong><small>شناسه کالا: 1402005</small></div><b class="product-price">679,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش آرامش 001"><div class="product-info"><strong>دمنوش آرامش 001</strong><small>شناسه کالا: 1402004</small></div><b class="product-price">599,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش آویشن 004"><div class="product-info"><strong>دمنوش آویشن 004</strong><small>شناسه کالا: 1402003</small></div><b class="product-price">549,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش بابونه 005"><div class="product-info"><strong>دمنوش بابونه 005</strong><small>شناسه کالا: 1402002</small></div><b class="product-price">379,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش گزنه 003"><div class="product-info"><strong>دمنوش گزنه 003</strong><small>شناسه کالا: 1402001</small></div><b class="product-price">359,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش میوه‌های استوایی"><div class="product-info"><strong>دمنوش میوه‌های استوایی</strong><small>شناسه کالا: 1402017</small></div><b class="product-price">1,749,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="دمنوش فلفل"><div class="product-info"><strong>دمنوش فلفل</strong><small>شناسه کالا: 1402016</small></div><b class="product-price">1,470,000 تومان</b></div></div></details>
+<details class="card category-card"><summary><span class="icon">🧂</span><h3>ادویه</h3><p>هنر آشپزی با عطر ادویه</p><span class="category-hint">9 محصول · مشاهده فهرست</span></summary><div class="product-list"><div class="product-row"><img class="product-image" data-image="" alt="ادویه سوسیس"><div class="product-info"><strong>ادویه سوسیس</strong><small>شناسه کالا: 41090</small></div><b class="product-price">550,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="ادویه همبرگر"><div class="product-info"><strong>ادویه همبرگر</strong><small>شناسه کالا: 41089</small></div><b class="product-price">630,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="ادویه فلافل"><div class="product-info"><strong>ادویه فلافل</strong><small>شناسه کالا: 41088</small></div><b class="product-price">274,700 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="ادویه پلویی"><div class="product-info"><strong>ادویه پلویی</strong><small>شناسه کالا: 41079</small></div><b class="product-price">570,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="ادویه مراکشی"><div class="product-info"><strong>ادویه مراکشی</strong><small>شناسه کالا: 41096</small></div><b class="product-price">497,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="ادویه فرانسوی"><div class="product-info"><strong>ادویه فرانسوی</strong><small>شناسه کالا: 41095</small></div><b class="product-price">590,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="ادویه جوجه‌کباب"><div class="product-info"><strong>ادویه جوجه‌کباب</strong><small>شناسه کالا: 41073</small></div><b class="product-price">399,700 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="ادویه تندوری"><div class="product-info"><strong>ادویه تندوری</strong><small>شناسه کالا: 41072</small></div><b class="product-price">439,000 تومان</b></div>
+<div class="product-row"><img class="product-image" data-image="" alt="ادویه مکزیکی (تاکو)"><div class="product-info"><strong>ادویه مکزیکی (تاکو)</strong><small>شناسه کالا: 41091</small></div><b class="product-price">279,700 تومان</b></div></div></details>
+<details class="card category-card"><summary><span class="icon">🍯</span><h3>عسل</h3><p>شیرینی طبیعت</p><span class="category-hint">مشاهده فهرست</span></summary><div class="product-list"><p class="empty-category">فهرست محصولات این بخش به‌زودی تکمیل می‌شود.</p></div></details>
+</div>
+</section>
+<script>
+
+/* نمایش محصولات هر دسته در صفحه‌ای جداگانه با کارت‌های مستقل */
+document.addEventListener("DOMContentLoaded", function () {
+  const section = document.querySelector("#products");
+  const categoryGrid = section.querySelector(".grid");
+  const page = document.createElement("div");
+  page.className = "product-page";
+  page.hidden = true;
+  section.appendChild(page);
+
+  categoryGrid.querySelectorAll(".category-card").forEach(function (category) {
+    const summary = category.querySelector("summary");
+    summary.addEventListener("click", function (event) {
+      event.preventDefault();
+      const title = summary.querySelector("h3").textContent.trim();
+      const rows = category.querySelectorAll(".product-row");
+      const empty = category.querySelector(".empty-category");
+      categoryGrid.hidden = true;
+      page.hidden = false;
+      page.replaceChildren();
+
+      const head = document.createElement("div");
+      head.className = "product-page-head";
+      const back = document.createElement("button");
+      back.className = "back-products";
+      back.type = "button";
+      back.textContent = "بازگشت به دسته‌ها";
+      back.addEventListener("click", function () {
+        page.hidden = true;
+        categoryGrid.hidden = false;
+        window.scrollTo({top: section.offsetTop, behavior: "smooth"});
+      });
+      const heading = document.createElement("h3");
+      heading.textContent = title;
+      head.append(back, heading);
+      page.appendChild(head);
+
+      if (empty) {
+        const message = document.createElement("p");
+        message.className = "empty-category";
+        message.textContent = empty.textContent;
+        page.appendChild(message);
+        return;
+      }
+
+      const cards = document.createElement("div");
+      cards.className = "product-cards";
+      rows.forEach(function (row) {
+        const card = document.createElement("article");
+        card.className = "product-card";
+        const image = row.querySelector(".product-image");
+        if (image && image.getAttribute("data-image") && image.getAttribute("data-image").trim()) {
+          const picture = image.cloneNode(true);
+          picture.src = image.getAttribute("data-image").trim();
+          picture.style.display = "block";
+          card.appendChild(picture);
+        }
+        const info = row.querySelector(".product-info").cloneNode(true);
+        const price = row.querySelector(".product-price").cloneNode(true);
+        card.append(info, price);
+        cards.appendChild(card);
+      });
+      page.appendChild(cards);
+      window.scrollTo({top: section.offsetTop, behavior: "smooth"});
+    });
+  });
+});
+
+</script>
+</body>
+</html>
