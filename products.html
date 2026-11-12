@@ -328,7 +328,6 @@ document.addEventListener("DOMContentLoaded", function () {
         categoryGrid.hidden = false;
         floatingCart.hidden = true;
         invoice.hidden = true;
-        window.scrollTo({top: section.offsetTop, behavior: "smooth"});
       });
       const heading = document.createElement("h3");
       heading.textContent = title;
@@ -392,7 +391,6 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       page.append(cards, invoice);
       renderInvoice();
-      window.scrollTo({top: section.offsetTop, behavior: "smooth"});
     });
   });
 });
