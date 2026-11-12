@@ -289,14 +289,30 @@ document.addEventListener("DOMContentLoaded", function () {
     return lines.join("\n");
   }
 
-  invoice.querySelector(".share-order").addEventListener("click", function () {
+  invoice.querySelector(".share-order").addEventListener("click", async function () {
     if (cart.size === 0) {
       alert("ابتدا محصولی به فاکتور اضافه کنید.");
       return;
     }
+    const button = invoice.querySelector(".share-order");
     const message = buildOrderText();
-    const telegramUrl = "https://t.me/reza_shahab_nezam?text=" + encodeURIComponent(message);
-    window.location.href = telegramUrl;
+    button.disabled = true;
+    button.textContent = "در حال ارسال سفارش...";
+    try {
+      const response = await fetch("https://black-mud-3a10.faryadereza.workers.dev/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.ok) throw new Error("ارسال ناموفق بود");
+      alert("سفارش با موفقیت برای چایسا ارسال شد.");
+    } catch (error) {
+      alert("ارسال سفارش انجام نشد. لطفاً اتصال اینترنت و تنظیمات ربات را بررسی کنید یا از دکمه کپی پیش‌فاکتور استفاده کنید.");
+    } finally {
+      button.disabled = false;
+      button.textContent = "ارسال سفارش برای چایسا";
+    }
   });
 
   invoice.querySelector(".clear-invoice").addEventListener("click", function () {
