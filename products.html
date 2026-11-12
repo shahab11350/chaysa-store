@@ -67,6 +67,26 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .page-nav{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;background:#244b37;padding:13px}
 .page-nav a{color:white;text-decoration:none;font-size:14px}
 #products{padding-top:24px}
+
+/* سبد خرید و فاکتور سفارش */
+.add-to-invoice{border:0;background:#b99b55;color:#fff;border-radius:9px;padding:10px 12px;font-family:inherit;font-size:13px;cursor:pointer}
+.add-to-invoice:active{transform:scale(.98)}
+.invoice-box{margin-top:24px;background:#fff;border:1px solid #e8dfca;border-radius:16px;padding:16px;box-shadow:0 5px 18px #0000000b}
+.invoice-box h3{margin:0 0 12px;color:#173b2b}
+.invoice-empty{color:#888;text-align:center;padding:14px 5px;font-size:13px}
+.invoice-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 0;border-bottom:1px solid #eee8d8}
+.invoice-line-name{font-size:13px;font-weight:bold;line-height:1.8}
+.invoice-line-meta{font-size:11px;color:#888;margin-top:3px}
+.invoice-controls{display:flex;align-items:center;gap:8px;direction:ltr}
+.qty-btn{width:29px;height:29px;border:0;border-radius:8px;background:#edf1e9;color:#244b37;font-size:18px;cursor:pointer}
+.qty-value{min-width:18px;text-align:center;font-size:13px}
+.invoice-line-total{font-size:12px;font-weight:bold;color:#244b37;white-space:nowrap;margin-top:5px}
+.invoice-summary{display:flex;justify-content:space-between;gap:12px;padding-top:15px;margin-top:6px;font-weight:bold;color:#173b2b}
+.invoice-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.invoice-actions button{flex:1;min-width:130px;border:0;border-radius:9px;padding:11px;font-family:inherit;cursor:pointer}
+.copy-invoice{background:#244b37;color:white}
+.clear-invoice{background:#f1eee5;color:#665a43}
+@media(max-width:380px){.invoice-line{grid-template-columns:1fr}.invoice-controls{justify-content:flex-start}}
 </style>
 </head>
 <body>
@@ -134,8 +154,6 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 </div>
 </section>
 <script>
-
-/* نمایش محصولات هر دسته در صفحه‌ای جداگانه با کارت‌های مستقل */
 document.addEventListener("DOMContentLoaded", function () {
   const section = document.querySelector("#products");
   const categoryGrid = section.querySelector(".grid");
@@ -143,6 +161,101 @@ document.addEventListener("DOMContentLoaded", function () {
   page.className = "product-page";
   page.hidden = true;
   section.appendChild(page);
+
+  const invoice = document.createElement("section");
+  invoice.className = "invoice-box";
+  invoice.innerHTML = '<h3>فاکتور سفارش شما</h3><div class="invoice-items"><p class="invoice-empty">هنوز محصولی به فاکتور اضافه نشده است.</p></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="invoice-total">۰ تومان</strong></div><div class="invoice-actions"><button type="button" class="copy-invoice">کپی فاکتور</button><button type="button" class="clear-invoice">پاک کردن فاکتور</button></div>';
+  const cart = new Map();
+
+  function formatMoney(value) {
+    return Math.round(value).toLocaleString("fa-IR") + " تومان";
+  }
+
+  function renderInvoice() {
+    const items = invoice.querySelector(".invoice-items");
+    const totalEl = invoice.querySelector(".invoice-total");
+    items.replaceChildren();
+    let grandTotal = 0;
+    if (cart.size === 0) {
+      const empty = document.createElement("p");
+      empty.className = "invoice-empty";
+      empty.textContent = "هنوز محصولی به فاکتور اضافه نشده است.";
+      items.appendChild(empty);
+    } else {
+      cart.forEach(function (item, code) {
+        const line = document.createElement("div");
+        line.className = "invoice-line";
+        const details = document.createElement("div");
+        const name = document.createElement("div");
+        name.className = "invoice-line-name";
+        name.textContent = item.name;
+        const meta = document.createElement("div");
+        meta.className = "invoice-line-meta";
+        meta.textContent = "شناسه کالا: " + code + " | " + formatMoney(item.price) + " × " + item.qty;
+        const lineTotal = document.createElement("div");
+        lineTotal.className = "invoice-line-total";
+        lineTotal.textContent = "جمع: " + formatMoney(item.price * item.qty);
+        details.append(name, meta, lineTotal);
+
+        const controls = document.createElement("div");
+        controls.className = "invoice-controls";
+        const minus = document.createElement("button");
+        minus.type = "button";
+        minus.className = "qty-btn";
+        minus.textContent = "−";
+        minus.setAttribute("aria-label", "کاهش تعداد");
+        minus.addEventListener("click", function () {
+          item.qty -= 1;
+          if (item.qty <= 0) cart.delete(code);
+          renderInvoice();
+        });
+        const quantity = document.createElement("span");
+        quantity.className = "qty-value";
+        quantity.textContent = item.qty.toLocaleString("fa-IR");
+        const plus = document.createElement("button");
+        plus.type = "button";
+        plus.className = "qty-btn";
+        plus.textContent = "+";
+        plus.setAttribute("aria-label", "افزایش تعداد");
+        plus.addEventListener("click", function () {
+          item.qty += 1;
+          renderInvoice();
+        });
+        controls.append(minus, quantity, plus);
+        line.append(details, controls);
+        items.appendChild(line);
+        grandTotal += item.price * item.qty;
+      });
+    }
+    totalEl.textContent = formatMoney(grandTotal);
+  }
+
+  invoice.querySelector(".clear-invoice").addEventListener("click", function () {
+    cart.clear();
+    renderInvoice();
+  });
+
+  invoice.querySelector(".copy-invoice").addEventListener("click", function () {
+    if (cart.size === 0) {
+      alert("ابتدا محصولی به فاکتور اضافه کنید.");
+      return;
+    }
+    const lines = ["فاکتور سفارش چایسا", "--------------------"];
+    let total = 0;
+    cart.forEach(function (item, code) {
+      lines.push(item.name + " | شناسه: " + code + " | تعداد: " + item.qty + " | مبلغ: " + (item.price * item.qty).toLocaleString("en-US") + " تومان");
+      total += item.price * item.qty;
+    });
+    lines.push("--------------------", "جمع کل: " + total.toLocaleString("en-US") + " تومان");
+    const text = lines.join("\n");
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        alert("فاکتور کپی شد. می‌توانید آن را برای چایسا ارسال کنید.");
+      }).catch(function () { window.prompt("متن فاکتور را کپی کنید:", text); });
+    } else {
+      window.prompt("متن فاکتور را کپی کنید:", text);
+    }
+  });
 
   categoryGrid.querySelectorAll(".category-card").forEach(function (category) {
     const summary = category.querySelector("summary");
@@ -176,6 +289,7 @@ document.addEventListener("DOMContentLoaded", function () {
         message.className = "empty-category";
         message.textContent = empty.textContent;
         page.appendChild(message);
+        page.appendChild(invoice);
         return;
       }
 
@@ -194,14 +308,30 @@ document.addEventListener("DOMContentLoaded", function () {
         const info = row.querySelector(".product-info").cloneNode(true);
         const price = row.querySelector(".product-price").cloneNode(true);
         card.append(info, price);
+        const add = document.createElement("button");
+        add.type = "button";
+        add.className = "add-to-invoice";
+        add.textContent = "افزودن به فاکتور";
+        add.addEventListener("click", function () {
+          const name = info.querySelector("strong").textContent.trim();
+          const codeText = info.querySelector("small").textContent;
+          const code = codeText.replace(/[^0-9]/g, "");
+          const priceValue = Number(price.textContent.replace(/[^0-9]/g, ""));
+          if (!code || !priceValue) return;
+          if (cart.has(code)) cart.get(code).qty += 1;
+          else cart.set(code, {name:name, price:priceValue, qty:1});
+          renderInvoice();
+          invoice.scrollIntoView({behavior:"smooth", block:"start"});
+        });
+        card.appendChild(add);
         cards.appendChild(card);
       });
-      page.appendChild(cards);
+      page.append(cards, invoice);
+      renderInvoice();
       window.scrollTo({top: section.offsetTop, behavior: "smooth"});
     });
   });
 });
-
 </script>
 </body>
 </html>
