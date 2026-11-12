@@ -85,12 +85,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .invoice-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .invoice-actions button{flex:1;min-width:130px;border:0;border-radius:9px;padding:11px;font-family:inherit;cursor:pointer}
 .copy-invoice{background:#244b37;color:white}
-.payment-details{margin-top:16px;padding:14px;background:#f8f6ef;border:1px dashed #cbb77e;border-radius:12px;line-height:2;font-size:13px}
-.payment-details h4{margin:0 0 8px;color:#173b2b;font-size:15px}
-.payment-details strong{color:#244b37}
-.payment-note{font-size:11px;color:#777;margin:8px 0 0}
-.payment-copy{background:#b99b55;color:#fff}
-.finalize-payment{background:#b99b55;color:#fff;font-weight:bold}
+.order-note{margin:14px 0 0;padding:12px;background:#f8f6ef;border-radius:10px;color:#665a43;font-size:12px;line-height:2}.share-order{background:#244b37;color:#fff;font-weight:bold}
 .clear-invoice{background:#f1eee5;color:#665a43}
 .floating-cart{position:fixed;z-index:1000;left:12px;right:12px;bottom:12px;max-width:620px;margin:auto;background:#fff;border:1px solid #d9c99f;border-radius:16px;box-shadow:0 8px 30px #0003;padding:12px 14px;max-height:38vh;display:flex;flex-direction:column;gap:8px}
 .floating-cart[hidden]{display:none}
@@ -181,7 +176,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const invoice = document.createElement("section");
   invoice.className = "invoice-box";
-  invoice.innerHTML = '<h3>فاکتور موقت سفارش چایسا</h3><div class="invoice-items"><p class="invoice-empty">هنوز محصولی به فاکتور اضافه نشده است.</p></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="invoice-total">۰ تومان</strong></div><div class="payment-details"><h4>اطلاعات پرداخت</h4><div>شماره حساب / کارت: <strong>................................</strong></div><div>نام صاحب حساب: <strong>................................</strong></div><p class="payment-note">پس از تکمیل پرداخت و تأیید فروشنده، فاکتور نهایی سفارش صادر می‌شود. این فاکتور تا پیش از تأیید پرداخت، موقت است.</p></div><div class="invoice-actions"><button type="button" class="finalize-payment">پرداخت نهایی و دریافت فاکتور</button><button type="button" class="copy-invoice">کپی فاکتور موقت</button><button type="button" class="clear-invoice">پاک کردن فاکتور</button></div>';
+  invoice.innerHTML = '<h3>پیش‌فاکتور سفارش چایسا</h3><div class="invoice-items"><p class="invoice-empty">هنوز محصولی به فاکتور اضافه نشده است.</p></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="invoice-total">۰ تومان</strong></div><p class="order-note">پس از ارسال سفارش، چایسا جزئیات را بررسی می‌کند و برای هماهنگی پرداخت با شما تماس می‌گیرد.</p><div class="invoice-actions"><button type="button" class="share-order">ارسال سفارش برای چایسا</button><button type="button" class="copy-invoice">کپی پیش‌فاکتور</button><button type="button" class="clear-invoice">پاک کردن فاکتور</button></div>';
   const cart = new Map();
   const floatingCart = document.createElement("aside");
   floatingCart.className = "floating-cart";
@@ -282,7 +277,42 @@ document.addEventListener("DOMContentLoaded", function () {
     floatingTotal.textContent = "جمع: " + formatMoney(grandTotal);
   }
 
-  invoice.querySelector(".finalize-payment").addEventListener("click", function () {\n    const payment = invoice.querySelector(".payment-details");\n    payment.scrollIntoView({behavior:"smooth", block:"center"});\n    alert("برای نهایی‌کردن سفارش، ابتدا باید شماره حساب و نام صاحب حساب ثبت شود. پس از پرداخت، رسید را برای فروشنده بفرستید تا پرداخت تأیید و فاکتور اصلی صادر شود.");\n  });\n\n  invoice.querySelector(".clear-invoice").addEventListener("click", function () {
+  function buildOrderText() {
+    const lines = ["سفارش جدید چایسا", "--------------------"];
+    let total = 0;
+    cart.forEach(function (item, code) {
+      lines.push(item.name + " | شناسه: " + code + " | تعداد: " + item.qty + " | مبلغ: " + (item.price * item.qty).toLocaleString("en-US") + " تومان");
+      total += item.price * item.qty;
+    });
+    lines.push("--------------------", "جمع کل: " + total.toLocaleString("en-US") + " تومان", "", "لطفاً برای هماهنگی و تکمیل سفارش با من تماس بگیرید.");
+    return lines.join("\\n");
+  }
+
+  invoice.querySelector(".share-order").addEventListener("click", async function () {
+    if (cart.size === 0) {
+      alert("ابتدا محصولی به فاکتور اضافه کنید.");
+      return;
+    }
+    const message = buildOrderText();
+    if (navigator.share) {
+      try {
+        await navigator.share({title:"سفارش چایسا", text:message});
+      } catch (error) {
+        if (error && error.name !== "AbortError") alert("ارسال انجام نشد. لطفاً از گزینه کپی پیش‌فاکتور استفاده کنید.");
+      }
+    } else if (navigator.clipboard && navigator.clipboard.writeText) {
+      try {
+        await navigator.clipboard.writeText(message);
+        alert("متن سفارش کپی شد. آن را در پیام‌رسان و برای چایسا ارسال کنید.");
+      } catch (error) {
+        window.prompt("متن سفارش را کپی کنید:", message);
+      }
+    } else {
+      window.prompt("متن سفارش را کپی کنید:", message);
+    }
+  });
+
+  invoice.querySelector(".clear-invoice").addEventListener("click", function () {
     cart.clear();
     renderInvoice();
   });
@@ -292,20 +322,13 @@ document.addEventListener("DOMContentLoaded", function () {
       alert("ابتدا محصولی به فاکتور اضافه کنید.");
       return;
     }
-    const lines = ["فاکتور موقت سفارش چایسا", "--------------------"];
-    let total = 0;
-    cart.forEach(function (item, code) {
-      lines.push(item.name + " | شناسه: " + code + " | تعداد: " + item.qty + " | مبلغ: " + (item.price * item.qty).toLocaleString("en-US") + " تومان");
-      total += item.price * item.qty;
-    });
-    lines.push("--------------------", "جمع کل: " + total.toLocaleString("en-US") + " تومان", "", "اطلاعات پرداخت", "شماره حساب / کارت: ................................", "نام صاحب حساب: ................................", "", "پس از پرداخت و تأیید فروشنده، فاکتور نهایی صادر می‌شود.");
-    const text = lines.join("\n");
+    const text = buildOrderText();
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(text).then(function () {
-        alert("فاکتور کپی شد. می‌توانید آن را برای چایسا ارسال کنید.");
-      }).catch(function () { window.prompt("متن فاکتور را کپی کنید:", text); });
+        alert("پیش‌فاکتور کپی شد. می‌توانید آن را برای چایسا ارسال کنید.");
+      }).catch(function () { window.prompt("متن پیش‌فاکتور را کپی کنید:", text); });
     } else {
-      window.prompt("متن فاکتور را کپی کنید:", text);
+      window.prompt("متن پیش‌فاکتور را کپی کنید:", text);
     }
   });
 
