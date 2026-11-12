@@ -295,20 +295,20 @@ document.addEventListener("DOMContentLoaded", function () {
       return;
     }
     const message = buildOrderText();
-    const rubikaUrl = "https://t.me/reza_shahab_nezam";
-    const rubikaTab = window.open(rubikaUrl, "_blank");
+    const telegramUrl = "https://t.me/reza_shahab_nezam";
+    const telegramTab = window.open(telegramUrl, "_blank");
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
         await navigator.clipboard.writeText(message);
-        alert("متن سفارش کپی شد. در صفحه روبینوی چایسا آن را در گفت‌وگو جای‌گذاری و ارسال کنید.");
+        alert("متن سفارش کپی شد. در تلگرام، گفت‌وگوی مقصد را باز کنید و متن را جای‌گذاری و ارسال کنید.");
       } else {
-        window.prompt("متن سفارش را کپی کنید؛ سپس در روبینوی چایسا جای‌گذاری کنید:", message);
+        window.prompt("متن سفارش را کپی کنید؛ سپس در تلگرام جای‌گذاری و ارسال کنید:", message);
       }
     } catch (error) {
-      window.prompt("متن سفارش را کپی کنید؛ سپس در روبینوی چایسا جای‌گذاری کنید:", message);
+      window.prompt("متن سفارش را کپی کنید؛ سپس در تلگرام جای‌گذاری و ارسال کنید:", message);
     }
-    if (!rubikaTab) {
-      window.location.href = rubikaUrl;
+    if (!telegramTab) {
+      window.location.href = telegramUrl;
     }
   });
 
