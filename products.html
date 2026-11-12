@@ -85,7 +85,19 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .invoice-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .invoice-actions button{flex:1;min-width:130px;border:0;border-radius:9px;padding:11px;font-family:inherit;cursor:pointer}
 .copy-invoice{background:#244b37;color:white}
+
 .clear-invoice{background:#f1eee5;color:#665a43}
+.floating-cart{position:fixed;z-index:1000;left:12px;right:12px;bottom:12px;max-width:620px;margin:auto;background:#fff;border:1px solid #d9c99f;border-radius:16px;box-shadow:0 8px 30px #0003;padding:12px 14px;max-height:38vh;display:flex;flex-direction:column;gap:8px}
+.floating-cart[hidden]{display:none}
+.floating-cart-head{display:flex;justify-content:space-between;align-items:center;color:#173b2b;font-weight:bold;font-size:14px}
+.floating-cart-items{overflow:auto;min-height:0;display:flex;flex-direction:column;gap:5px;font-size:12px;color:#555}
+.floating-cart-item{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #eee8d8;padding:4px 0}
+.floating-cart-item span:last-child{white-space:nowrap;color:#244b37;font-weight:bold}
+.floating-cart-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid #eee8d8;padding-top:8px}
+.floating-cart-total{font-size:13px;font-weight:bold;color:#173b2b}
+.finish-selection{border:0;background:#244b37;color:#fff;border-radius:9px;padding:11px 14px;font-family:inherit;font-size:13px;cursor:pointer;white-space:nowrap}
+@media(max-width:380px){.floating-cart{left:8px;right:8px;bottom:8px;padding:10px}.floating-cart-bottom{align-items:stretch;flex-direction:column}.finish-selection{width:100%}}
+
 @media(max-width:380px){.invoice-line{grid-template-columns:1fr}.invoice-controls{justify-content:flex-start}}
 </style>
 </head>
@@ -166,6 +178,16 @@ document.addEventListener("DOMContentLoaded", function () {
   invoice.className = "invoice-box";
   invoice.innerHTML = '<h3>فاکتور سفارش شما</h3><div class="invoice-items"><p class="invoice-empty">هنوز محصولی به فاکتور اضافه نشده است.</p></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="invoice-total">۰ تومان</strong></div><div class="invoice-actions"><button type="button" class="copy-invoice">کپی فاکتور</button><button type="button" class="clear-invoice">پاک کردن فاکتور</button></div>';
   const cart = new Map();
+  const floatingCart = document.createElement("aside");
+  floatingCart.className = "floating-cart";
+  floatingCart.hidden = true;
+  floatingCart.innerHTML = '<div class="floating-cart-head"><span>سبد انتخاب شما</span><span class="floating-cart-count">۰ محصول</span></div><div class="floating-cart-items"><span class="invoice-empty">هنوز محصولی انتخاب نکرده‌اید.</span></div><div class="floating-cart-bottom"><strong class="floating-cart-total">جمع: ۰ تومان</strong><button type="button" class="finish-selection">پایان انتخاب محصول</button></div>';
+  document.body.appendChild(floatingCart);
+  floatingCart.querySelector(".finish-selection").addEventListener("click", function () {
+    floatingCart.hidden = true;
+    invoice.hidden = false;
+    invoice.scrollIntoView({behavior:"smooth", block:"start"});
+  });
 
   function formatMoney(value) {
     return Math.round(value).toLocaleString("fa-IR") + " تومان";
@@ -228,6 +250,31 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     }
     totalEl.textContent = formatMoney(grandTotal);
+    const floatingItems = floatingCart.querySelector(".floating-cart-items");
+    const floatingCount = floatingCart.querySelector(".floating-cart-count");
+    const floatingTotal = floatingCart.querySelector(".floating-cart-total");
+    floatingItems.replaceChildren();
+    let totalQty = 0;
+    if (cart.size === 0) {
+      const empty = document.createElement("span");
+      empty.className = "invoice-empty";
+      empty.textContent = "هنوز محصولی انتخاب نکرده‌اید.";
+      floatingItems.appendChild(empty);
+    } else {
+      cart.forEach(function(item) {
+        totalQty += item.qty;
+        const line = document.createElement("div");
+        line.className = "floating-cart-item";
+        const name = document.createElement("span");
+        name.textContent = item.name + " × " + item.qty.toLocaleString("fa-IR");
+        const amount = document.createElement("span");
+        amount.textContent = formatMoney(item.price * item.qty);
+        line.append(name, amount);
+        floatingItems.appendChild(line);
+      });
+    }
+    floatingCount.textContent = totalQty.toLocaleString("fa-IR") + " قلم";
+    floatingTotal.textContent = "جمع: " + formatMoney(grandTotal);
   }
 
   invoice.querySelector(".clear-invoice").addEventListener("click", function () {
@@ -266,6 +313,8 @@ document.addEventListener("DOMContentLoaded", function () {
       const empty = category.querySelector(".empty-category");
       categoryGrid.hidden = true;
       page.hidden = false;
+      invoice.hidden = true;
+      floatingCart.hidden = false;
       page.replaceChildren();
 
       const head = document.createElement("div");
@@ -277,6 +326,8 @@ document.addEventListener("DOMContentLoaded", function () {
       back.addEventListener("click", function () {
         page.hidden = true;
         categoryGrid.hidden = false;
+        floatingCart.hidden = true;
+        invoice.hidden = true;
         window.scrollTo({top: section.offsetTop, behavior: "smooth"});
       });
       const heading = document.createElement("h3");
@@ -317,7 +368,6 @@ document.addEventListener("DOMContentLoaded", function () {
           if (cart.has(code)) cart.get(code).qty += 1;
           else cart.set(code, {name:name, price:priceValue, qty:1});
           renderInvoice();
-          invoice.scrollIntoView({behavior:"smooth", block:"start"});
         }
         card.style.cursor = "pointer";
         card.setAttribute("role", "button");
