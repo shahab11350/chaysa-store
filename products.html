@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const checkout = document.createElement("section");
   checkout.className = "checkout-box";
   checkout.hidden = true;
-  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً اطلاعات خریدار و نشانی تحویل را وارد کنید. موارد ستاره‌دار الزامی هستند.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" autocomplete="tel" placeholder="شماره تماس *" required><input class="customer-id" type="text" autocomplete="off" placeholder="آیدی تلگرام یا روبیکا (اختیاری)"><input class="customer-province" type="text" placeholder="استان *" required><input class="customer-city" type="text" placeholder="شهر *" required><textarea class="customer-address wide" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" placeholder="کد پستی *" required><textarea class="customer-notes wide" placeholder="توضیحات تحویل (اختیاری؛ پلاک، واحد و...)"></textarea></div><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div>';
+  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً تمام فیلدها را تکمیل کنید. ثبت و ارسال سفارش بدون تکمیل همه موارد امکان‌پذیر نیست.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" autocomplete="tel" placeholder="شماره تماس *" required><input class="customer-id" type="text" autocomplete="off" placeholder="آیدی تلگرام یا روبیکا *" required><input class="customer-province" type="text" placeholder="استان *" required><input class="customer-city" type="text" placeholder="شهر *" required><textarea class="customer-address wide" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" placeholder="کد پستی *" required><textarea class="customer-notes wide" placeholder="توضیحات تحویل * (اگر توضیحی ندارید، بنویسید: ندارد)" required></textarea></div><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div>';
   section.appendChild(checkout);
   function checkoutValue(selector) { return checkout.querySelector(selector).value.trim(); }
   function updateFinalPreview() {
@@ -372,10 +372,12 @@ document.addEventListener("DOMContentLoaded", function () {
       [".customer-name","نام"],
       [".customer-family","نام خانوادگی"],
       [".customer-contact","شماره تماس"],
+      [".customer-id","آیدی تلگرام یا روبیکا"],
       [".customer-province","استان"],
       [".customer-city","شهر"],
       [".customer-address","آدرس دقیق محل تحویل"],
-      [".customer-postal","کد پستی"]
+      [".customer-postal","کد پستی"],
+      [".customer-notes","توضیحات تحویل (در صورت نداشتن توضیح، عبارت ندارد را بنویسید)"]
     ];
     for (const entry of required) {
       const field = checkout.querySelector(entry[0]);
