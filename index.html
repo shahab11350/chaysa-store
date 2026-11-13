@@ -61,36 +61,20 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
 
-<meta name="chaysa-release" content="2026-11-13-37">
+<meta name="chaysa-release" content="2026-11-13-38">
 </head>
 <body>
 <style>
-#chaysaWelcomeFloat{position:fixed;inset:0;z-index:2147482000;display:flex;align-items:center;justify-content:center;padding:22px;pointer-events:none;opacity:0;visibility:hidden}
+#chaysaWelcomeFloat{position:relative;inset:auto;z-index:2147482000;display:flex;align-items:flex-start;justify-content:center;width:100%;height:0;margin:0 auto;padding:0;overflow:visible;pointer-events:none;opacity:0;visibility:hidden}
 #chaysaWelcomeFloat.show{visibility:visible;animation:chaysaWelcomeLife 12s ease forwards}
-#chaysaWelcomeFloat .welcome-card{max-width:min(90vw,430px);padding:22px 26px;border:1px solid #c5a45b;border-radius:18px;background:rgba(23,59,43,.96);color:#fff;text-align:center;box-shadow:0 12px 38px #0004;direction:rtl}
+#chaysaWelcomeFloat .welcome-card{position:relative;max-width:min(88vw,390px);margin:3px auto 0;padding:15px 24px;border:1px solid #c5a45b;border-radius:48% 52% 45% 55% / 58% 48% 52% 42%;background:rgba(23,59,43,.97);color:#fff;text-align:center;box-shadow:0 8px 24px #0003;direction:rtl;transform:rotate(-3deg)}
 #chaysaWelcomeFloat strong{display:block;color:#f0d58c;font:bold 23px Tahoma,sans-serif;margin-bottom:10px}
 #chaysaWelcomeFloat span{display:block;font:14px/2 Tahoma,sans-serif;color:#f8f3e7}
 @keyframes chaysaWelcomeLife{0%{opacity:0}8%{opacity:1}88%{opacity:1}100%{opacity:0;visibility:hidden}}
-@media(max-width:420px){#chaysaWelcomeFloat .welcome-card{padding:18px 20px}#chaysaWelcomeFloat strong{font-size:20px}#chaysaWelcomeFloat span{font-size:12px}}
+@media(max-width:420px){#chaysaWelcomeFloat .welcome-card{padding:13px 18px}#chaysaWelcomeFloat strong{font-size:20px}#chaysaWelcomeFloat span{font-size:12px}}
 @media(prefers-reduced-motion:reduce){#chaysaWelcomeFloat.show{animation:chaysaWelcomeLife 12s linear forwards}}
 </style>
-<div id="chaysaWelcomeFloat" aria-label="پیام خوشامدگویی">
-  <div class="welcome-card">
-    <strong>سلام! خوش اومدی به چایسا 🌿</strong>
-    <span>خیلی خوشحالیم که اینجایی؛ امیدواریم لحظه‌های دل‌نشین و انتخاب‌های خوش‌طعم داشته باشی.</span>
-  </div>
-</div>
-<script>
-function showChaysaWelcome(){
-  const welcome=document.getElementById("chaysaWelcomeFloat");
-  if(welcome){setTimeout(function(){welcome.classList.add("show");},350);}
-}
-if(document.readyState==="loading"){
-  document.addEventListener("DOMContentLoaded",showChaysaWelcome,{once:true});
-}else{
-  showChaysaWelcome();
-}
-</script>
+
 
 <header>
 <div id="chaysaCalendar" aria-label="تقویم چایسا">
@@ -149,6 +133,24 @@ if(document.readyState==="loading"){
   document.getElementById("chaysaNext").addEventListener("click",()=>selectTrack(current+1));
 })();
 </script>
+<div id="chaysaWelcomeFloat" aria-label="پیام خوشامدگویی">
+  <div class="welcome-card">
+    <strong>سلام! خوش اومدی به چایسا 🌿</strong>
+    <span>خیلی خوشحالیم که اینجایی؛ امیدواریم لحظه‌های دل‌نشین و انتخاب‌های خوش‌طعم داشته باشی.</span>
+  </div>
+</div>
+<script>
+function showChaysaWelcome(){
+  const welcome=document.getElementById("chaysaWelcomeFloat");
+  if(welcome){setTimeout(function(){welcome.classList.add("show");},350);}
+}
+if(document.readyState==="loading"){
+  document.addEventListener("DOMContentLoaded",showChaysaWelcome,{once:true});
+}else{
+  showChaysaWelcome();
+}
+</script>
+
 
 <div class="hero">
 <p>از عطر چای و دمنوش تا طعم ادویه و شیرینی عسل</p>
@@ -251,13 +253,13 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
 #chaysaClock .cc-time{font-size:18px;font-weight:bold;letter-spacing:.5px;font-variant-numeric:tabular-nums;line-height:1.4;white-space:nowrap}
 #chaysaCalendar .cc-date{font-size:11px;line-height:1.6;color:#f8f3e7}
 #chaysaClock .cc-zone{font-size:8px;color:#e4d5ae;margin-top:2px}
-#chaysaMusicPlayer{position:relative!important;left:auto!important;bottom:auto!important;z-index:2!important;width:min(1000px,calc(100% - 24px));margin:12px auto 18px;padding:8px 12px;background:#fff;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #00000012;direction:rtl}
+#chaysaMusicPlayer{position:relative!important;left:auto!important;bottom:auto!important;z-index:2!important;width:min(620px,calc(100% - 24px));margin:10px auto 8px;padding:5px 9px;background:#fff;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #00000012;direction:rtl}
 #chaysaMusicPlayer .cm-controls{position:relative;z-index:5;display:flex!important;align-items:center;justify-content:space-between;gap:5px;margin:0 0 5px;padding:2px;min-height:30px;visibility:visible!important;opacity:1!important}
 #chaysaMusicPlayer .cm-controls button{display:inline-flex!important;visibility:visible!important;opacity:1!important;position:relative;z-index:6;border:1px solid #c5a45b;border-radius:7px;background:#173b2b!important;color:#fff!important;padding:6px 9px;min-width:56px;font:bold 11px Tahoma;cursor:pointer}
 #chaysaMusicPlayer .cm-controls span{display:inline-block!important;visibility:visible!important;opacity:1!important;font:bold 11px Tahoma;color:#244b37;white-space:nowrap}
 #chaysaMusicPlayer .cm-heading{font:bold 12px Tahoma;color:#244b37;text-align:center;margin:0 0 4px}
-#chaysaSuno{display:block!important;pointer-events:auto!important;width:100%;height:112px;border:0;border-radius:8px;background:#fff}
-@media(max-width:420px){header{min-height:170px;padding:50px 108px 18px}.logo{font-size:27px}header h1{font-size:22px;margin:5px 0}header p{font-size:11px;margin-top:3px}#chaysaCalendar,#chaysaClock{top:8px!important;width:96px;height:96px;padding:7px;border-width:1px}#chaysaCalendar{right:6px!important}#chaysaClock{left:6px!important}#chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:10px;margin-bottom:3px}#chaysaClock .cc-time{font-size:16px}#chaysaCalendar .cc-date{font-size:10px}#chaysaClock .cc-zone{font-size:7px}#chaysaMusicPlayer{left:auto!important;bottom:auto!important;width:calc(100% - 20px);margin:10px auto 16px}#chaysaSuno{height:108px}}</style>
+#chaysaSuno{display:block!important;pointer-events:auto!important;width:100%;height:84px;border:0;border-radius:8px;background:#fff}
+@media(max-width:420px){header{min-height:170px;padding:50px 108px 18px}.logo{font-size:27px}header h1{font-size:22px;margin:5px 0}header p{font-size:11px;margin-top:3px}#chaysaCalendar,#chaysaClock{top:8px!important;width:96px;height:96px;padding:7px;border-width:1px}#chaysaCalendar{right:6px!important}#chaysaClock{left:6px!important}#chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:10px;margin-bottom:3px}#chaysaClock .cc-time{font-size:16px}#chaysaCalendar .cc-date{font-size:10px}#chaysaClock .cc-zone{font-size:7px}#chaysaMusicPlayer{left:auto!important;bottom:auto!important;width:calc(100% - 20px);margin:10px auto 16px}#chaysaSuno{height:82px}}</style>
 
 <script>
 (function(){
