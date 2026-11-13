@@ -174,8 +174,8 @@ document.addEventListener("DOMContentLoaded", function () {
 #chaysaClock .cc-time{font-size:25px;font-weight:bold;letter-spacing:1px;font-variant-numeric:tabular-nums;line-height:1.4}
 #chaysaClock .cc-date{font-size:11px;line-height:1.8;color:#f8f3e7;margin-top:4px}
 #chaysaClock .cc-zone{font-size:9px;color:#e4d5ae;margin-top:3px}
-#chaysaSuno{display:block!important;pointer-events:auto!important;position:fixed!important;left:10px!important;bottom:10px!important;z-index:2147483000!important;width:min(330px,calc(100vw - 20px));height:150px;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #0004;background:#fff}
-@media(max-width:420px){#chaysaClock{top:8px!important;right:7px!important;width:174px;padding:9px 10px}#chaysaClock .cc-time{font-size:22px}#chaysaSuno{left:7px!important;bottom:7px!important;width:min(300px,calc(100vw - 14px));height:145px}}
+#chaysaMusicPlayer{position:fixed!important;left:10px!important;bottom:10px!important;z-index:2147483000!important;width:min(340px,calc(100vw - 20px));padding:8px;background:#fff;border:1px solid #c5a45b;border-radius:14px;box-shadow:0 4px 18px #0004;direction:rtl}#chaysaMusicPlayer .cm-controls{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}#chaysaMusicPlayer .cm-controls button{border:0;border-radius:8px;background:#173b2b;color:#fff;padding:8px 12px;font: bold 12px Tahoma;cursor:pointer}#chaysaMusicPlayer .cm-controls span{font: bold 12px Tahoma;color:#244b37}#chaysaSuno{display:block!important;pointer-events:auto!important;width:100%;height:150px;border:0;border-radius:9px;background:#fff}
+@media(max-width:420px){#chaysaClock{top:8px!important;right:7px!important;width:174px;padding:9px 10px}#chaysaClock .cc-time{font-size:22px}#chaysaMusicPlayer{left:7px!important;bottom:7px!important;width:min(310px,calc(100vw - 14px))}#chaysaSuno{height:145px}}
 </style>
 <div id="chaysaClock" aria-label="تقویم و ساعت چایسا">
   <div class="cc-title">تقویم و ساعت چایسا</div>
@@ -183,7 +183,32 @@ document.addEventListener("DOMContentLoaded", function () {
   <div class="cc-date" id="chaysaClockDate">در حال بارگذاری تاریخ...</div>
   <div class="cc-zone">به وقت محلی شما</div>
 </div>
-<iframe id="chaysaSuno" src="https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292" title="موسیقی چایسا در Suno" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+<div id="chaysaMusicPlayer" aria-label="پخش موسیقی چایسا">
+  <div class="cm-controls">
+    <button type="button" id="chaysaPrev">قبلی</button>
+    <span id="chaysaTrackLabel">آهنگ ۱ از ۲</span>
+    <button type="button" id="chaysaNext">بعدی</button>
+  </div>
+  <iframe id="chaysaSuno" src="https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292" title="موسیقی چایسا در Suno" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+</div>
+<script>
+(function(){
+  const tracks=[
+    "https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292",
+    "https://suno.com/embed/bd6ae157-548b-4b59-a459-7a4b30d97352"
+  ];
+  let current=0;
+  const player=document.getElementById("chaysaSuno");
+  const label=document.getElementById("chaysaTrackLabel");
+  function selectTrack(index){
+    current=(index+tracks.length)%tracks.length;
+    player.src=tracks[current];
+    label.textContent="آهنگ "+(current+1)+" از "+tracks.length;
+  }
+  document.getElementById("chaysaPrev").addEventListener("click",()=>selectTrack(current-1));
+  document.getElementById("chaysaNext").addEventListener("click",()=>selectTrack(current+1));
+})();
+</script>
 <script>
 (function(){
   const timeEl=document.getElementById("chaysaClockTime");
