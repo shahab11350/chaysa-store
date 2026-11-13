@@ -169,24 +169,29 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <style>
-#chaysaClock{position:fixed!important;top:12px!important;right:12px!important;z-index:2147483001!important;width:154px;height:154px;box-sizing:border-box;padding:17px 12px;background:linear-gradient(145deg,#173b2b,#24543d);color:#fff;border:2px solid #c5a45b;border-radius:50%!important;box-shadow:0 5px 20px #0004;font-family:Tahoma,sans-serif;text-align:center;direction:rtl;display:flex;flex-direction:column;align-items:center;justify-content:center}
-#chaysaClock .cc-title{font-size:12px;font-weight:bold;color:#f0d58c;margin-bottom:5px}
-#chaysaClock .cc-time{font-size:22px;font-weight:bold;letter-spacing:1px;font-variant-numeric:tabular-nums;line-height:1.4}
-#chaysaClock .cc-date{font-size:10px;line-height:1.7;color:#f8f3e7;margin-top:3px}
-#chaysaClock .cc-zone{font-size:9px;color:#e4d5ae;margin-top:2px}
-#chaysaMusicPlayer{position:fixed!important;left:8px!important;bottom:8px!important;z-index:2147483000!important;width:min(265px,calc(100vw - 16px));padding:6px;background:#fff;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #0004;direction:rtl}
+header{position:relative;min-height:176px;padding:48px 110px 22px}
+#chaysaCalendar,#chaysaClock{position:absolute!important;top:12px!important;z-index:10!important;width:92px;height:92px;box-sizing:border-box;padding:9px;background:linear-gradient(145deg,#173b2b,#24543d);color:#fff;border:2px solid #c5a45b;border-radius:50%!important;box-shadow:0 4px 14px #0003;font-family:Tahoma,sans-serif;text-align:center;direction:rtl;display:flex;flex-direction:column;align-items:center;justify-content:center}
+#chaysaCalendar{right:12px!important}
+#chaysaClock{left:12px!important;right:auto!important}
+#chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:10px;font-weight:bold;color:#f0d58c;margin-bottom:3px}
+#chaysaClock .cc-time{font-size:16px;font-weight:bold;letter-spacing:.5px;font-variant-numeric:tabular-nums;line-height:1.4;white-space:nowrap}
+#chaysaCalendar .cc-date{font-size:10px;line-height:1.6;color:#f8f3e7}
+#chaysaClock .cc-zone{font-size:8px;color:#e4d5ae;margin-top:2px}
+#chaysaMusicPlayer{position:fixed!important;left:8px!important;bottom:8px!important;z-index:2147483000!important;width:min(245px,calc(100vw - 16px));padding:6px;background:#fff;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #0004;direction:rtl}
 #chaysaMusicPlayer .cm-controls{position:relative;z-index:5;display:flex!important;align-items:center;justify-content:space-between;gap:5px;margin:0 0 5px;padding:2px;min-height:30px;visibility:visible!important;opacity:1!important}
 #chaysaMusicPlayer .cm-controls button{display:inline-flex!important;visibility:visible!important;opacity:1!important;position:relative;z-index:6;border:1px solid #c5a45b;border-radius:7px;background:#173b2b!important;color:#fff!important;padding:6px 9px;min-width:56px;font:bold 11px Tahoma;cursor:pointer}
 #chaysaMusicPlayer .cm-controls span{display:inline-block!important;visibility:visible!important;opacity:1!important;font:bold 11px Tahoma;color:#244b37;white-space:nowrap}
 #chaysaMusicPlayer .cm-heading{font:bold 12px Tahoma;color:#244b37;text-align:center;margin:0 0 4px}
-#chaysaSuno{display:block!important;pointer-events:auto!important;width:100%;height:120px;border:0;border-radius:8px;background:#fff}
-@media(max-width:420px){#chaysaClock{top:8px!important;right:7px!important;width:132px;height:132px;padding:12px 8px}#chaysaClock .cc-title{font-size:10px}#chaysaClock .cc-time{font-size:18px}#chaysaClock .cc-date{font-size:9px}#chaysaMusicPlayer{left:6px!important;bottom:6px!important;width:min(245px,calc(100vw - 12px))}#chaysaSuno{height:112px}}
-</style>
-<div id="chaysaClock" aria-label="تقویم و ساعت چایسا">
-  <div class="cc-title">تقویم و ساعت چایسا</div>
+#chaysaSuno{display:block!important;pointer-events:auto!important;width:100%;height:112px;border:0;border-radius:8px;background:#fff}
+@media(max-width:420px){header{min-height:145px;padding:42px 78px 16px}.logo{font-size:27px}header h1{font-size:22px;margin:5px 0}header p{font-size:11px;margin-top:3px}#chaysaCalendar,#chaysaClock{top:8px!important;width:68px;height:68px;padding:5px;border-width:1px}#chaysaCalendar{right:6px!important}#chaysaClock{left:6px!important}#chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:8px;margin-bottom:2px}#chaysaClock .cc-time{font-size:12px}#chaysaCalendar .cc-date{font-size:8px}#chaysaClock .cc-zone{font-size:7px}#chaysaMusicPlayer{left:6px!important;bottom:6px!important;width:min(230px,calc(100vw - 12px))}#chaysaSuno{height:108px}}</style>
+<div id="chaysaCalendar" aria-label="تقویم چایسا">
+  <div class="cc-title">تقویم</div>
+  <div class="cc-date" id="chaysaClockDate">در حال بارگذاری...</div>
+</div>
+<div id="chaysaClock" aria-label="ساعت چایسا">
+  <div class="cc-title">ساعت</div>
   <div class="cc-time" id="chaysaClockTime">--:--:--</div>
-  <div class="cc-date" id="chaysaClockDate">در حال بارگذاری تاریخ...</div>
-  <div class="cc-zone">به وقت محلی شما</div>
+  <div class="cc-zone">وقت محلی</div>
 </div>
 <div id="chaysaMusicPlayer" aria-label="موسیقی چایسا">
   <div class="cm-heading">موسیقی چایسا</div>
