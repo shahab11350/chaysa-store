@@ -163,32 +163,17 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 });
 </script>
-<style>
-#chaysaMusic{position:fixed!important;left:12px!important;bottom:12px!important;z-index:2147483000!important;display:flex!important;align-items:center;gap:10px;padding:12px 17px;background:#173b2b;color:#fff;border:1px solid #c5a45b;border-radius:15px;box-shadow:0 4px 18px #0004;font-family:Tahoma,sans-serif}
-#chaysaMusic strong{color:#f0d58c;font-size:15px}
-#chaysaMusic span{font-size:12px;color:#fff;opacity:.9}
-@media(max-width:420px){#chaysaMusic{left:8px!important;bottom:8px!important;padding:10px 13px;gap:8px}#chaysaMusic strong{font-size:13px}}
-</style>
-<div id="chaysaMusic" dir="rtl" aria-label="موسیقی چایسا به‌زودی">
-  <strong>♫ موسیقی چایسا</strong>
-  <span>به‌زودی...</span>
-</div>
-  <iframe
-    src="https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292"
-    title="موسیقی چایسا در Suno"
-    loading="lazy"
-    allow="autoplay; encrypted-media"
-    allowfullscreen>
-  </iframe>
-</div>
+
+
 
 <style>
-#chaysaClock{position:fixed!important;right:12px!important;bottom:12px!important;z-index:2147482999!important;width:190px;box-sizing:border-box;padding:12px 14px;background:linear-gradient(145deg,#173b2b,#24543d);color:#fff;border:1px solid #c5a45b;border-radius:16px;box-shadow:0 5px 20px #0004;font-family:Tahoma,sans-serif;text-align:center;direction:rtl}
+#chaysaClock{position:fixed!important;top:12px!important;right:10px!important;z-index:2147483001!important;width:190px;box-sizing:border-box;padding:12px 14px;background:linear-gradient(145deg,#173b2b,#24543d);color:#fff;border:1px solid #c5a45b;border-radius:16px;box-shadow:0 5px 20px #0004;font-family:Tahoma,sans-serif;text-align:center;direction:rtl}
 #chaysaClock .cc-title{font-size:13px;font-weight:bold;color:#f0d58c;margin-bottom:7px}
 #chaysaClock .cc-time{font-size:25px;font-weight:bold;letter-spacing:1px;font-variant-numeric:tabular-nums;line-height:1.4}
 #chaysaClock .cc-date{font-size:11px;line-height:1.8;color:#f8f3e7;margin-top:4px}
-#chaysaClock .cc-zone{font-size:9px;color:#e4d5ae;opacity:.9;margin-top:3px}
-@media(max-width:420px){#chaysaClock{right:7px!important;bottom:7px!important;width:160px;padding:9px 10px}#chaysaClock .cc-time{font-size:21px}#chaysaClock .cc-title{font-size:12px}}
+#chaysaClock .cc-zone{font-size:9px;color:#e4d5ae;margin-top:3px}
+#chaysaSuno{position:fixed!important;left:10px!important;bottom:10px!important;z-index:2147483000!important;width:min(330px,calc(100vw - 20px));height:150px;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #0004;background:#fff}
+@media(max-width:420px){#chaysaClock{top:8px!important;right:7px!important;width:174px;padding:9px 10px}#chaysaClock .cc-time{font-size:22px}#chaysaSuno{left:7px!important;bottom:7px!important;width:min(300px,calc(100vw - 14px));height:145px}}
 </style>
 <div id="chaysaClock" aria-label="تقویم و ساعت چایسا">
   <div class="cc-title">تقویم و ساعت چایسا</div>
@@ -196,6 +181,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <div class="cc-date" id="chaysaClockDate">در حال بارگذاری تاریخ...</div>
   <div class="cc-zone">به وقت محلی شما</div>
 </div>
+<iframe id="chaysaSuno" src="https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292" title="موسیقی چایسا در Suno" loading="lazy" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 <script>
 (function(){
   const timeEl=document.getElementById("chaysaClockTime");
