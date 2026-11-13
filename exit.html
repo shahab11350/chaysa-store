@@ -20,7 +20,7 @@ body{margin:0;min-height:100vh;display:grid;place-items:center;padding:22px;font
 <main class="exit-card">
 <div class="logo">CHAYSA</div>
 <p class="message"><span class="bye">فعلاً خداحافظ 😢</span><span class="back">... ولی قول بده زود برگردی 🙏</span></p>
-<a class="return" href="index.html" style="display:block;width:fit-content;margin:12px auto 0;background:transparent;color:#e6cc85;border:1px solid #d8bd79">خدا نگهدارت باشه</a>
+<button class="return" type="button" id="chaysaFarewellExit" style="display:block;width:fit-content;margin:12px auto 0;background:transparent;color:#e6cc85;border:1px solid #d8bd79;cursor:pointer;font:bold 15px Tahoma,sans-serif">خدا نگهدارت باشه</button>
 <div class="small">چایسا همیشه به روی شما بازه 🌿</div>
 </main>
 
@@ -36,6 +36,15 @@ document.addEventListener("click", function(event) {
     event.preventDefault();
     window.location.replace(destination.href);
   }
+});
+</script>
+
+<script>
+document.getElementById("chaysaFarewellExit").addEventListener("click", function () {
+  // Replace this history entry with the homepage before loading it.
+  const home = new URL("index.html", window.location.href);
+  window.history.replaceState({ chaysaHome: true }, "", home.pathname + home.search);
+  window.location.reload();
 });
 </script>
 </body>
