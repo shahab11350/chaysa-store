@@ -65,6 +65,15 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 </head>
 <body>
 <header>
+<div id="chaysaCalendar" aria-label="تقویم چایسا">
+  <div class="cc-title">تقویم</div>
+  <div class="cc-date" id="chaysaClockDate">در حال بارگذاری...</div>
+</div>
+<div id="chaysaClock" aria-label="ساعت چایسا">
+  <div class="cc-title">ساعت</div>
+  <div class="cc-time" id="chaysaClockTime">--:--:--</div>
+  <div class="cc-zone">وقت محلی</div>
+</div>
 <div class="logo">CHAYSA</div>
 <h1>چایسا</h1>
 <p>فروشگاهی برای انتخاب‌های تازه</p>
@@ -184,15 +193,6 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
 #chaysaMusicPlayer .cm-heading{font:bold 12px Tahoma;color:#244b37;text-align:center;margin:0 0 4px}
 #chaysaSuno{display:block!important;pointer-events:auto!important;width:100%;height:112px;border:0;border-radius:8px;background:#fff}
 @media(max-width:420px){header{min-height:145px;padding:42px 78px 16px}.logo{font-size:27px}header h1{font-size:22px;margin:5px 0}header p{font-size:11px;margin-top:3px}#chaysaCalendar,#chaysaClock{top:8px!important;width:68px;height:68px;padding:5px;border-width:1px}#chaysaCalendar{right:6px!important}#chaysaClock{left:6px!important}#chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:8px;margin-bottom:2px}#chaysaClock .cc-time{font-size:12px}#chaysaCalendar .cc-date{font-size:8px}#chaysaClock .cc-zone{font-size:7px}#chaysaMusicPlayer{left:6px!important;bottom:6px!important;width:min(230px,calc(100vw - 12px))}#chaysaSuno{height:108px}}</style>
-<div id="chaysaCalendar" aria-label="تقویم چایسا">
-  <div class="cc-title">تقویم</div>
-  <div class="cc-date" id="chaysaClockDate">در حال بارگذاری...</div>
-</div>
-<div id="chaysaClock" aria-label="ساعت چایسا">
-  <div class="cc-title">ساعت</div>
-  <div class="cc-time" id="chaysaClockTime">--:--:--</div>
-  <div class="cc-zone">وقت محلی</div>
-</div>
 <div id="chaysaMusicPlayer" aria-label="موسیقی چایسا">
   <div class="cm-heading">موسیقی چایسا</div>
   <div class="cm-controls">
