@@ -148,7 +148,8 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 function showChaysaWelcome(){
   const welcome=document.getElementById("chaysaWelcomeFloat");
   if(!welcome)return;
-  // خوشامدگویی فقط یک‌بار در هر نشست مرورگر نمایش داده شود؛ نه هنگام بازگشت از صفحه خروج.
+  // پس از خروج، هنگام بازگشت به صفحه اصلی پیام خوشامد نمایش داده نشود.
+  if(new URLSearchParams(window.location.search).get("skipWelcome")==="1")return;
   try{
     if(sessionStorage.getItem("chaysaWelcomeShown")==="1")return;
     sessionStorage.setItem("chaysaWelcomeShown","1");
