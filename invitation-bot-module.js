@@ -66,8 +66,8 @@ export async function handleInvitationUpdate(update, env) {
     });
     const link = `${SITE}?${params.toString()}`;
     const displayName = [session.name, session.surname].filter(Boolean).join(" ");
-    const salutation = session.title ? `${displayName} ${session.title}` : displayName;
-    const invitationText = `سلام ${salutation} عزیز 🌿
+    const salutation = session.title ? `${displayName} ${session.title}` : `${displayName} عزیز`;
+    const invitationText = `سلام ${salutation} 🌿
 
 ${STYLES[style].text}
 
