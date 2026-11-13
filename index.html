@@ -61,7 +61,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
 
-<meta name="chaysa-release" content="2026-11-13-36">
+<meta name="chaysa-release" content="2026-11-13-37">
 </head>
 <body>
 <style>
@@ -112,6 +112,44 @@ if(document.readyState==="loading"){
 <a href="#about">درباره ما</a>
 <a href="#contact">تماس با ما</a>
 </nav>
+<div id="chaysaMusicPlayer" aria-label="موسیقی چایسا">
+  <div class="cm-heading">موسیقی چایسا</div>
+  <div class="cm-controls">
+    <button type="button" id="chaysaPrev">قبلی</button>
+    <span id="chaysaTrackLabel">آهنگ ۱ از ۴</span>
+    <button type="button" id="chaysaNext">بعدی</button>
+  </div>
+  <div id="chaysaSunoHost"><iframe id="chaysaSuno" src="https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292?autoplay=1" title="موسیقی چایسا در Suno" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+</div>
+<script>
+(function(){
+  const tracks=[
+    "https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292?autoplay=1",
+    "https://suno.com/embed/bd6ae157-548b-4b59-a459-7a4b30d97352?autoplay=1",
+    "https://suno.com/embed/69996b36-0658-42e4-8955-d05a9247e799?autoplay=1",
+    "https://suno.com/embed/54319a6b-bb2b-4d49-a1bc-6e04ef23f887?autoplay=1"
+  ];
+  let current=0;
+  const host=document.getElementById("chaysaSunoHost");
+  const label=document.getElementById("chaysaTrackLabel");
+  function selectTrack(index){
+    current=(index+tracks.length)%tracks.length;
+    const fresh=document.createElement("iframe");
+    fresh.id="chaysaSuno";
+    fresh.title="موسیقی چایسا در Suno";
+    fresh.loading="eager";
+    fresh.referrerPolicy="strict-origin-when-cross-origin";
+    fresh.allow="autoplay; encrypted-media; fullscreen; picture-in-picture";
+    fresh.allowFullscreen=true;
+    fresh.src=tracks[current];
+    host.replaceChildren(fresh);
+    label.textContent="آهنگ "+(current+1)+" از "+tracks.length;
+  }
+  document.getElementById("chaysaPrev").addEventListener("click",()=>selectTrack(current-1));
+  document.getElementById("chaysaNext").addEventListener("click",()=>selectTrack(current+1));
+})();
+</script>
+
 <div class="hero">
 <p>از عطر چای و دمنوش تا طعم ادویه و شیرینی عسل</p>
 <a class="btn" href="products.html">مشاهده محصولات</a>
@@ -213,50 +251,14 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
 #chaysaClock .cc-time{font-size:18px;font-weight:bold;letter-spacing:.5px;font-variant-numeric:tabular-nums;line-height:1.4;white-space:nowrap}
 #chaysaCalendar .cc-date{font-size:11px;line-height:1.6;color:#f8f3e7}
 #chaysaClock .cc-zone{font-size:8px;color:#e4d5ae;margin-top:2px}
-#chaysaMusicPlayer{position:fixed!important;left:8px!important;bottom:8px!important;z-index:2147483000!important;width:min(245px,calc(100vw - 16px));padding:6px;background:#fff;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #0004;direction:rtl}
+#chaysaMusicPlayer{position:relative!important;left:auto!important;bottom:auto!important;z-index:2!important;width:min(1000px,calc(100% - 24px));margin:12px auto 18px;padding:8px 12px;background:#fff;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #00000012;direction:rtl}
 #chaysaMusicPlayer .cm-controls{position:relative;z-index:5;display:flex!important;align-items:center;justify-content:space-between;gap:5px;margin:0 0 5px;padding:2px;min-height:30px;visibility:visible!important;opacity:1!important}
 #chaysaMusicPlayer .cm-controls button{display:inline-flex!important;visibility:visible!important;opacity:1!important;position:relative;z-index:6;border:1px solid #c5a45b;border-radius:7px;background:#173b2b!important;color:#fff!important;padding:6px 9px;min-width:56px;font:bold 11px Tahoma;cursor:pointer}
 #chaysaMusicPlayer .cm-controls span{display:inline-block!important;visibility:visible!important;opacity:1!important;font:bold 11px Tahoma;color:#244b37;white-space:nowrap}
 #chaysaMusicPlayer .cm-heading{font:bold 12px Tahoma;color:#244b37;text-align:center;margin:0 0 4px}
 #chaysaSuno{display:block!important;pointer-events:auto!important;width:100%;height:112px;border:0;border-radius:8px;background:#fff}
-@media(max-width:420px){header{min-height:170px;padding:50px 108px 18px}.logo{font-size:27px}header h1{font-size:22px;margin:5px 0}header p{font-size:11px;margin-top:3px}#chaysaCalendar,#chaysaClock{top:8px!important;width:96px;height:96px;padding:7px;border-width:1px}#chaysaCalendar{right:6px!important}#chaysaClock{left:6px!important}#chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:10px;margin-bottom:3px}#chaysaClock .cc-time{font-size:16px}#chaysaCalendar .cc-date{font-size:10px}#chaysaClock .cc-zone{font-size:7px}#chaysaMusicPlayer{left:6px!important;bottom:6px!important;width:min(230px,calc(100vw - 12px))}#chaysaSuno{height:108px}}</style>
-<div id="chaysaMusicPlayer" aria-label="موسیقی چایسا">
-  <div class="cm-heading">موسیقی چایسا</div>
-  <div class="cm-controls">
-    <button type="button" id="chaysaPrev">قبلی</button>
-    <span id="chaysaTrackLabel">آهنگ ۱ از ۴</span>
-    <button type="button" id="chaysaNext">بعدی</button>
-  </div>
-  <div id="chaysaSunoHost"><iframe id="chaysaSuno" src="https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292?autoplay=1" title="موسیقی چایسا در Suno" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
-</div>
-<script>
-(function(){
-  const tracks=[
-    "https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292?autoplay=1",
-    "https://suno.com/embed/bd6ae157-548b-4b59-a459-7a4b30d97352?autoplay=1",
-    "https://suno.com/embed/69996b36-0658-42e4-8955-d05a9247e799?autoplay=1",
-    "https://suno.com/embed/54319a6b-bb2b-4d49-a1bc-6e04ef23f887?autoplay=1"
-  ];
-  let current=0;
-  const host=document.getElementById("chaysaSunoHost");
-  const label=document.getElementById("chaysaTrackLabel");
-  function selectTrack(index){
-    current=(index+tracks.length)%tracks.length;
-    const fresh=document.createElement("iframe");
-    fresh.id="chaysaSuno";
-    fresh.title="موسیقی چایسا در Suno";
-    fresh.loading="eager";
-    fresh.referrerPolicy="strict-origin-when-cross-origin";
-    fresh.allow="autoplay; encrypted-media; fullscreen; picture-in-picture";
-    fresh.allowFullscreen=true;
-    fresh.src=tracks[current];
-    host.replaceChildren(fresh);
-    label.textContent="آهنگ "+(current+1)+" از "+tracks.length;
-  }
-  document.getElementById("chaysaPrev").addEventListener("click",()=>selectTrack(current-1));
-  document.getElementById("chaysaNext").addEventListener("click",()=>selectTrack(current+1));
-})();
-</script>
+@media(max-width:420px){header{min-height:170px;padding:50px 108px 18px}.logo{font-size:27px}header h1{font-size:22px;margin:5px 0}header p{font-size:11px;margin-top:3px}#chaysaCalendar,#chaysaClock{top:8px!important;width:96px;height:96px;padding:7px;border-width:1px}#chaysaCalendar{right:6px!important}#chaysaClock{left:6px!important}#chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:10px;margin-bottom:3px}#chaysaClock .cc-time{font-size:16px}#chaysaCalendar .cc-date{font-size:10px}#chaysaClock .cc-zone{font-size:7px}#chaysaMusicPlayer{left:auto!important;bottom:auto!important;width:calc(100% - 20px);margin:10px auto 16px}#chaysaSuno{height:108px}}</style>
+
 <script>
 (function(){
   const timeEl=document.getElementById("chaysaClockTime");
