@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173b2b">
+<title>ساخت دعوت‌نامه | چایسا</title>
+<style>
+:root{--green:#173b2b;--gold:#b99b55;--paper:#fffdf7;--bg:#f3f0e6;--ink:#26372b;--muted:#68756b}
+*{box-sizing:border-box}
+body{margin:0;padding:20px 12px 40px;background:linear-gradient(145deg,#f5f1e7,#e8eee5);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+main{width:min(100%,680px);margin:0 auto}
+header{text-align:center;padding:18px 10px 22px}
+.brand{color:var(--gold);letter-spacing:5px;font-weight:bold;font-size:14px}
+h1{font-size:clamp(24px,6vw,32px);color:var(--green);margin:12px 0}
+.intro{color:var(--muted);font-size:14px;line-height:2}
+.panel{background:var(--paper);border:1px solid #d9c99f;border-radius:22px;padding:clamp(18px,5vw,30px);box-shadow:0 14px 40px #173b2b12;margin-bottom:16px}
+label{display:block;font-size:14px;font-weight:bold;margin:15px 0 8px}
+input,select{width:100%;min-height:50px;border:1px solid #d8d6ca;border-radius:12px;background:white;padding:12px 14px;font:16px Tahoma,Arial,sans-serif;color:var(--ink)}
+input:focus,select:focus{outline:2px solid #b99b5577;border-color:var(--gold)}
+.hint{font-size:12px;color:var(--muted);line-height:1.9;margin-top:6px}
+button{border:0;border-radius:13px;padding:14px 18px;font: bold 15px Tahoma,Arial,sans-serif;cursor:pointer}
+.primary{width:100%;margin-top:22px;background:var(--green);color:white}
+.secondary{background:#eee9d9;color:var(--green);width:100%;margin-top:10px}
+.result{display:none}
+.result h2{font-size:19px;color:var(--green);margin:0 0 12px}
+.output{direction:rtl;white-space:pre-wrap;overflow-wrap:anywhere;background:#f7f5ed;border:1px solid #e1dac7;border-radius:12px;padding:14px;line-height:2;font-size:14px}
+.small{font-size:12px;color:var(--muted);line-height:2;margin:10px 0}
+.notice{color:#725a24;background:#f8f1dd;padding:12px;border-radius:12px;font-size:12px;line-height:2;margin-top:14px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:10px}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div class="brand">CHAYSA</div>
+<h1>ساخت دعوت‌نامه اختصاصی</h1>
+<div class="intro">برای هر دوست، یک دعوت با نام و حال‌وهوای دلخواهت بساز.<br>بدون نیاز به ربات یا تنظیمات اضافی.</div>
+</header>
+<section class="panel">
+<form id="inviteForm">
+<label for="name">نام مخاطب <span aria-hidden="true">*</span></label>
+<input id="name" name="name" maxlength="80" required autocomplete="given-name" placeholder="مثلاً علی">
+<label for="surname">نام خانوادگی (اختیاری)</label>
+<input id="surname" name="surname" maxlength="80" autocomplete="family-name" placeholder="مثلاً احمدی">
+<label for="title">خطاب دلخواه (اختیاری)</label>
+<input id="title" name="title" maxlength="60" placeholder="مثلاً جان، عزیزم، خواهرم">
+<div class="hint">اگر این قسمت را خالی بگذاری، در متن دعوت فقط از نام مخاطب استفاده می‌شود.</div>
+<label for="style">سبک دعوت‌نامه</label>
+<select id="style" name="style">
+<option value="luxury">لوکس و رسمی</option>
+<option value="friendly">صمیمی و دوستانه</option>
+<option value="art">هنری و شاعرانه</option>
+<option value="religious">مذهبی و معنوی</option>
+<option value="mystic">عارفانه و تأمل‌برانگیز</option>
+<option value="humor">طنز و شوخ‌طبعانه</option>
+</select>
+<button class="primary" type="submit">ساخت دعوت‌نامه</button>
+</form>
+</section>
+<section class="panel result" id="result" aria-live="polite">
+<h2>دعوت‌نامه آماده است 🌿</h2>
+<div class="small">لینک اختصاصی مخاطب:</div>
+<div class="output" id="linkOutput"></div>
+<button class="secondary" id="copyLink" type="button">کپی لینک</button>
+<div class="small" style="margin-top:18px">متن آماده برای ارسال:</div>
+<div class="output" id="messageOutput"></div>
+<button class="primary" id="copyMessage" type="button">کپی متن کامل دعوت‌نامه</button>
+<div class="notice">این صفحه فقط دعوت‌نامه را می‌سازد. سفارش‌گیری فروشگاه و ربات تلگرام تغییری نمی‌کنند. لینک با اطلاعات نام و سبک در نشانی صفحه ساخته می‌شود؛ بنابراین اطلاعات حساس در آن وارد نکن.</div>
+</section>
+<footer>با مهر، چایسا</footer>
+</main>
+<script>
+(function(){
+ const form=document.getElementById('inviteForm');
+ const result=document.getElementById('result');
+ const linkOutput=document.getElementById('linkOutput');
+ const messageOutput=document.getElementById('messageOutput');
+ const styles={
+  luxury:'با سلیقه‌ای از جنس آرامش، به دنیای عطرها و طعم‌های منتخب چایسا دعوتی. امیدواریم این همراهی برایت دل‌نشین و به‌یادماندنی باشد.',
+  friendly:'گفتیم یک گوشه دنج از دنیای چایسا را با تو قسمت کنیم. بیا تا از عطر چای و طعم لحظه‌های خوب، کنار هم لذت ببریم.',
+  art:'گاهی یک عطر، پنجره‌ای به خاطره‌ای دور است؛ و گاهی یک فنجان، آغاز یک روایت تازه. به روایت چایسا خوش آمدی.',
+  religious:'امیدواریم روزگارت سرشار از آرامش، تندرستی و برکت باشد. خوشحالیم که می‌توانیم گوشه‌ای از لحظه‌های خوبت را با چایسا همراه شویم.',
+  mystic:'در میان شتاب روزگار، گاهی یک مکث کوتاه کافی‌ست؛ یک عطر، یک فنجان، و بازگشت به روشنایی درون. به خلوت دل‌نشین چایسا دعوتی.',
+  humor:'ورود به چایسا ممکن است باعث لبخند، انتخاب‌های خوشمزه و دلتنگی برای یک فنجان دیگر شود! مسئولیت این اتفاقات با خودت؛ ما فقط دعوتت کردیم.'
+ };
+ let currentLink='',currentMessage='';
+ form.addEventListener('submit',function(event){
+  event.preventDefault();
+  const name=document.getElementById('name').value.trim();
+  const surname=document.getElementById('surname').value.trim();
+  const title=document.getElementById('title').value.trim();
+  const style=document.getElementById('style').value;
+  if(!name){document.getElementById('name').focus();return;}
+  const params=new URLSearchParams({name:name,style:style});
+  if(surname)params.set('surname',surname);
+  if(title)params.set('title',title);
+  currentLink=new URL('./invitation.html?'+params.toString(),location.href).href;
+  const fullName=[name,surname].filter(Boolean).join(' ');
+  const greeting=title?(fullName+'، '+title):(fullName);
+  currentMessage='سلام '+greeting+' 🌿\n\n'+styles[style]+'\n\nخوشحال می‌شویم مهمان دنیای چایسا باشی:\n'+currentLink+'\n\nبا مهر، چایسا';
+  linkOutput.textContent=currentLink;
+  messageOutput.textContent=currentMessage;
+  result.style.display='block';
+  result.scrollIntoView({behavior:'smooth',block:'start'});
+ });
+ async function copyText(text,button){
+  const original=button.textContent;
+  try{
+   if(navigator.clipboard && window.isSecureContext){await navigator.clipboard.writeText(text);}
+   else{
+    const area=document.createElement('textarea');area.value=text;area.style.position='fixed';area.style.opacity='0';document.body.appendChild(area);area.select();
+    const ok=document.execCommand('copy');area.remove();if(!ok)throw new Error('copy failed');
+   }
+   button.textContent='کپی شد ✓';
+  }catch(e){button.textContent='کپی خودکار ممکن نشد؛ متن را انتخاب کن';}
+  setTimeout(()=>button.textContent=original,2600);
+ }
+ document.getElementById('copyLink').addEventListener('click',function(){copyText(currentLink,this);});
+ document.getElementById('copyMessage').addEventListener('click',function(){copyText(currentMessage,this);});
+})();
+</script>
+</body>
+</html>
