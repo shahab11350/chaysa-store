@@ -61,13 +61,15 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
 
-<meta name="chaysa-release" content="2026-11-13-38">
+<meta name="chaysa-release" content="2026-11-13-39">
 </head>
 <body>
 <style>
 #chaysaWelcomeFloat{position:relative;inset:auto;z-index:2147482000;display:flex;align-items:flex-start;justify-content:center;width:100%;height:0;margin:0 auto;padding:0;overflow:visible;pointer-events:none;opacity:0;visibility:hidden}
 #chaysaWelcomeFloat.show{visibility:visible;animation:chaysaWelcomeLife 12s ease forwards}
-#chaysaWelcomeFloat .welcome-card{position:relative;max-width:min(88vw,390px);margin:3px auto 0;padding:15px 24px;border:1px solid #c5a45b;border-radius:48% 52% 45% 55% / 58% 48% 52% 42%;background:rgba(23,59,43,.97);color:#fff;text-align:center;box-shadow:0 8px 24px #0003;direction:rtl;transform:rotate(-3deg)}
+#chaysaWelcomeFloat .welcome-card{position:relative;isolation:isolate;max-width:min(88vw,390px);margin:8px auto 0;padding:17px 27px;border:2px solid #c5a45b;border-radius:34px;background:#173b2b;color:#fff;text-align:center;box-shadow:0 7px 18px #0002;direction:rtl;transform:rotate(-2deg)}
+#chaysaWelcomeFloat .welcome-card:before{content:"";position:absolute;z-index:-1;left:24px;bottom:-13px;width:24px;height:24px;background:#173b2b;border-left:2px solid #c5a45b;border-bottom:2px solid #c5a45b;transform:rotate(-35deg);border-bottom-left-radius:5px}
+#chaysaWelcomeFloat .welcome-card:after{content:"";position:absolute;z-index:-1;top:-10px;right:36px;width:20px;height:20px;border-radius:50%;background:#173b2b;border-top:2px solid #c5a45b;border-right:2px solid #c5a45b}
 #chaysaWelcomeFloat strong{display:block;color:#f0d58c;font:bold 23px Tahoma,sans-serif;margin-bottom:10px}
 #chaysaWelcomeFloat span{display:block;font:14px/2 Tahoma,sans-serif;color:#f8f3e7}
 @keyframes chaysaWelcomeLife{0%{opacity:0}8%{opacity:1}88%{opacity:1}100%{opacity:0;visibility:hidden}}
