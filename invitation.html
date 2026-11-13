@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#173b2b">
+<title>دعوت‌نامه اختصاصی چایسا</title>
+<style>
+:root{--bg:#f5f1e7;--paper:#fffdf7;--ink:#26372b;--accent:#b99b55;--deep:#173b2b;--muted:#68756b}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:24px 14px;display:grid;place-items:center;background:radial-gradient(circle at 15% 10%,#e7e2cf,transparent 35%),linear-gradient(145deg,#f5f1e7,#e8eee5);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+.card{width:min(100%,620px);background:var(--paper);border:1px solid color-mix(in srgb,var(--accent) 65%,white);border-radius:26px;overflow:hidden;box-shadow:0 18px 55px #173b2b1c}
+.top{height:12px;background:linear-gradient(90deg,var(--deep),var(--accent),var(--deep))}
+.inner{padding:clamp(24px,6vw,48px);text-align:center}
+.brand{font-size:14px;letter-spacing:5px;color:var(--accent);font-weight:bold}
+.kicker{margin:28px 0 10px;color:var(--muted);font-size:13px}
+h1{margin:0;color:var(--deep);font-size:clamp(25px,6vw,36px);line-height:1.8}
+.name{margin:12px 0 22px;font-size:clamp(20px,5vw,27px);color:var(--accent);font-weight:bold;line-height:1.8}
+.message{font-size:16px;line-height:2.5;white-space:pre-line;margin:18px auto;max-width:490px}
+.signature{margin-top:28px;color:var(--deep);font-weight:bold;line-height:2}
+.rule{width:72px;height:2px;background:var(--accent);margin:25px auto}
+.footer{padding:16px;background:#f2efe5;text-align:center;color:var(--muted);font-size:12px;line-height:2}
+.home{display:inline-block;margin-top:20px;padding:12px 24px;border-radius:30px;background:var(--deep);color:#fff;text-decoration:none;font-size:14px}
+body[data-style="friendly"]{--bg:#fff4e9;--paper:#fffaf4;--ink:#594234;--accent:#c47b52;--deep:#78452f}
+body[data-style="art"]{--bg:#f0edf5;--paper:#fbf9ff;--ink:#383047;--accent:#9a7ab8;--deep:#403052}
+body[data-style="religious"]{--bg:#edf3e9;--paper:#fbfff8;--ink:#344536;--accent:#a68c4c;--deep:#31543b}
+body[data-style="mystic"]{--bg:#eeedf5;--paper:#faf9ff;--ink:#39334e;--accent:#8b83b8;--deep:#383354}
+body[data-style="humor"]{--bg:#fff4d9;--paper:#fffdf4;--ink:#594523;--accent:#d28b35;--deep:#77521d}
+body[data-style="luxury"]{--bg:#f5f1e7}
+body[data-style="art"] .card{border-radius:4px 28px 4px 28px}
+body[data-style="mystic"] .card{border-radius:50px 12px 50px 12px}
+body[data-style="humor"] .card{transform:rotate(-.35deg)}
+@media(max-width:420px){body{padding:12px}.inner{padding:28px 20px}.message{font-size:15px}}
+</style>
+</head>
+<body data-style="luxury">
+<main class="card">
+<div class="top"></div>
+<div class="inner">
+<div class="brand">CHAYSA</div>
+<div class="kicker" id="styleLabel">یک دعوت دوستانه از طرف چایسا</div>
+<h1 id="headline">به دنیای چایسا خوش آمدی</h1>
+<div class="name" id="guestName">مهمان عزیز</div>
+<div class="rule"></div>
+<p class="message" id="message">اینجا دنیایی از عطرها، طعم‌ها و لحظه‌های دل‌نشین منتظر توست. خوشحالیم که در این مسیر همراه ما هستی.</p>
+<div class="signature" id="signature">با مهر، چایسا</div>
+<a class="home" href="./index.html">ورود به دنیای چایسا</a>
+</div>
+<div class="footer">این دعوت‌نامه با مهر و به‌صورت اختصاصی برای شما آماده شده است.</div>
+</main>
+<script>
+(function(){
+ const q=new URLSearchParams(location.search);
+ const name=(q.get('name')||q.get('n')||'').trim();
+ const surname=(q.get('surname')||q.get('s')||'').trim();
+ const title=(q.get('title')||q.get('t')||'').trim();
+ const style=(q.get('style')||'luxury').toLowerCase();
+ const styles={
+  luxury:{label:'دعوت‌نامه‌ای به رسم ظرافت',headline:'به دنیای چایسا خوش آمدی',message:'با سلیقه‌ای از جنس آرامش، به دنیای عطرها و طعم‌های منتخب چایسا دعوتی.\nامیدواریم این همراهی برایت دل‌نشین و به‌یادماندنی باشد.'},
+  friendly:{label:'یک دعوت گرم و دوستانه',headline:'چه خوب که اینجایی!',message:'گفتیم یک گوشه دنج از دنیای چایسا را با تو قسمت کنیم.\nبیا تا از عطر چای و طعم لحظه‌های خوب، کنار هم لذت ببریم.'},
+  art:{label:'دعوتی با رنگ و خیال',headline:'هر طعم، قصه‌ای تازه',message:'گاهی یک عطر، پنجره‌ای به خاطره‌ای دور است؛\nو گاهی یک فنجان، آغاز یک روایت تازه.\nبه روایت چایسا خوش آمدی.'},
+  religious:{label:'دعوتی با مهر و معنویت',headline:'با آرزوی خیر و برکت',message:'امیدواریم روزگارت سرشار از آرامش، تندرستی و برکت باشد.\nخوشحالیم که می‌توانیم گوشه‌ای از لحظه‌های خوبت را با چایسا همراه شویم.'},
+  mystic:{label:'دعوتی برای لحظه‌ای درنگ',headline:'آرامش، در همین لحظه',message:'در میان شتاب روزگار، گاهی یک مکث کوتاه کافی‌ست؛\nیک عطر، یک فنجان، و بازگشت به روشنایی درون.\nبه خلوت دل‌نشین چایسا دعوتی.'},
+  humor:{label:'دعوت‌نامه با چاشنی لبخند',headline:'هشدار: احتمال خوش‌طعم شدن!',message:'ورود به چایسا ممکن است باعث لبخند، انتخاب‌های خوشمزه و دلتنگی برای یک فنجان دیگر شود!\nمسئولیت این اتفاقات با خودت؛ ما فقط دعوتت کردیم.'}
+ };
+ const chosen=styles[style]||styles.luxury;
+ document.body.dataset.style=styles[style]?style:'luxury';
+ document.getElementById('styleLabel').textContent=chosen.label;
+ document.getElementById('headline').textContent=chosen.headline;
+ document.getElementById('guestName').textContent=name?(name+(surname?' '+surname:'')+(title?'، '+title:'')):'مهمان عزیز';
+ document.getElementById('message').textContent=chosen.message;
+ document.title='دعوت‌نامه چایسا'+(name?' | '+name:'');
+})();
+</script>
+</body>
+</html>
