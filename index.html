@@ -174,7 +174,7 @@ document.addEventListener("DOMContentLoaded", function () {
 #chaysaClock .cc-time{font-size:25px;font-weight:bold;letter-spacing:1px;font-variant-numeric:tabular-nums;line-height:1.4}
 #chaysaClock .cc-date{font-size:11px;line-height:1.8;color:#f8f3e7;margin-top:4px}
 #chaysaClock .cc-zone{font-size:9px;color:#e4d5ae;margin-top:3px}
-#chaysaSuno{position:fixed!important;left:10px!important;bottom:10px!important;z-index:2147483000!important;width:min(330px,calc(100vw - 20px));height:150px;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #0004;background:#fff}
+#chaysaSuno{display:block!important;pointer-events:auto!important;position:fixed!important;left:10px!important;bottom:10px!important;z-index:2147483000!important;width:min(330px,calc(100vw - 20px));height:150px;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #0004;background:#fff}
 @media(max-width:420px){#chaysaClock{top:8px!important;right:7px!important;width:174px;padding:9px 10px}#chaysaClock .cc-time{font-size:22px}#chaysaSuno{left:7px!important;bottom:7px!important;width:min(300px,calc(100vw - 14px));height:145px}}
 </style>
 <div id="chaysaClock" aria-label="تقویم و ساعت چایسا">
@@ -183,7 +183,7 @@ document.addEventListener("DOMContentLoaded", function () {
   <div class="cc-date" id="chaysaClockDate">در حال بارگذاری تاریخ...</div>
   <div class="cc-zone">به وقت محلی شما</div>
 </div>
-<iframe id="chaysaSuno" src="https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292" title="موسیقی چایسا در Suno" loading="lazy" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe id="chaysaSuno" src="https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292" title="موسیقی چایسا در Suno" loading="eager" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
 <script>
 (function(){
   const timeEl=document.getElementById("chaysaClockTime");
