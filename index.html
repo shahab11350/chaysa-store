@@ -61,7 +61,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
 
-<meta name="chaysa-release" content="2026-11-13-40">
+<meta name="chaysa-release" content="2026-11-13-41">
 </head>
 <body>
 <style>
@@ -178,15 +178,18 @@ if(document.readyState==="loading"){
   <form id="chaysaQuestionForm" style="background:#fff;border:1px solid #e6d9b8;border-radius:16px;padding:20px;text-align:right;box-shadow:0 4px 16px #0000000a">
     <label for="chaysaQuestionText" style="display:block;font-weight:bold;margin:0 0 8px">متن سؤال یا درخواست</label>
     <textarea id="chaysaQuestionText" required maxlength="2000" rows="4" placeholder="سؤالت رو اینجا بنویس..." style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px/2 Tahoma;resize:vertical"></textarea>
-    <label for="chaysaContactType" style="display:block;font-weight:bold;margin:16px 0 8px">راه دریافت پاسخ</label>
-    <select id="chaysaContactType" required style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;background:#fff;font:14px Tahoma">
-      <option value="شماره تماس">شماره تماس</option>
-      <option value="آیدی تلگرام">آیدی تلگرام</option>
-      <option value="آیدی روبیکا">آیدی روبیکا</option>
-      <option value="آیدی بله">آیدی بله</option>
-    </select>
-    <label for="chaysaContactValue" style="display:block;font-weight:bold;margin:16px 0 8px">شماره یا آیدی ارتباطی</label>
-    <input id="chaysaContactValue" required maxlength="100" placeholder="شماره تماس یا آیدی خودت رو وارد کن" style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px Tahoma">
+    <fieldset style="border:0;padding:0;margin:16px 0 8px">
+      <legend style="display:block;font-weight:bold;margin:0 0 10px">روش دریافت پاسخ (یکی را انتخاب کن)</legend>
+      <div id="chaysaContactChoices" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+        <label class="chaysa-contact-option"><input type="radio" name="chaysaContactType" value="تلفن" required> تلفن</label>
+        <label class="chaysa-contact-option"><input type="radio" name="chaysaContactType" value="تلگرام" required> تلگرام</label>
+        <label class="chaysa-contact-option"><input type="radio" name="chaysaContactType" value="روبیکا" required> روبیکا</label>
+        <label class="chaysa-contact-option"><input type="radio" name="chaysaContactType" value="بله" required> بله</label>
+        <label class="chaysa-contact-option"><input type="radio" name="chaysaContactType" value="اینستاگرام" required> اینستاگرام</label>
+      </div>
+    </fieldset>
+    <label id="chaysaContactLabel" for="chaysaContactValue" style="display:block;font-weight:bold;margin:16px 0 8px">شماره تلفن یا شناسه انتخاب‌شده</label>
+    <input id="chaysaContactValue" type="text" required maxlength="100" placeholder="ابتدا روش ارتباط را انتخاب کن، سپس شماره یا شناسه را وارد کن" style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px Tahoma">
     <p style="font-size:12px;color:#777;line-height:2;margin:12px 0">اطلاعات شما نزد چایسا محفوظ می‌مونه و فقط برای پاسخ‌گویی به همین درخواست استفاده می‌شه.</p>
     <button id="chaysaQuestionSend" type="submit" style="display:block;width:100%;border:0;border-radius:10px;background:#244b37;color:#fff;padding:14px;font:bold 14px Tahoma;cursor:pointer">ارسال درخواست</button>
     <p id="chaysaQuestionStatus" role="status" aria-live="polite" style="margin:12px 0 0;font-size:13px;text-align:center"></p>
@@ -278,7 +281,7 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
 #chaysaClock .cc-time{font-size:18px;font-weight:bold;letter-spacing:.5px;font-variant-numeric:tabular-nums;line-height:1.4;white-space:nowrap}
 #chaysaCalendar .cc-date{font-size:11px;line-height:1.6;color:#f8f3e7}
 #chaysaClock .cc-zone{font-size:8px;color:#e4d5ae;margin-top:2px}
-#chaysaMusicPlayer{position:relative!important;left:auto!important;bottom:auto!important;z-index:2!important;width:min(620px,calc(100% - 24px));margin:10px auto 8px;padding:5px 9px;background:#fff;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #00000012;direction:rtl}
+.chaysa-contact-option{display:flex;align-items:center;gap:7px;justify-content:center;padding:12px 8px;border:1px solid #c5a45b;border-radius:10px;background:#fff;color:#244b37;font:bold 14px Tahoma;cursor:pointer}.chaysa-contact-option:has(input:checked){background:#244b37;color:#fff;border-color:#244b37}.chaysa-contact-option input{accent-color:#c5a45b;width:17px;height:17px;margin:0} @media(max-width:360px){#chaysaContactChoices{grid-template-columns:1fr!important}}\n#chaysaMusicPlayer{position:relative!important;left:auto!important;bottom:auto!important;z-index:2!important;width:min(620px,calc(100% - 24px));margin:10px auto 8px;padding:5px 9px;background:#fff;border:1px solid #c5a45b;border-radius:12px;box-shadow:0 4px 18px #00000012;direction:rtl}
 #chaysaMusicPlayer .cm-controls{position:relative;z-index:5;display:flex!important;align-items:center;justify-content:space-between;gap:5px;margin:0 0 5px;padding:2px;min-height:30px;visibility:visible!important;opacity:1!important}
 #chaysaMusicPlayer .cm-controls button{display:inline-flex!important;visibility:visible!important;opacity:1!important;position:relative;z-index:6;border:1px solid #c5a45b;border-radius:7px;background:#173b2b!important;color:#fff!important;padding:6px 9px;min-width:56px;font:bold 11px Tahoma;cursor:pointer}
 #chaysaMusicPlayer .cm-controls span{display:inline-block!important;visibility:visible!important;opacity:1!important;font:bold 11px Tahoma;color:#244b37;white-space:nowrap}
@@ -308,14 +311,24 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
   const form=document.getElementById("chaysaQuestionForm");
   if(!form)return;
   const question=document.getElementById("chaysaQuestionText");
-  const contactType=document.getElementById("chaysaContactType");
+  const contactChoices=form.querySelectorAll('input[name="chaysaContactType"]');
+  const contactLabel=document.getElementById("chaysaContactLabel");
   const contactValue=document.getElementById("chaysaContactValue");
   const button=document.getElementById("chaysaQuestionSend");
   const status=document.getElementById("chaysaQuestionStatus");
+  contactChoices.forEach(function(choice){
+    choice.addEventListener("change",function(){
+      const type=choice.value;
+      contactLabel.textContent=type==="تلفن"?"شماره تلفن": "شناسه "+type;
+      contactValue.placeholder=type==="تلفن"?"شماره تلفن خودت را وارد کن":"شناسه یا آیدی "+type+" خودت را وارد کن";
+      contactValue.value="";
+    });
+  });
   form.addEventListener("submit",async function(event){
     event.preventDefault();
-    if(!question.value.trim()||!contactValue.value.trim()){
-      status.textContent="لطفاً سؤال و راه ارتباطی را کامل وارد کن.";
+    const selectedContact=form.querySelector('input[name="chaysaContactType"]:checked');
+    if(!question.value.trim()||!selectedContact||!contactValue.value.trim()){
+      status.textContent="لطفاً سؤال را بنویس، یکی از پنج روش ارتباط را انتخاب کن و شماره یا شناسه همان روش را وارد کن.";
       status.style.color="#a33";
       return;
     }
@@ -325,7 +338,7 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
       "متن سؤال:",
       question.value.trim(),
       "--------------------",
-      "راه دریافت پاسخ: "+contactType.value,
+      "روش دریافت پاسخ: "+selectedContact.value,
       "اطلاعات ارتباطی: "+contactValue.value.trim()
     ].join("\n");
     button.disabled=true;
