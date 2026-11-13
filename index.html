@@ -88,6 +88,44 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 <h2>درباره چایسا</h2>
 <p>چایسا، فروشگاهی برای انتخاب‌های متنوع امروز و فردا؛ با نگاهی به فرصت‌های تازه در آینده.</p>
 </section>
+<style>
+.music-player{position:fixed;bottom:14px;left:14px;z-index:1000;background:#173b2b;color:#fff;border:1px solid #b99b55;border-radius:16px;padding:12px 14px;box-shadow:0 5px 22px #0003;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 28px);font-family:Tahoma,sans-serif}
+.music-player button,.music-player select{font:inherit;border:1px solid #d8c58f;border-radius:9px;background:#f7f5ef;color:#173b2b;padding:8px 10px}
+.music-player .music-copy{font-size:12px;line-height:1.8}
+.music-player .music-copy strong{color:#e6cc85;font-size:13px}
+.music-player input{width:65px;accent-color:#e6cc85}
+@media(max-width:420px){.music-player{left:8px;bottom:8px;padding:9px;gap:7px}.music-player .music-copy{font-size:10px}.music-player input{width:48px}}
+</style>
+<div class="music-player" id="chaysaMusic">
+  <div class="music-copy"><strong>موسیقی چایسا</strong><br><span id="musicMessage">اگر دوست نداری، خاموشش کن</span></div>
+  <button type="button" id="musicToggle" aria-label="پخش یا توقف موسیقی">▶ پخش</button>
+  <label for="musicVolume" style="font-size:11px">صدا</label>
+  <input id="musicVolume" type="range" min="0" max="1" step="0.05" value="0.35" aria-label="تنظیم صدای موسیقی">
+  <audio id="chaysaAudio" preload="none" loop>
+    <source src="https://drive.google.com/uc?export=download&amp;id=1IqYexaDGsmWvs2sh9Tp-F1I90xXFostI" type="audio/mpeg">
+  </audio>
+</div>
+<script>
+(function(){
+  const audio=document.getElementById("chaysaAudio");
+  const toggle=document.getElementById("musicToggle");
+  const volume=document.getElementById("musicVolume");
+  const message=document.getElementById("musicMessage");
+  audio.volume=Number(volume.value);
+  function update(){toggle.textContent=audio.paused?"▶ پخش":"Ⅱ توقف";}
+  toggle.addEventListener("click",async function(){
+    if(audio.paused){
+      try{await audio.play();message.textContent="همراه لحظه‌های شما";}catch(e){message.textContent="برای پخش، دوباره لمس کنید";}
+    }else{audio.pause();message.textContent="اگر دوست نداری، خاموشش کن";}
+    update();
+  });
+  volume.addEventListener("input",function(){audio.volume=Number(volume.value);if(audio.volume>0)audio.muted=false;});
+  audio.addEventListener("play",update);
+  audio.addEventListener("pause",update);
+  audio.play().then(function(){message.textContent="همراه لحظه‌های شما";update();}).catch(function(){message.textContent="برای شنیدن موسیقی، پخش را لمس کنید";update();});
+})();
+</script>
+
 <footer id="contact">
 <strong>CHAYSA | چایسا</strong>
 <p>راهی برای انتخاب‌های تازه</p>
