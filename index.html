@@ -147,7 +147,13 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 <script>
 function showChaysaWelcome(){
   const welcome=document.getElementById("chaysaWelcomeFloat");
-  if(welcome){setTimeout(function(){welcome.classList.add("show");},350);}
+  if(!welcome)return;
+  // خوشامدگویی فقط یک‌بار در هر نشست مرورگر نمایش داده شود؛ نه هنگام بازگشت از صفحه خروج.
+  try{
+    if(sessionStorage.getItem("chaysaWelcomeShown")==="1")return;
+    sessionStorage.setItem("chaysaWelcomeShown","1");
+  }catch(error){}
+  setTimeout(function(){welcome.classList.add("show");},350);
 }
 if(document.readyState==="loading"){
   document.addEventListener("DOMContentLoaded",showChaysaWelcome,{once:true});
