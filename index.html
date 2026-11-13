@@ -164,14 +164,15 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 <style>
-#chaysaMusic{position:fixed!important;left:12px!important;bottom:12px!important;z-index:2147483000!important;width:min(360px,calc(100vw - 24px));box-sizing:border-box;padding:10px;background:#173b2b;color:#fff;border:2px solid #c5a45b;border-radius:15px;box-shadow:0 4px 18px #0005;font-family:Tahoma,sans-serif}
-#chaysaMusic .music-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 7px;font-size:12px;line-height:1.6}
-#chaysaMusic .music-heading strong{color:#f0d58c;font-size:13px}
-#chaysaMusic iframe{display:block;width:100%;height:150px;border:0;border-radius:9px;background:#fff}
-@media(max-width:420px){#chaysaMusic{left:7px!important;bottom:7px!important;width:calc(100vw - 14px);padding:8px}#chaysaMusic iframe{height:145px}}
+#chaysaMusic{position:fixed!important;left:12px!important;bottom:12px!important;z-index:2147483000!important;display:flex!important;align-items:center;gap:10px;padding:12px 17px;background:#173b2b;color:#fff;border:1px solid #c5a45b;border-radius:15px;box-shadow:0 4px 18px #0004;font-family:Tahoma,sans-serif}
+#chaysaMusic strong{color:#f0d58c;font-size:15px}
+#chaysaMusic span{font-size:12px;color:#fff;opacity:.9}
+@media(max-width:420px){#chaysaMusic{left:8px!important;bottom:8px!important;padding:10px 13px;gap:8px}#chaysaMusic strong{font-size:13px}}
 </style>
-<div id="chaysaMusic" dir="rtl">
-  <div class="music-heading"><strong>موسیقی چایسا</strong><span>اگر دوست نداری، خاموشش کن</span></div>
+<div id="chaysaMusic" dir="rtl" aria-label="موسیقی چایسا به‌زودی">
+  <strong>♫ موسیقی چایسا</strong>
+  <span>به‌زودی...</span>
+</div>
   <iframe
     src="https://suno.com/embed/c5f7a061-299b-4b1d-a8f4-06743f2aa292"
     title="موسیقی چایسا در Suno"
