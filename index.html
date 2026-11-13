@@ -61,7 +61,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
 </style>
 
-<meta name="chaysa-release" content="2026-11-13-39">
+<meta name="chaysa-release" content="2026-11-13-40">
 </head>
 <body>
 <style>
@@ -97,6 +97,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 <a href="products.html">محصولات</a>
 <a href="#about">درباره ما</a>
 <a href="#contact">تماس با ما</a>
+<a href="#questions">پرسش و راهنمایی</a>
 </nav>
 <div id="chaysaMusicPlayer" aria-label="موسیقی چایسا">
   <div class="cm-heading">موسیقی چایسا</div>
@@ -169,6 +170,28 @@ if(document.readyState==="loading"){
 <p>چایسا، فروشگاهی برای انتخاب‌های متنوع امروز و فردا؛ با نگاهی به فرصت‌های تازه در آینده.</p>
 </section>
 
+
+
+<section id="questions" class="about" style="max-width:760px">
+  <h2>پاسخ‌گوی سؤالات درباره سایت و محصولات</h2>
+  <p>سؤال، ابهام یا پیشنهادت رو برامون بنویس. همکاران چایسا بررسی می‌کنن و از راه ارتباطی انتخابی‌ات پاسخ می‌دن.</p>
+  <form id="chaysaQuestionForm" style="background:#fff;border:1px solid #e6d9b8;border-radius:16px;padding:20px;text-align:right;box-shadow:0 4px 16px #0000000a">
+    <label for="chaysaQuestionText" style="display:block;font-weight:bold;margin:0 0 8px">متن سؤال یا درخواست</label>
+    <textarea id="chaysaQuestionText" required maxlength="2000" rows="4" placeholder="سؤالت رو اینجا بنویس..." style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px/2 Tahoma;resize:vertical"></textarea>
+    <label for="chaysaContactType" style="display:block;font-weight:bold;margin:16px 0 8px">راه دریافت پاسخ</label>
+    <select id="chaysaContactType" required style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;background:#fff;font:14px Tahoma">
+      <option value="شماره تماس">شماره تماس</option>
+      <option value="آیدی تلگرام">آیدی تلگرام</option>
+      <option value="آیدی روبیکا">آیدی روبیکا</option>
+      <option value="آیدی بله">آیدی بله</option>
+    </select>
+    <label for="chaysaContactValue" style="display:block;font-weight:bold;margin:16px 0 8px">شماره یا آیدی ارتباطی</label>
+    <input id="chaysaContactValue" required maxlength="100" placeholder="شماره تماس یا آیدی خودت رو وارد کن" style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px Tahoma">
+    <p style="font-size:12px;color:#777;line-height:2;margin:12px 0">اطلاعات شما نزد چایسا محفوظ می‌مونه و فقط برای پاسخ‌گویی به همین درخواست استفاده می‌شه.</p>
+    <button id="chaysaQuestionSend" type="submit" style="display:block;width:100%;border:0;border-radius:10px;background:#244b37;color:#fff;padding:14px;font:bold 14px Tahoma;cursor:pointer">ارسال درخواست</button>
+    <p id="chaysaQuestionStatus" role="status" aria-live="polite" style="margin:12px 0 0;font-size:13px;text-align:center"></p>
+  </form>
+</section>
 
 <footer id="contact">
 <strong>CHAYSA | چایسا</strong>
@@ -279,5 +302,56 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
   setInterval(tick,1000);
 })();
 </script>
+
+<script>
+(function(){
+  const form=document.getElementById("chaysaQuestionForm");
+  if(!form)return;
+  const question=document.getElementById("chaysaQuestionText");
+  const contactType=document.getElementById("chaysaContactType");
+  const contactValue=document.getElementById("chaysaContactValue");
+  const button=document.getElementById("chaysaQuestionSend");
+  const status=document.getElementById("chaysaQuestionStatus");
+  form.addEventListener("submit",async function(event){
+    event.preventDefault();
+    if(!question.value.trim()||!contactValue.value.trim()){
+      status.textContent="لطفاً سؤال و راه ارتباطی را کامل وارد کن.";
+      status.style.color="#a33";
+      return;
+    }
+    const message=[
+      "درخواست جدید راهنمایی چایسا",
+      "--------------------",
+      "متن سؤال:",
+      question.value.trim(),
+      "--------------------",
+      "راه دریافت پاسخ: "+contactType.value,
+      "اطلاعات ارتباطی: "+contactValue.value.trim()
+    ].join("\n");
+    button.disabled=true;
+    button.textContent="در حال ارسال...";
+    status.textContent="";
+    try{
+      const response=await fetch("https://black-mud-3a10.faryadereza.workers.dev/",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({message:message})
+      });
+      const result=await response.json();
+      if(!response.ok||!result.ok)throw new Error("ارسال ناموفق");
+      status.textContent="درخواستت با موفقیت ثبت شد. همکاران چایسا پاسخ رو از راه انتخابی‌ات ارسال می‌کنن.";
+      status.style.color="#24613d";
+      form.reset();
+    }catch(error){
+      status.textContent="ارسال درخواست انجام نشد. لطفاً دوباره تلاش کن.";
+      status.style.color="#a33";
+    }finally{
+      button.disabled=false;
+      button.textContent="ارسال درخواست";
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
