@@ -100,7 +100,7 @@ function saveTelegramRecipient(chat) {
   fs.writeFileSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", JSON.stringify(rows, null, 2), "utf8");
   fs.renameSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", TELEGRAM_RECIPIENTS_FILE);
 }
-app.post("/telegram/webhook", (req, res) => {
+app.post("/telegram/webhook", async (req, res) => {
   const expected = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   const supplied = req.get("x-telegram-bot-api-secret-token") || "";
   if (!expected || supplied !== expected) return res.sendStatus(403);
@@ -108,6 +108,31 @@ app.post("/telegram/webhook", (req, res) => {
     const update = req.body || {};
     const msg = update.message || update.edited_message;
     if (msg && msg.chat) saveTelegramRecipient(msg.chat);
+    const startMatch = msg && msg.chat && msg.chat.type === "private" &&
+      typeof msg.text === "string" ? msg.text.trim().match(/^\/start(?:@\w+)?\s+(Q-[A-Za-z0-9-]+)$/i) : null;
+    if (startMatch) {
+      const rows = readQuestions();
+      const question = rows.find(x => x.id === startMatch[1]);
+      if (question) {
+        question.customerChatId = String(msg.chat.id);
+        question.customerUsername = msg.chat.username || "";
+        question.customerName = [msg.chat.first_name, msg.chat.last_name].filter(Boolean).join(" ");
+        question.linkedAt = new Date().toISOString();
+        question.status = question.reply ? "پاسخ ثبت‌شده" : "در انتظار پاسخ";
+        saveQuestions(rows);
+        const token = process.env.TELEGRAM_BOT_TOKEN || "";
+        if (token) await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: msg.chat.id, text: "اتصال شما به پرسش چایسا انجام شد. پاسخ همکارمون از همین گفت‌وگو براتون ارسال می‌شه." })
+        });
+      } else {
+        const token = process.env.TELEGRAM_BOT_TOKEN || "";
+        if (token) await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: msg.chat.id, text: "این پیوند پرسش معتبر نیست. لطفاً از فرم پرسش و پاسخ چایسا دوباره اقدام کنید." })
+        });
+      }
+    }
     return res.sendStatus(200);
   } catch (_) { return res.sendStatus(500); }
 });
@@ -157,6 +182,36 @@ app.use("/media", express.static(MEDIA, { maxAge: "1y", immutable: true, fallthr
 const QUESTIONS_FILE = path.join(DATA, "questions.json");
 function readQuestions(){try{const x=JSON.parse(fs.readFileSync(QUESTIONS_FILE,"utf8"));return Array.isArray(x)?x:[]}catch(_){return[]}}
 function saveQuestions(rows){const t=QUESTIONS_FILE+".tmp";fs.writeFileSync(t,JSON.stringify(rows,null,2),"utf8");fs.renameSync(t,QUESTIONS_FILE)}
+app.get("/api/admin/questions",requireAdmin,(_req,res)=>{
+  const rows=readQuestions().map(q=>({
+    id:q.id,createdAt:q.createdAt,question:q.question,status:q.status||"در انتظار اتصال مشتری",
+    customerLinked:Boolean(q.customerChatId),customerUsername:q.customerUsername||"",
+    customerName:q.customerName||"",reply:q.reply||"",repliedAt:q.repliedAt||""
+  })).reverse();
+  return json(res,200,rows);
+});
+app.post("/api/admin/questions/:id/reply",requireAdmin,async(req,res)=>{
+  const key="question-reply:"+(req.ip||"unknown");
+  if(limited(key,20,10*60*1000))return json(res,429,{ok:false,error:"تعداد پاسخ‌ها زیاد است؛ کمی بعد دوباره تلاش کنید."});
+  const reply=typeof req.body.reply==="string"?req.body.reply.trim():"";
+  if(!reply||reply.length>4000)return json(res,400,{ok:false,error:"متن پاسخ را کامل و معتبر وارد کنید."});
+  const rows=readQuestions(),q=rows.find(x=>x.id===req.params.id);
+  if(!q)return json(res,404,{ok:false,error:"پرسش پیدا نشد."});
+  if(!q.customerChatId)return json(res,409,{ok:false,error:"مشتری هنوز اتصال تلگرام را کامل نکرده است."});
+  const token=process.env.TELEGRAM_BOT_TOKEN||"";
+  if(!token)return json(res,503,{ok:false,error:"اتصال ربات تلگرام آماده نیست."});
+  const message=["پاسخ پرسش شما از چایسا 🌿","شناسه پرسش: "+q.id,"--------------------",reply].join("\n");
+  try{
+    const response=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{
+      method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({chat_id:q.customerChatId,text:message,disable_web_page_preview:true})
+    });
+    const result=await response.json();
+    if(!response.ok||result.ok!==true)return json(res,502,{ok:false,error:"ارسال پاسخ به تلگرام مشتری انجام نشد."});
+  }catch(_){return json(res,502,{ok:false,error:"ارتباط با تلگرام برقرار نشد؛ پاسخ ارسال نشد."})}
+  q.reply=reply;q.repliedAt=new Date().toISOString();q.status="پاسخ ارسال‌شده";saveQuestions(rows);
+  return json(res,200,{ok:true,status:q.status,repliedAt:q.repliedAt});
+});
 app.post("/api/questions",async(req,res)=>{
   const key="question:"+(req.ip||"unknown");
   if(limited(key,5,10*60*1000))return json(res,429,{ok:false,error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کنید."});
