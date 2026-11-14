@@ -60,8 +60,8 @@ app.get("/api/products", (_req, res) => json(res, 200, readProducts()));
 app.post("/api/admin/login", (req, res) => {
   const key = req.ip || "unknown";
   if (limited("login:" + key, 8, 15 * 60 * 1000)) return json(res, 429, { error: "تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کن." });
-  if (!secret || typeof req.body.password !== "string" || req.body.password.length > 256 ||
-      !crypto.timingSafeEqual(Buffer.from(req.body.password.padEnd(secret.length).slice(0, secret.length)), Buffer.from(secret))) {
+  if (!secret || typeof req.body.password !== "string" || req.body.password.length !== secret.length ||
+      !crypto.timingSafeEqual(Buffer.from(req.body.password), Buffer.from(secret))) {
     return json(res, 401, { error: "رمز عبور نادرست است." });
   }
   const exp = String(Date.now() + 8 * 60 * 60 * 1000);
@@ -118,6 +118,13 @@ app.post("/api/orders", async (req, res) => {
   return json(res, 200, { ok: true, delivered: 2 });
 });
 
+// Do not expose server-side source, package metadata, or deployment configuration.
+app.use((req, res, next) => {
+  const blocked = new Set(["server.js", "package.json", "package-lock.json", "worker.js", "wrangler.toml", "CLOUDFLARE-SETUP.md", "BACKUP-STATUS.md", "DEVELOPMENT-CHECKPOINT.md"]);
+  const name = decodeURIComponent((req.path || "").split("/").pop() || "");
+  if (blocked.has(name) || name.startsWith(".")) return res.sendStatus(404);
+  next();
+});
 app.use(express.static(ROOT, { index: "index.html", dotfiles: "ignore" }));
 app.use((err, _req, res, _next) => {
   if (err && err.code === "LIMIT_FILE_SIZE") return json(res, 400, { error: "حجم عکس نباید بیشتر از ۵ مگابایت باشد." });
