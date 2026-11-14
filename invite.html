@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173b2b">
+<title>دعوت‌نامه اختصاصی چایسا</title>
+<style>
+:root{--green:#173b2b;--green2:#244b37;--gold:#c5a45b;--cream:#f7f5ef;--ink:#26372b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Tahoma,sans-serif}
+header{background:var(--green);color:#fff;text-align:center;padding:24px 16px 28px;border-bottom:4px solid var(--gold)}
+.brand{font-size:30px;letter-spacing:4px;color:#e6cc85;font-weight:bold}
+header h1{font-size:20px;margin:9px 0 4px}
+header p{margin:0;color:#eee3c5;font-size:13px;line-height:2}
+main{width:min(960px,calc(100% - 24px));margin:24px auto 40px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:20px;align-items:start}
+.panel{background:#fff;border:1px solid #e6dcc5;border-radius:18px;padding:20px;box-shadow:0 8px 24px #173b2b0b}
+h2{font-size:17px;color:var(--green);margin:0 0 14px}
+label{display:block;font-size:13px;font-weight:bold;margin:14px 0 7px}
+textarea,input{width:100%;font:14px/2 Tahoma,sans-serif;color:var(--ink);background:#fff;border:1px solid #d9d2c2;border-radius:10px;padding:11px;outline-color:var(--gold)}
+textarea{min-height:115px;resize:vertical}
+button,a.action{border:0;border-radius:10px;padding:12px 14px;font:bold 13px Tahoma,sans-serif;cursor:pointer;text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.primary{background:var(--green);color:#fff}.gold{background:var(--gold);color:#fff}.light{background:#f2eee3;color:var(--green);border:1px solid #e4d9bf}
+.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.full{width:100%;margin-top:10px}
+.note{font-size:11px;color:#777;line-height:2;margin:10px 0 0}
+.preview-wrap{background:#f4f0e6;border-radius:14px;padding:12px}
+canvas{display:block;width:100%;height:auto;border-radius:10px}
+.platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
+.platforms button{background:#f6f3eb;color:var(--green);border:1px solid #e6dcc5}
+.status{min-height:24px;margin:10px 0 0;text-align:center;font-size:12px;color:var(--green);line-height:1.8}
+footer{text-align:center;color:#777;font-size:11px;padding:0 12px 24px}
+@media(max-width:700px){main{grid-template-columns:1fr;margin-top:14px}.preview-panel{order:-1}.panel{padding:16px}}
+</style>
+</head>
+<body>
+<header><div class="brand">CHAYSA</div><h1>دعوت‌نامه‌ای از جنس طعم‌های تازه</h1><p>یک تجربه دل‌نشین را با دوستانت قسمت کن.</p></header>
+<main>
+<section class="panel">
+<h2>دعوت‌نامه خودت را آماده کن</h2>
+<label for="inviteText">متن دعوت (قابل ویرایش)</label>
+<textarea id="inviteText">با خیال راحت وارد دنیای چایسا شوید؛ برای مشاهده دعوت‌نامه اختصاصی خود، اینجا را لمس کنید.</textarea>
+<label for="storeUrl">پیوند فروشگاه</label>
+<input id="storeUrl" type="url" value="https://shahab11350.github.io/chaysa-store/" dir="ltr">
+<div class="actions">
+<button class="primary" id="copyInvite" type="button">کپی متن و پیوند</button>
+<button class="light" id="downloadCard" type="button">ذخیره کارت تصویری</button>
+</div>
+<p class="note">برای انتخاب یک یا چند مخاطب، روش اشتراک‌گذاری را بزن؛ انتخاب مخاطب در برنامه پیام‌رسان انجام می‌شود. هیچ پیامکی ارسال نمی‌شود.</p>
+<h2 style="margin-top:22px">اشتراک‌گذاری دعوت‌نامه</h2>
+<div class="platforms">
+<button type="button" data-platform="whatsapp">واتساپ</button>
+<button type="button" data-platform="telegram">تلگرام</button>
+<button type="button" data-platform="rubika">روبیکا</button>
+<button type="button" data-platform="bale">بله</button>
+<button type="button" data-platform="instagram">دایرکت اینستاگرام</button>
+<button type="button" data-platform="native">سایر برنامه‌ها</button>
+</div>
+<p class="note">واتساپ و تلگرام صفحه اشتراک‌گذاری خود را باز می‌کنند. برای روبیکا و بله از پنجره اشتراک‌گذاری دستگاه استفاده می‌شود. در اینستاگرام، متن کپی می‌شود تا آن را در گفت‌وگو جای‌گذاری کنی؛ ارسال خودکار دایرکت از بیرون اینستاگرام در دسترس نیست.</p>
+<p class="status" id="status" role="status" aria-live="polite"></p>
+</section>
+<section class="panel preview-panel">
+<h2>پیش‌نمایش کارت دعوت چایسا</h2>
+<div class="preview-wrap"><canvas id="inviteCard" width="1080" height="1350" aria-label="کارت تصویری دعوت چایسا"></canvas></div>
+<p class="note">کارت تصویری با نام چایسا و متن دعوت ساخته می‌شود. می‌توانی آن را ذخیره و همراه پیام بفرستی.</p>
+<a class="action light full" href="https://shahab11350.github.io/chaysa-store/" target="_blank" rel="noopener">مشاهده فروشگاه چایسا</a>
+</section>
+</main>
+<footer>CHAYSA · فروشگاهی برای طعم‌های تازه</footer>
+<script>
+(function(){
+ const textEl=document.getElementById('inviteText'),urlEl=document.getElementById('storeUrl'),canvas=document.getElementById('inviteCard'),ctx=canvas.getContext('2d'),status=document.getElementById('status');
+ const cleanUrl=()=>{try{return new URL(urlEl.value).href}catch(e){return ''}};
+ function lines(text,max){
+   const words=text.split(/\s+/),out=[];let line='';
+   for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>max&&line){out.push(line);line=word}else line=test}
+   if(line)out.push(line);return out;
+ }
+ function draw(){
+   ctx.clearRect(0,0,1080,1350);ctx.fillStyle='#f7f5ef';ctx.fillRect(0,0,1080,1350);
+   ctx.strokeStyle='#c5a45b';ctx.lineWidth=12;ctx.strokeRect(42,42,996,1266);
+   ctx.strokeStyle='#173b2b';ctx.lineWidth=3;ctx.strokeRect(65,65,950,1220);
+   ctx.textAlign='center';ctx.direction='rtl';
+   ctx.fillStyle='#173b2b';ctx.font='bold 112px Tahoma';ctx.fillText('CHAYSA',540,290);
+   ctx.fillStyle='#b08d43';ctx.font='bold 54px Tahoma';ctx.fillText('دعوت‌نامه‌ای برای طعم‌های تازه',540,420);
+   ctx.fillStyle='#244b37';ctx.font='46px Tahoma';
+   const message=textEl.value.trim();const rows=lines(message,820);let y=590;
+   rows.slice(0,5).forEach(row=>{ctx.fillText(row,540,y);y+=82});
+   ctx.fillStyle='#c5a45b';ctx.beginPath();ctx.arc(540,980,7,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#173b2b';ctx.font='bold 42px Tahoma';ctx.fillText('با مهر، چایسا',540,1080);
+   ctx.font='28px Tahoma';ctx.fillStyle='#6c715f';ctx.fillText('فروشگاهی برای طعم‌های تازه',540,1150);
+   ctx.font='24px Tahoma';ctx.fillText('برای دیدن فروشگاه، پیوند همراه پیام را لمس کنید',540,1210);
+ }
+ function invite(){const u=cleanUrl();if(!u){status.textContent='پیوند فروشگاه معتبر نیست.';return null}return textEl.value.trim()+'\n'+u}
+ async function copy(){const msg=invite();if(!msg)return;try{await navigator.clipboard.writeText(msg);status.textContent='متن دعوت و پیوند کپی شد.'}catch(e){const t=document.createElement('textarea');t.value=msg;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();status.textContent='متن دعوت و پیوند کپی شد.'}}
+ async function nativeShare(){const msg=invite();if(!msg)return;if(navigator.share){try{await navigator.share({title:'دعوت‌نامه چایسا',text:textEl.value.trim(),url:cleanUrl()});status.textContent='پنجره اشتراک‌گذاری باز شد.'}catch(e){if(e.name!=='AbortError')status.textContent='اشتراک‌گذاری انجام نشد؛ متن را کپی کن.'}}else{await copy();status.textContent='اشتراک‌گذاری دستگاه پشتیبانی نمی‌شود؛ متن کپی شد.'}}
+ document.getElementById('copyInvite').addEventListener('click',copy);
+ document.getElementById('downloadCard').addEventListener('click',()=>{draw();const a=document.createElement('a');a.download='CHAYSA-invitation.png';a.href=canvas.toDataURL('image/png');a.click();status.textContent='کارت تصویری آماده و ذخیره شد.'});
+ document.querySelectorAll('[data-platform]').forEach(btn=>btn.addEventListener('click',async()=>{
+   const msg=invite();if(!msg)return;const u=encodeURIComponent(cleanUrl()),t=encodeURIComponent(textEl.value.trim());const p=btn.dataset.platform;
+   if(p==='whatsapp'){window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank','noopener');return}
+   if(p==='telegram'){window.open('https://t.me/share/url?url='+u+'&text='+t,'_blank','noopener');return}
+   if(p==='instagram'){await copy();window.open('https://www.instagram.com/direct/inbox/','_blank','noopener');status.textContent='متن کپی شد؛ آن را در گفت‌وگوی اینستاگرام جای‌گذاری کن.';return}
+   await nativeShare();
+ }));
+ textEl.addEventListener('input',draw);urlEl.addEventListener('input',draw);draw();
+})();
+</script>
+</body>
+</html>
