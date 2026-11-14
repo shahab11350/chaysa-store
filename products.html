@@ -87,6 +87,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .checkout-preview h4{margin:0 0 8px;color:#173b2b}
 .checkout-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .checkout-actions button{flex:1;min-width:130px;border:0;border-radius:9px;padding:12px;font-family:inherit;cursor:pointer}
+.checkout-status{margin:14px 0 0;padding:14px;border-radius:10px;font-size:16px;line-height:2;font-weight:bold;text-align:center}.checkout-status.success{background:#edf6ee;border:1px solid #8ab493;color:#245b32}.checkout-status.error{background:#fff0ee;border:1px solid #d99a91;color:#9b3025}.checkout-send:disabled{opacity:.7;cursor:wait}
 .checkout-send{background:#244b37;color:white;font-weight:bold}
 .checkout-back{background:#f1eee5;color:#665a43}
 .payment-tracking-note{margin:12px 0 0;padding:12px;background:#f8f6ef;border-radius:10px;color:#665a43;font-size:12px;line-height:2}
@@ -334,7 +335,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const checkout = document.createElement("section");
   checkout.className = "checkout-box";
   checkout.hidden = true;
-  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً تمام فیلدها را تکمیل کنید. ثبت و ارسال سفارش بدون تکمیل همه موارد امکان‌پذیر نیست.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" autocomplete="tel" placeholder="شماره تماس *" required><input class="customer-id" type="text" autocomplete="off" placeholder="آیدی تلگرام یا روبیکا *" required><input class="customer-province" type="text" placeholder="استان *" required><input class="customer-city" type="text" placeholder="شهر *" required><textarea class="customer-address wide" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" placeholder="کد پستی *" required><textarea class="customer-notes wide" placeholder="توضیحات تحویل * (اگر توضیحی ندارید، بنویسید: ندارد)" required></textarea></div><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div>';
+  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً تمام فیلدها را تکمیل کنید. ثبت و ارسال سفارش بدون تکمیل همه موارد امکان‌پذیر نیست.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" autocomplete="tel" placeholder="شماره تماس *" required><input class="customer-id" type="text" autocomplete="off" placeholder="آیدی تلگرام یا روبیکا *" required><input class="customer-province" type="text" placeholder="استان *" required><input class="customer-city" type="text" placeholder="شهر *" required><textarea class="customer-address wide" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" placeholder="کد پستی *" required><textarea class="customer-notes wide" placeholder="توضیحات تحویل * (اگر توضیحی ندارید، بنویسید: ندارد)" required></textarea></div><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div><p class="checkout-status" role="status" aria-live="polite" hidden></p>';
   section.appendChild(checkout);
   function checkoutValue(selector) { return checkout.querySelector(selector).value.trim(); }
   function updateFinalPreview() {
@@ -523,23 +524,36 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (!validateCheckout()) return;
     updateFinalPreview();
     const button = checkout.querySelector(".checkout-send");
+    const status = checkout.querySelector(".checkout-status");
     const message = buildOrderText();
     button.disabled = true;
     button.textContent = "در حال ارسال سفارش...";
+    status.hidden = true;
+    status.className = "checkout-status";
+    status.textContent = "";
     try {
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: {"Content-Type":"application/json"},
         body: JSON.stringify({message:message})
       });
-      const result = await response.json();
-      if (!response.ok || !result.ok) throw new Error("ارسال ناموفق بود");
-      alert("سفارش و مشخصات کامل آن با موفقیت برای چایسا ارسال شد.");
+      let result = {};
+      try { result = await response.json(); } catch(parseError) {}
+      if (!response.ok || !result.ok) {
+        const detail = result.error ? " (" + result.error + ")" : "";
+        throw new Error("ثبت سفارش انجام نشد" + detail);
+      }
+      status.textContent = "سفارش شما با موفقیت ثبت و برای چایسا ارسال شد. برای جلوگیری از ثبت تکراری، این سفارش دیگر ارسال نمی‌شود.";
+      status.classList.add("success");
+      status.hidden = false;
+      button.textContent = "سفارش ثبت شد";
+      button.disabled = true;
     } catch(error) {
-      alert("ارسال سفارش انجام نشد. لطفاً اتصال اینترنت را بررسی کنید یا متن فاکتور را از صفحه نهایی کپی کنید.");
-    } finally {
+      status.textContent = error.message || "ارسال سفارش ناموفق بود. لطفاً اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.";
+      status.classList.add("error");
+      status.hidden = false;
       button.disabled = false;
-      button.textContent = "تأیید و ارسال سفارش";
+      button.textContent = "تلاش دوباره برای ارسال";
     }
   });
 
