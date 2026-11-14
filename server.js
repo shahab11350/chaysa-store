@@ -76,18 +76,32 @@ app.get("/api/admin/telegram/recipients", requireAdmin, async (_req, res) => {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   if (!token) return json(res, 503, { error: "توکن تلگرام تنظیم نشده است." });
   try {
-    const response = await fetch("https://api.telegram.org/bot" + token + "/getUpdates");
-    const data = await response.json();
-    if (!response.ok || data.ok !== true) return json(res, 502, { error: "دریافت اطلاعات تلگرام ممکن نشد؛ وضعیت ربات را بررسی می‌کنیم." });
+    const base = "https://api.telegram.org/bot" + token + "/";
+    const [meResponse, webhookResponse, updatesResponse] = await Promise.all([
+      fetch(base + "getMe"), fetch(base + "getWebhookInfo"), fetch(base + "getUpdates")
+    ]);
+    const [me, webhook, updates] = await Promise.all([meResponse.json(), webhookResponse.json(), updatesResponse.json()]);
+    if (!meResponse.ok || me.ok !== true) return json(res, 502, { error: "توکن به یک ربات معتبر تلگرام متصل نیست." });
+    if (!webhookResponse.ok || webhook.ok !== true) return json(res, 502, { error: "وضعیت وب‌هوک تلگرام قابل دریافت نیست." });
+    if (!updatesResponse.ok || updates.ok !== true) return json(res, 200, {
+      recipients: [], bot_username: me.result.username || "", webhook_active: Boolean(webhook.result.url),
+      pending_update_count: webhook.result.pending_update_count || 0,
+      telegram_error_code: updates.error_code || updatesResponse.status,
+      telegram_description: updates.description || "دریافت پیام‌ها از صف تلگرام ممکن نشد."
+    });
     const chats = new Map();
-    for (const update of (data.result || [])) {
+    for (const update of (updates.result || [])) {
       const msg = update.message || update.edited_message || update.my_chat_member;
       const chat = msg && msg.chat;
       if (chat && chat.id != null && (chat.type === "private" || chat.type === "group")) {
         chats.set(String(chat.id), { id: String(chat.id), username: chat.username || "", first_name: chat.first_name || "" });
       }
     }
-    return json(res, 200, { recipients: Array.from(chats.values()) });
+    return json(res, 200, {
+      recipients: Array.from(chats.values()), bot_username: me.result.username || "",
+      webhook_active: Boolean(webhook.result.url), pending_update_count: webhook.result.pending_update_count || 0,
+      last_webhook_error: webhook.result.last_error_message || ""
+    });
   } catch (_) { return json(res, 502, { error: "ارتباط با تلگرام برقرار نشد." }); }
 });
 app.get("/api/admin/products", requireAdmin, (_req, res) => json(res, 200, readProducts()));
