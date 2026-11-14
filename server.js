@@ -170,14 +170,14 @@ app.post("/api/questions",async(req,res)=>{
   if(!question||question.length>2000)
     return json(res,400,{ok:false,error:"متن پرسش را کامل و معتبر وارد کنید."});
   const token=process.env.TELEGRAM_BOT_TOKEN||"";
-  const recipients=String(process.env.ORDER_CHAT_IDS||"").split(",").map(x=>x.trim()).filter(x=>/^-?\\d+$/.test(x));
+  const recipients=String(process.env.ORDER_CHAT_IDS||"").split(",").map(x=>x.trim()).filter(x=>/^-?\d+$/.test(x));
   if(!token||recipients.length!==2||new Set(recipients).size!==2)
     return json(res,503,{ok:false,error:"سامانه دریافت پرسش‌ها موقتاً آماده نیست. لطفاً بعداً تلاش کنید."});
   const now=new Date();
   const item={id:"Q-"+now.toISOString().replace(/[-:.TZ]/g,"").slice(0,14)+"-"+crypto.randomBytes(4).toString("hex").toUpperCase(),createdAt:now.toISOString(),question,delivery:"در انتظار ارسال"};
   const rows=readQuestions();rows.push(item);
   try{saveQuestions(rows)}catch(_){return json(res,500,{ok:false,error:"ثبت پرسش انجام نشد. لطفاً دوباره تلاش کنید."})}
-  const message=["پرسش جدید از فروشگاه چایسا","شناسه: "+item.id,"زمان: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"--------------------","متن پرسش:",question].join("\\n");
+  const message=["پرسش جدید از فروشگاه چایسا","شناسه: "+item.id,"زمان: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"--------------------","متن پرسش:",question].join("\n");
   const results=await Promise.all(recipients.map(async chat_id=>{
     try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id,text:message,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok===true}catch(_){return false}
   }));
