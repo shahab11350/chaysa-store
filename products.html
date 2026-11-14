@@ -80,9 +80,9 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .checkout-box{margin:24px auto;background:#fff;border:1px solid #e8dfca;border-radius:16px;padding:16px;box-shadow:0 5px 18px #0000000b}
 .checkout-box h3{margin:0 0 14px;color:#173b2b}
 .checkout-fields{display:grid;grid-template-columns:1fr;gap:10px}
-.checkout-fields input,.checkout-fields textarea{width:100%;padding:12px;border:1px solid #d9d2c2;border-radius:9px;font-family:inherit;font-size:13px;background:#fff;color:#26372b}
+.checkout-fields input,.checkout-fields textarea,.checkout-fields select{width:100%;padding:12px;border:1px solid #d9d2c2;border-radius:9px;font-family:inherit;font-size:13px;background:#fff;color:#26372b}
 .checkout-fields textarea{min-height:84px;resize:vertical}
-.checkout-fields input:focus,.checkout-fields textarea:focus{outline:2px solid #b99b55;border-color:#b99b55}
+.checkout-fields input:focus,.checkout-fields textarea:focus,.checkout-fields select:focus{outline:2px solid #b99b55;border-color:#b99b55}
 .checkout-preview{margin-top:18px;padding:14px;background:#fbfaf6;border:1px solid #e8dfca;border-radius:12px;line-height:2;font-size:13px}
 .checkout-preview h4{margin:0 0 8px;color:#173b2b}
 .checkout-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
@@ -164,7 +164,8 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .checkout-box input,
 .checkout-box textarea,
 .checkout-fields input,
-.checkout-fields textarea{
+.checkout-fields textarea,
+.checkout-fields select{
   box-sizing:border-box!important;
   width:100%!important;
   min-height:66px!important;
@@ -335,7 +336,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const checkout = document.createElement("section");
   checkout.className = "checkout-box";
   checkout.hidden = true;
-  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً تمام فیلدها را تکمیل کنید. ثبت و ارسال سفارش بدون تکمیل همه موارد امکان‌پذیر نیست.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" autocomplete="tel" placeholder="شماره تماس *" required><input class="customer-id" type="text" autocomplete="off" placeholder="آیدی تلگرام یا روبیکا *" required><input class="customer-province" type="text" placeholder="استان *" required><input class="customer-city" type="text" placeholder="شهر *" required><textarea class="customer-address wide" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" placeholder="کد پستی *" required><textarea class="customer-notes wide" placeholder="توضیحات تحویل * (اگر توضیحی ندارید، بنویسید: ندارد)" required></textarea></div><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div><p class="checkout-status" role="status" aria-live="polite" hidden></p>';
+  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً تمام فیلدها را تکمیل کنید. ثبت و ارسال سفارش بدون تکمیل همه موارد امکان‌پذیر نیست.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" inputmode="tel" dir="ltr" autocomplete="tel" placeholder="شماره تماس *" required><input class="customer-id" type="text" inputmode="url" lang="en" dir="ltr" autocapitalize="none" spellcheck="false" autocomplete="off" placeholder="شناسه تلگرام یا روبیکا *" required><select class="customer-province" lang="fa" required><option value="">استان را انتخاب کنید *</option></select><select class="customer-city" lang="fa" required disabled><option value="">ابتدا استان را انتخاب کنید *</option></select><textarea class="customer-address wide" inputmode="text" lang="fa" dir="rtl" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" dir="ltr" lang="en" autocomplete="postal-code" pattern="[0-9]{10}" maxlength="10" placeholder="کد پستی (۱۰ رقم) *" required><textarea class="customer-notes wide" inputmode="text" lang="fa" dir="rtl" placeholder="توضیحات تحویل * (اگر توضیحی ندارید، بنویسید: ندارد)" required></textarea></div><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div><p class="checkout-status" role="status" aria-live="polite" hidden></p>';
   section.appendChild(checkout);
   function checkoutValue(selector) { return checkout.querySelector(selector).value.trim(); }
   function updateFinalPreview() {
@@ -370,8 +371,56 @@ document.addEventListener("DOMContentLoaded", async function () {
     });
     checkout.querySelector(".final-total").textContent = formatMoney(total);
   }
+  const provinceField = checkout.querySelector(".customer-province");
+  const cityField = checkout.querySelector(".customer-city");
+  const postalField = checkout.querySelector(".customer-postal");
+  const locationResponse = await fetch("/iran-locations.json", {cache:"force-cache"});
+  if (!locationResponse.ok) throw new Error("Iran location data could not be loaded");
+  const iranLocations = await locationResponse.json();
+  iranLocations.provinces.forEach(function(province) {
+    const option = document.createElement("option");
+    option.value = province.name;
+    option.textContent = province.name;
+    option.dataset.provinceId = String(province.id);
+    provinceField.appendChild(option);
+  });
+  provinceField.addEventListener("change", function() {
+    const selected = iranLocations.provinces.find(function(item) { return item.name === provinceField.value; });
+    cityField.replaceChildren();
+    const prompt = document.createElement("option");
+    prompt.value = "";
+    prompt.textContent = selected ? "شهر را انتخاب کنید *" : "ابتدا استان را انتخاب کنید *";
+    cityField.appendChild(prompt);
+    if (!selected) {
+      cityField.disabled = true;
+      updateFinalPreview();
+      return;
+    }
+    iranLocations.cities.filter(function(city) {
+      return Number(city.province_id) === Number(selected.id);
+    }).sort(function(a,b) { return a.name.localeCompare(b.name, "fa"); }).forEach(function(city) {
+      const option = document.createElement("option");
+      option.value = city.name;
+      option.textContent = city.name;
+      cityField.appendChild(option);
+    });
+    cityField.disabled = false;
+    updateFinalPreview();
+  });
+  function normalizeDigits(value) {
+    return value.replace(/[۰-۹]/g, function(d) { return String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)); })
+      .replace(/[٠-٩]/g, function(d) { return String("٠١٢٣٤٥٦٧٨٩".indexOf(d)); });
+  }
+  postalField.addEventListener("input", function() {
+    const normalized = normalizeDigits(postalField.value).replace(/[^0-9]/g, "").slice(0,10);
+    if (postalField.value !== normalized) postalField.value = normalized;
+    updateFinalPreview();
+  });
   checkout.querySelectorAll("input,textarea").forEach(function(field) {
-    field.addEventListener("input", updateFinalPreview);
+    if (field !== postalField) field.addEventListener("input", updateFinalPreview);
+  });
+  checkout.querySelectorAll("select").forEach(function(field) {
+    field.addEventListener("change", updateFinalPreview);
   });
   invoice.querySelector(".go-checkout").addEventListener("click", function() {
     if (cart.size === 0) { alert("ابتدا محصولی به فاکتور اضافه کنید."); return; }
@@ -515,6 +564,13 @@ document.addEventListener("DOMContentLoaded", async function () {
         field.focus();
         return false;
       }
+    }
+    const postal = checkout.querySelector(".customer-postal");
+    postal.value = normalizeDigits(postal.value).replace(/[^0-9]/g, "");
+    if (!/^\\d{10}$/.test(postal.value)) {
+      alert("کد پستی باید دقیقاً ۱۰ رقم باشد.");
+      postal.focus();
+      return false;
     }
     return true;
   }
