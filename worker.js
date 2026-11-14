@@ -31,7 +31,7 @@ export default {
     if (url.pathname === "/api/orders" && request.method === "POST") {
       const body = await request.json().catch(() => ({}));
       const message = typeof body.message === "string" ? body.message.trim() : "";
-      const recipients = String(env.ORDER_CHAT_IDS || "").split(",").map(x => x.trim()).filter(x => /^-?\\d+$/.test(x));
+      const recipients = String(env.ORDER_CHAT_IDS || "").split(",").map(x => x.trim()).filter(x => /^-?\d+$/.test(x));
       if (!message || message.length > 3900) return json({error:"متن سفارش خالی یا بیش از حد طولانی است."},400);
       if (!env.TELEGRAM_BOT_TOKEN || recipients.length !== 2 || new Set(recipients).size !== 2) {
         return json({error:"تنظیمات محرمانه ارسال فاکتور هنوز کامل نشده است."},503);
