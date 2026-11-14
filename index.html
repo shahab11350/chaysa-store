@@ -185,6 +185,10 @@ if(document.readyState==="loading"){
   <h2>پرسش از شما، پاسخ از ما</h2>
   <p>سؤال، ابهام یا پیشنهادت رو برامون بنویس. بعد از ثبت پرسش، برای دریافت پاسخ از همکارمون، اتصال تلگرام رو کامل کن.</p>
   <form id="chaysaQuestionForm" style="background:#fff;border:1px solid #e6d9b8;border-radius:16px;padding:20px;text-align:right;box-shadow:0 4px 16px #0000000a">
+    <label for="chaysaQuestionFirstName" style="display:block;font-weight:bold;margin:0 0 8px">نام <span style="color:#b33">*</span></label>
+    <input id="chaysaQuestionFirstName" type="text" required maxlength="60" autocomplete="given-name" placeholder="نام" style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px Tahoma;margin-bottom:12px">
+    <label for="chaysaQuestionLastName" style="display:block;font-weight:bold;margin:0 0 8px">نام خانوادگی <span style="color:#b33">*</span></label>
+    <input id="chaysaQuestionLastName" type="text" required maxlength="80" autocomplete="family-name" placeholder="نام خانوادگی" style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px Tahoma;margin-bottom:16px">
     <label for="chaysaQuestionText" style="display:block;font-weight:bold;margin:0 0 8px">متن سؤال یا درخواست</label>
     <textarea id="chaysaQuestionText" required maxlength="2000" rows="4" placeholder="سؤالت رو اینجا بنویس..." style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px/2 Tahoma;resize:vertical"></textarea>
     <label for="chaysaTelegramUsername" style="display:block;font-weight:bold;margin:16px 0 8px">آیدی تلگرام <span style="color:#b33">*</span></label>
@@ -312,12 +316,20 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
 (function(){
   const form=document.getElementById("chaysaQuestionForm");
   if(!form)return;
+  const firstName=document.getElementById("chaysaQuestionFirstName");
+  const lastName=document.getElementById("chaysaQuestionLastName");
   const question=document.getElementById("chaysaQuestionText");
   const telegramUsername=document.getElementById("chaysaTelegramUsername");
   const button=document.getElementById("chaysaQuestionSend");
   const status=document.getElementById("chaysaQuestionStatus");
   form.addEventListener("submit",async function(event){
     event.preventDefault();
+    if(!firstName.value.trim()||!lastName.value.trim()){
+      status.textContent="لطفاً نام و نام خانوادگی را وارد کن.";
+      status.style.color="#a33";
+      (!firstName.value.trim()?firstName:lastName).focus();
+      return;
+    }
     if(!question.value.trim()){
       status.textContent="لطفاً متن پرسش را بنویس.";
       status.style.color="#a33";
@@ -337,7 +349,7 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
       const response=await fetch("/api/questions",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({question:question.value.trim(),telegramUsername:username})
+        body:JSON.stringify({firstName:firstName.value.trim(),lastName:lastName.value.trim(),question:question.value.trim(),telegramUsername:username})
       });
       const result=await response.json();
       if(!response.ok||!result.ok)throw new Error(result.error||"ارسال ناموفق");

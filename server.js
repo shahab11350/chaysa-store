@@ -203,6 +203,7 @@ function saveQuestions(rows){const t=QUESTIONS_FILE+".tmp";fs.writeFileSync(t,JS
 app.get("/api/admin/questions",requireAdmin,(_req,res)=>{
   const rows=readQuestions().map(q=>({
     id:q.id,createdAt:q.createdAt,question:q.question,status:q.status||"در انتظار اتصال مشتری",
+    firstName:q.firstName||"",lastName:q.lastName||"",telegramUsername:q.telegramUsername||"",
     customerLinked:Boolean(q.customerChatId),customerUsername:q.customerUsername||"",
     customerName:q.customerName||"",reply:q.reply||"",repliedAt:q.repliedAt||""
   })).reverse();
@@ -237,7 +238,7 @@ app.post("/api/bostani/login",(req,res)=>{
  const exp=String(Date.now()+8*60*60*1000);res.cookie("chaysa_bostani",exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true});
 });
 app.post("/api/bostani/logout",(_req,res)=>{res.clearCookie("chaysa_bostani",{httpOnly:true,secure:true,sameSite:"strict",path:"/"});return json(res,200,{ok:true});});
-app.get("/api/bostani/questions",requireBostani,(_req,res)=>{const rows=readQuestions().map(q=>({id:q.id,createdAt:q.createdAt,question:q.question,status:q.status||"در انتظار اتصال مشتری",customerLinked:Boolean(q.customerChatId),customerUsername:q.customerUsername||"",reply:q.reply||"",repliedAt:q.repliedAt||""})).reverse();return json(res,200,rows);});
+app.get("/api/bostani/questions",requireBostani,(_req,res)=>{const rows=readQuestions().map(q=>({id:q.id,createdAt:q.createdAt,question:q.question,status:q.status||"در انتظار اتصال مشتری",firstName:q.firstName||"",lastName:q.lastName||"",telegramUsername:q.telegramUsername||"",customerLinked:Boolean(q.customerChatId),customerUsername:q.customerUsername||"",reply:q.reply||"",repliedAt:q.repliedAt||""})).reverse();return json(res,200,rows);});
 app.post("/api/bostani/questions/:id/reply",requireBostani,async(req,res)=>{
  const key="bostani-reply:"+(req.ip||"unknown");if(limited(key,20,10*60*1000))return json(res,429,{ok:false,error:"تعداد پاسخ‌ها زیاد است؛ کمی بعد دوباره تلاش کنید."});
  const reply=typeof req.body.reply==="string"?req.body.reply.trim():"";if(!reply||reply.length>4000)return json(res,400,{ok:false,error:"متن پاسخ را کامل و معتبر وارد کنید."});
@@ -256,8 +257,12 @@ app.post("/api/questions",async(req,res)=>{
     catch(_){return json(res,403,{ok:false,error:"درخواست نامعتبر است."});}
   }
   const b=req.body||{};
+  const firstName=typeof b.firstName==="string"?b.firstName.trim():"";
+  const lastName=typeof b.lastName==="string"?b.lastName.trim():"";
   const question=typeof b.question==="string"?b.question.trim():"";
   const telegramUsername=typeof b.telegramUsername==="string"?b.telegramUsername.trim().replace(/^@+/,""):"";
+  if(!firstName||firstName.length>60||!lastName||lastName.length>80)
+    return json(res,400,{ok:false,error:"نام و نام خانوادگی الزامی است و باید معتبر وارد شوند."});
   if(!question||question.length>2000)
     return json(res,400,{ok:false,error:"متن پرسش را کامل و معتبر وارد کنید."});
   if(!/^[A-Za-z0-9_]{5,32}$/.test(telegramUsername))
@@ -267,10 +272,10 @@ app.post("/api/questions",async(req,res)=>{
   if(!token||recipients.length!==2||new Set(recipients).size!==2)
     return json(res,503,{ok:false,error:"سامانه دریافت پرسش‌ها موقتاً آماده نیست. لطفاً بعداً تلاش کنید."});
   const now=new Date();
-  const item={id:"Q-"+now.toISOString().replace(/[-:.TZ]/g,"").slice(0,14)+"-"+crypto.randomBytes(4).toString("hex").toUpperCase(),createdAt:now.toISOString(),question,telegramUsername,delivery:"در انتظار ارسال"};
+  const item={id:"Q-"+now.toISOString().replace(/[-:.TZ]/g,"").slice(0,14)+"-"+crypto.randomBytes(4).toString("hex").toUpperCase(),createdAt:now.toISOString(),firstName,lastName,question,telegramUsername,delivery:"در انتظار ارسال"};
   const rows=readQuestions();rows.push(item);
   try{saveQuestions(rows)}catch(_){return json(res,500,{ok:false,error:"ثبت پرسش انجام نشد. لطفاً دوباره تلاش کنید."})}
-  const message=["پرسش جدید از فروشگاه چایسا","شناسه: "+item.id,"زمان: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"آیدی تلگرام مشتری: @"+telegramUsername,"--------------------","متن پرسش:",question].join("\n");
+  const message=["پرسش جدید از فروشگاه چایسا","شناسه: "+item.id,"زمان: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"نام مشتری: "+firstName+" "+lastName,"آیدی تلگرام مشتری: @"+telegramUsername,"--------------------","متن پرسش:",question].join("\n");
   const results=await Promise.all(recipients.map(async chat_id=>{
     try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id,text:message,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok===true}catch(_){return false}
   }));
