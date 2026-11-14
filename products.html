@@ -261,9 +261,68 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 </div>
 </section>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", async function () {
   const section = document.querySelector("#products");
   const categoryGrid = section.querySelector(".grid");
+  // Load the live catalogue when the Cloudflare API is available; keep the
+  // embedded catalogue as a graceful fallback for the current GitHub Pages site.
+  try {
+    const response = await fetch("/api/products", {cache:"no-store"});
+    if (response.ok) {
+      const liveProducts = await response.json();
+      if (Array.isArray(liveProducts) && liveProducts.length) {
+        const categories = ["چای","دمنوش","ادویه","عسل","سایر"];
+        categories.forEach(function(name) {
+          let card = Array.from(categoryGrid.querySelectorAll(".category-card")).find(function(item) {
+            return item.querySelector("summary h3")?.textContent.trim() === name;
+          });
+          if (!card) {
+            card = document.createElement("details");
+            card.className = "card category-card";
+            const summary = document.createElement("summary");
+            summary.innerHTML = '<span class="icon">🍵</span><h3></h3><p>انتخابی برای هر سلیقه</p><span class="category-hint"></span>';
+            summary.querySelector("h3").textContent = name;
+            card.appendChild(summary);
+            categoryGrid.appendChild(card);
+          }
+          const selected = liveProducts.filter(function(item) { return (item.category || "سایر") === name && item.active !== false; });
+          const hint = card.querySelector(".category-hint");
+          if (hint) hint.textContent = selected.length.toLocaleString("fa-IR") + " محصول · مشاهده فهرست";
+          card.querySelectorAll(".product-list,.empty-category").forEach(function(node) { node.remove(); });
+          const list = document.createElement("div");
+          list.className = "product-list";
+          selected.forEach(function(item) {
+            const row = document.createElement("div");
+            row.className = "product-row";
+            const image = document.createElement("img");
+            image.className = "product-image";
+            image.setAttribute("data-image", item.image || "");
+            image.alt = item.name || "";
+            const info = document.createElement("div");
+            info.className = "product-info";
+            const title = document.createElement("strong");
+            title.textContent = item.name || "";
+            const sku = document.createElement("small");
+            sku.textContent = "شناسه کالا: " + (item.sku || "");
+            info.append(title, sku);
+            const price = document.createElement("b");
+            price.className = "product-price";
+            price.textContent = Number(item.price || 0).toLocaleString("en-US") + " تومان";
+            row.append(image, info, price);
+            list.appendChild(row);
+          });
+          if (!selected.length) {
+            const empty = document.createElement("p");
+            empty.className = "empty-category";
+            empty.textContent = "فعلاً محصولی در این دسته ثبت نشده است.";
+            card.appendChild(empty);
+          } else card.appendChild(list);
+        });
+      }
+    }
+  } catch (error) {
+    // The static catalogue remains visible if the API is not deployed yet.
+  }
   const page = document.createElement("div");
   page.className = "product-page";
   page.hidden = true;
