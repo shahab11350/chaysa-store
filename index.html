@@ -187,6 +187,12 @@ if(document.readyState==="loading"){
   <form id="chaysaQuestionForm" style="background:#fff;border:1px solid #e6d9b8;border-radius:16px;padding:20px;text-align:right;box-shadow:0 4px 16px #0000000a">
     <label for="chaysaQuestionText" style="display:block;font-weight:bold;margin:0 0 8px">متن سؤال یا درخواست</label>
     <textarea id="chaysaQuestionText" required maxlength="2000" rows="4" placeholder="سؤالت رو اینجا بنویس..." style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px/2 Tahoma;resize:vertical"></textarea>
+    <label for="chaysaTelegramUsername" style="display:block;font-weight:bold;margin:16px 0 8px">آیدی تلگرام <span style="color:#b33">*</span></label>
+    <div style="display:flex;direction:ltr;align-items:stretch;border:1px solid #d8d0bd;border-radius:10px;overflow:hidden;background:#fff">
+      <span aria-hidden="true" style="display:flex;align-items:center;justify-content:center;min-width:46px;padding:0 12px;background:#f1eee5;color:#244b37;font:bold 18px Tahoma;border-right:1px solid #d8d0bd">@</span>
+      <input id="chaysaTelegramUsername" type="text" required minlength="5" maxlength="32" pattern="[A-Za-z0-9_]{5,32}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="آیدی شما بدون @ " style="flex:1;min-width:0;padding:13px;border:0;outline:none;font:14px Tahoma;direction:ltr;text-align:left">
+    </div>
+    <small style="display:block;color:#777;margin-top:6px;line-height:1.8">واردکردن آیدی تلگرام برای دریافت پاسخ الزامی است؛ فقط نام کاربری را بنویس، علامت @ از قبل قرار داده شده.</small>
     <button id="chaysaQuestionSend" type="submit" style="display:block;width:100%;border:0;border-radius:10px;background:#244b37;color:#fff;padding:14px;font:bold 14px Tahoma;cursor:pointer;margin-top:14px">ارسال پرسش</button>
     <p id="chaysaQuestionStatus" role="status" aria-live="polite" style="margin:12px 0 0;font-size:13px;text-align:center"></p>
   </form>
@@ -307,6 +313,7 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
   const form=document.getElementById("chaysaQuestionForm");
   if(!form)return;
   const question=document.getElementById("chaysaQuestionText");
+  const telegramUsername=document.getElementById("chaysaTelegramUsername");
   const button=document.getElementById("chaysaQuestionSend");
   const status=document.getElementById("chaysaQuestionStatus");
   form.addEventListener("submit",async function(event){
@@ -316,6 +323,13 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
       status.style.color="#a33";
       return;
     }
+    const username=telegramUsername.value.trim().replace(/^@+/,"");
+    if(!/^[A-Za-z0-9_]{5,32}$/.test(username)){
+      status.textContent="لطفاً آیدی تلگرام معتبر را بدون @ وارد کن (۵ تا ۳۲ نویسه؛ حروف انگلیسی، عدد و زیرخط).";
+      status.style.color="#a33";
+      telegramUsername.focus();
+      return;
+    }
     button.disabled=true;
     button.textContent="در حال ارسال...";
     status.textContent="";
@@ -323,7 +337,7 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
       const response=await fetch("/api/questions",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({question:question.value.trim()})
+        body:JSON.stringify({question:question.value.trim(),telegramUsername:username})
       });
       const result=await response.json();
       if(!response.ok||!result.ok)throw new Error(result.error||"ارسال ناموفق");
