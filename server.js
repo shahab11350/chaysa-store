@@ -72,6 +72,17 @@ app.all("/api/admin/logout", (_req, res) => {
   res.clearCookie("chaysa_admin", { httpOnly: true, secure: true, sameSite: "strict", path: "/" });
   return json(res, 200, { ok: true });
 });
+const ORDERS_FILE = path.join(DATA, "orders.json");
+function readOrders(){try{const x=JSON.parse(fs.readFileSync(ORDERS_FILE,"utf8"));return Array.isArray(x)?x:[]}catch(_){return[]}}
+function saveOrders(x){const t=ORDERS_FILE+".tmp";fs.writeFileSync(t,JSON.stringify(x,null,2),"utf8");fs.renameSync(t,ORDERS_FILE)}
+function normalizeDigits(v){return String(v||"").replace(/[۰-۹]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g,d=>String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))}
+app.get("/api/admin/orders",requireAdmin,(_req,res)=>json(res,200,readOrders()));
+app.patch("/api/admin/orders/:id/status",requireAdmin,(req,res)=>{
+ const allowed=["در انتظار بررسی","در حال آماده‌سازی","ارسال‌شده","تحویل‌شده","لغوشده"];
+ if(!allowed.includes(req.body.status))return json(res,400,{error:"وضعیت سفارش معتبر نیست."});
+ const rows=readOrders(),o=rows.find(x=>x.id===req.params.id);if(!o)return json(res,404,{error:"سفارش پیدا نشد."});
+ o.status=req.body.status;o.updatedAt=new Date().toISOString();if(o.status==="تحویل‌شده")o.deliveredAt=o.updatedAt;saveOrders(rows);return json(res,200,{ok:true,order:o});
+});
 const TELEGRAM_RECIPIENTS_FILE = path.join(DATA, "telegram-recipients.json");
 function readTelegramRecipients() {
   try {
@@ -143,28 +154,22 @@ app.post("/api/admin/upload", requireAdmin, upload.single("image"), (req, res) =
 });
 app.use("/media", express.static(MEDIA, { maxAge: "1y", immutable: true, fallthrough: false }));
 
-app.post("/api/orders", async (req, res) => {
-  const key = "order:" + (req.ip || "unknown");
-  if (limited(key, 5, 10 * 60 * 1000)) return json(res, 429, { error: "تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کن." });
-  const message = typeof req.body.message === "string" ? req.body.message.trim() : "";
-  if (!message || message.length > 3900) return json(res, 400, { error: "متن سفارش خالی یا بیش از حد طولانی است." });
-  const token = process.env.TELEGRAM_BOT_TOKEN || "";
-  const recipients = String(process.env.ORDER_CHAT_IDS || "").split(",").map(x => x.trim()).filter(x => /^-?\d+$/.test(x));
-  if (!token || recipients.length !== 2 || new Set(recipients).size !== 2) return json(res, 503, { error: "تنظیمات محرمانه ارسال فاکتور هنوز کامل نشده است." });
-  const results = await Promise.all(recipients.map(async chat_id => {
-    try {
-      const r = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id, text: message, disable_web_page_preview: true })
-      });
-      const data = await r.json();
-      return r.ok && data.ok === true;
-    } catch (_) { return false; }
-  }));
-  if (results.some(x => !x)) return json(res, 502, { error: "ارسال فاکتور به هر دو گیرنده کامل نشد.", delivered: results.filter(Boolean).length });
-  return json(res, 200, { ok: true, delivered: 2 });
+app.post("/api/orders",async(req,res)=>{
+ const key="order:"+(req.ip||"unknown");if(limited(key,5,10*60*1000))return json(res,429,{error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کن."});
+ const b=req.body||{},c=b.customer||{},fields=["name","family","contact","messengerId","province","city","address","postal","notes"];
+ if(!fields.every(k=>typeof c[k]==="string"&&c[k].trim())||b.termsAccepted!==true||typeof b.termsAcceptedAt!=="string")return json(res,400,{error:"اطلاعات خریدار و تأیید صحت آن‌ها الزامی است."});
+ if(!/^\d{10}$/.test(normalizeDigits(c.postal).replace(/[^0-9]/g,"")))return json(res,400,{error:"کد پستی باید دقیقاً ۱۰ رقم باشد."});
+ if(!Array.isArray(b.items)||!b.items.length||b.items.length>100)return json(res,400,{error:"سبد سفارش معتبر نیست."});
+ const catalog=readProducts(),items=[];
+ for(const x of b.items){const p=catalog.find(p=>String(p.sku)===String(x.sku)&&p.active!==false),qty=Number(x.qty);if(!p||!Number.isInteger(qty)||qty<1||qty>99)return json(res,400,{error:"کالا یا تعداد آن معتبر نیست؛ سبد را تازه‌سازی کنید."});items.push({sku:String(p.sku),name:String(p.name),qty,unitPrice:Number(p.price),lineTotal:Number(p.price)*qty})}
+ const total=items.reduce((n,x)=>n+x.lineTotal,0),now=new Date();
+ const order={id:"CH-"+now.toISOString().slice(0,10).replace(/-/g,"")+"-"+crypto.randomBytes(6).toString("hex").toUpperCase(),createdAt:now.toISOString(),status:"در انتظار بررسی",customer:Object.fromEntries(fields.map(k=>[k,String(c[k]).trim()])),termsAccepted:true,termsAcceptedAt:b.termsAcceptedAt,items,total,deliveryRule:"تحویل سفارش باید فقط به خریدار و پس از احراز هویت و تطبیق شناسه سفارش انجام شود. خریدار فاکتور و شناسه اختصاصی را تا زمان دریافت نگهداری کند."};
+ const rows=readOrders();rows.push(order);try{saveOrders(rows)}catch(_){return json(res,500,{error:"ذخیره سفارش انجام نشد؛ دوباره تلاش کنید."})}
+ const invoice=["فاکتور سفارش چایسا","شناسه سفارش: "+order.id,"تاریخ: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"وضعیت: "+order.status,"مشخصات خریدار",c.name+" "+c.family,"تماس: "+c.contact,"شناسه پیام‌رسان: "+c.messengerId,"استان/شهر: "+c.province+" / "+c.city,"نشانی: "+c.address,"کد پستی: "+c.postal,"توضیحات: "+c.notes,"اقلام سفارش",...items.map(x=>x.name+" | "+x.sku+" | "+x.qty+" × "+x.unitPrice.toLocaleString("en-US")+" = "+x.lineTotal.toLocaleString("en-US")+" تومان"),"جمع کل: "+total.toLocaleString("en-US")+" تومان",order.deliveryRule].join("\n");
+ const token=process.env.TELEGRAM_BOT_TOKEN||"",recipients=String(process.env.ORDER_CHAT_IDS||"").split(",").map(x=>x.trim()).filter(x=>/^-?\d+$/.test(x));
+ let delivered=0;if(token&&recipients.length===2&&new Set(recipients).size===2){const rs=await Promise.all(recipients.map(async id=>{try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:id,text:invoice,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok}catch(_){return false}}));delivered=rs.filter(Boolean).length}
+ return json(res,200,{ok:true,orderId:order.id,invoice,delivered});
 });
-
 // Do not expose server-side source, package metadata, or deployment configuration.
 app.use((req, res, next) => {
   const blocked = new Set(["server.js", "package.json", "package-lock.json", "worker.js", "wrangler.toml", "CLOUDFLARE-SETUP.md", "BACKUP-STATUS.md", "DEVELOPMENT-CHECKPOINT.md"]);
