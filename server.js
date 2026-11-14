@@ -154,6 +154,40 @@ app.post("/api/admin/upload", requireAdmin, upload.single("image"), (req, res) =
 });
 app.use("/media", express.static(MEDIA, { maxAge: "1y", immutable: true, fallthrough: false }));
 
+const QUESTIONS_FILE = path.join(DATA, "questions.json");
+function readQuestions(){try{const x=JSON.parse(fs.readFileSync(QUESTIONS_FILE,"utf8"));return Array.isArray(x)?x:[]}catch(_){return[]}}
+function saveQuestions(rows){const t=QUESTIONS_FILE+".tmp";fs.writeFileSync(t,JSON.stringify(rows,null,2),"utf8");fs.renameSync(t,QUESTIONS_FILE)}
+app.post("/api/questions",async(req,res)=>{
+  const key="question:"+(req.ip||"unknown");
+  if(limited(key,5,10*60*1000))return json(res,429,{ok:false,error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کنید."});
+  const origin=req.get("origin");
+  if(origin && origin!==req.protocol+"://"+req.get("host"))return json(res,403,{ok:false,error:"درخواست نامعتبر است."});
+  const b=req.body||{};
+  const question=typeof b.question==="string"?b.question.trim():"";
+  const contactType=typeof b.contactType==="string"?b.contactType.trim():"";
+  const contactValue=typeof b.contactValue==="string"?b.contactValue.trim():"";
+  const allowed=["تلفن","تلگرام","روبیکا","بله","اینستاگرام"];
+  if(!question||question.length>2000||!allowed.includes(contactType)||!contactValue||contactValue.length>100)
+    return json(res,400,{ok:false,error:"متن پرسش، روش ارتباط و شناسه تماس را کامل و معتبر وارد کنید."});
+  const token=process.env.TELEGRAM_BOT_TOKEN||"";
+  const recipients=String(process.env.ORDER_CHAT_IDS||"").split(",").map(x=>x.trim()).filter(x=>/^-?\\d+$/.test(x));
+  if(!token||recipients.length!==2||new Set(recipients).size!==2)
+    return json(res,503,{ok:false,error:"سامانه دریافت پرسش‌ها موقتاً آماده نیست. لطفاً بعداً تلاش کنید."});
+  const now=new Date();
+  const item={id:"Q-"+now.toISOString().replace(/[-:.TZ]/g,"").slice(0,14)+"-"+crypto.randomBytes(4).toString("hex").toUpperCase(),createdAt:now.toISOString(),question,contactType,contactValue,delivery:"در انتظار ارسال"};
+  const rows=readQuestions();rows.push(item);
+  try{saveQuestions(rows)}catch(_){return json(res,500,{ok:false,error:"ثبت پرسش انجام نشد. لطفاً دوباره تلاش کنید."})}
+  const message=["پرسش جدید از فروشگاه چایسا","شناسه: "+item.id,"زمان: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"--------------------","متن پرسش:",question,"--------------------","روش دریافت پاسخ: "+contactType,"اطلاعات ارتباطی: "+contactValue].join("\\n");
+  const results=await Promise.all(recipients.map(async chat_id=>{
+    try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id,text:message,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok===true}catch(_){return false}
+  }));
+  item.delivered=results.filter(Boolean).length;
+  item.delivery=item.delivered===2?"ارسال‌شده برای هر دو گیرنده":"ارسال ناقص";
+  item.updatedAt=new Date().toISOString();
+  try{const current=readQuestions();const saved=current.find(x=>x.id===item.id);if(saved){saved.delivered=item.delivered;saved.delivery=item.delivery;saved.updatedAt=item.updatedAt;saveQuestions(current)}}catch(_){}
+  if(item.delivered!==2)return json(res,502,{ok:false,error:"ارسال پرسش به هر دو گیرنده کامل نشد. لطفاً کمی بعد دوباره تلاش کنید.",delivered:item.delivered,requestId:item.id});
+  return json(res,200,{ok:true,delivered:2,requestId:item.id});
+});
 app.post("/api/orders",async(req,res)=>{
  const key="order:"+(req.ip||"unknown");if(limited(key,5,10*60*1000))return json(res,429,{error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کن."});
  const b=req.body||{},c=b.customer||{},fields=["name","family","contact","messengerId","province","city","address","postal","notes"];
