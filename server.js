@@ -72,6 +72,24 @@ app.all("/api/admin/logout", (_req, res) => {
   res.clearCookie("chaysa_admin", { httpOnly: true, secure: true, sameSite: "strict", path: "/" });
   return json(res, 200, { ok: true });
 });
+app.get("/api/admin/telegram/recipients", requireAdmin, async (_req, res) => {
+  const token = process.env.TELEGRAM_BOT_TOKEN || "";
+  if (!token) return json(res, 503, { error: "توکن تلگرام تنظیم نشده است." });
+  try {
+    const response = await fetch("https://api.telegram.org/bot" + token + "/getUpdates");
+    const data = await response.json();
+    if (!response.ok || data.ok !== true) return json(res, 502, { error: "دریافت اطلاعات تلگرام ممکن نشد؛ وضعیت ربات را بررسی می‌کنیم." });
+    const chats = new Map();
+    for (const update of (data.result || [])) {
+      const msg = update.message || update.edited_message || update.my_chat_member;
+      const chat = msg && msg.chat;
+      if (chat && chat.id != null && (chat.type === "private" || chat.type === "group")) {
+        chats.set(String(chat.id), { id: String(chat.id), username: chat.username || "", first_name: chat.first_name || "" });
+      }
+    }
+    return json(res, 200, { recipients: Array.from(chats.values()) });
+  } catch (_) { return json(res, 502, { error: "ارتباط با تلگرام برقرار نشد." }); }
+});
 app.get("/api/admin/products", requireAdmin, (_req, res) => json(res, 200, readProducts()));
 app.put("/api/admin/products", requireAdmin, (req, res) => {
   if (!Array.isArray(req.body) || req.body.length > 1000) return json(res, 400, { error: "ساختار اطلاعات معتبر نیست." });
