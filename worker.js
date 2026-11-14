@@ -18,6 +18,19 @@ export default {
       if (!exp || Number(exp) < Date.now() || !sig) return false;
       return hex(await sign(exp)) === sig;
     }
+    async function getProducts() {
+      const stored = env.CHSY_PRODUCTS ? await env.CHSY_PRODUCTS.get("products", "json") : null;
+      if (Array.isArray(stored) && stored.length) return stored;
+      const seedResponse = await env.ASSETS.fetch(new Request(new URL("/products-seed.json", request.url)));
+      if (seedResponse.ok) {
+        const seed = await seedResponse.json().catch(() => []);
+        return Array.isArray(seed) ? seed : [];
+      }
+      return [];
+    }
+    if (url.pathname === "/api/products" && request.method === "GET") {
+      return json(await getProducts());
+    }
     if (url.pathname === "/api/admin/login" && request.method === "POST") {
       const body = await request.json().catch(()=>({}));
       if (!secret || body.password !== secret) return json({error:"رمز عبور نادرست است."}, 401);
@@ -28,7 +41,7 @@ export default {
     if (url.pathname.startsWith("/api/admin/")) {
       if (!(await valid())) return json({error:"ابتدا وارد پنل مدیریت شوید."},401);
       if (!env.CHSY_PRODUCTS) return json({error:"اتصال فضای ذخیره‌سازی محصولات تنظیم نشده است."},503);
-      if (url.pathname === "/api/admin/products" && request.method === "GET") return json(await env.CHSY_PRODUCTS.get("products","json") || []);
+      if (url.pathname === "/api/admin/products" && request.method === "GET") return json(await getProducts());
       if (url.pathname === "/api/admin/products" && request.method === "PUT") {
         const items = await request.json();
         if (!Array.isArray(items)) return json({error:"ساختار اطلاعات معتبر نیست."},400);
