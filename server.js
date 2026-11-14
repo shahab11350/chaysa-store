@@ -54,6 +54,24 @@ function requireAdmin(req, res, next) {
   if (origin && origin !== req.protocol + "://" + req.get("host")) return json(res, 403, { error: "درخواست نامعتبر است." });
   next();
 }
+const bostaniSecret = process.env.BOSTANI_ACCESS_PASSWORD || "";
+function signBostani(value) { return crypto.createHmac("sha256", bostaniSecret).update(value).digest("hex"); }
+function isBostani(req) {
+  if (!bostaniSecret) return false;
+  const raw = req.headers.cookie || "";
+  const token = (raw.match(new RegExp("(?:^|;\\s*)chaysa_bostani=([^;]+)")) || [])[1];
+  if (!token) return false;
+  const parts=token.split("."), exp=parts[0], sig=parts[1];
+  if (!exp || !sig || !/^\\d+$/.test(exp) || Number(exp)<Date.now()) return false;
+  const expected=Buffer.from(signBostani(exp)), actual=Buffer.from(sig);
+  return expected.length===actual.length && crypto.timingSafeEqual(expected,actual);
+}
+function requireBostani(req,res,next) {
+  if(!isBostani(req)) return json(res,401,{error:"برای ورود به صفحهٔ اختصاصی خانم بستانی، رمز دسترسی را وارد کنید."});
+  const origin=req.get("origin");
+  if(origin && origin!==req.protocol+"://"+req.get("host")) return json(res,403,{error:"درخواست نامعتبر است."});
+  next();
+}
 app.get("/api/health", (_req, res) => json(res, 200, { ok: true, service: "chaysa-backup" }));
 app.get("/api/products", (_req, res) => json(res, 200, readProducts()));
 
@@ -211,6 +229,23 @@ app.post("/api/admin/questions/:id/reply",requireAdmin,async(req,res)=>{
   }catch(_){return json(res,502,{ok:false,error:"ارتباط با تلگرام برقرار نشد؛ پاسخ ارسال نشد."})}
   q.reply=reply;q.repliedAt=new Date().toISOString();q.status="پاسخ ارسال‌شده";saveQuestions(rows);
   return json(res,200,{ok:true,status:q.status,repliedAt:q.repliedAt});
+});
+app.post("/api/bostani/login",(req,res)=>{
+ const key=req.ip||"unknown";if(limited("bostani-login:"+key,6,15*60*1000))return json(res,429,{error:"تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کنید."});
+ const supplied=typeof req.body.password==="string"?req.body.password:"";
+ if(!bostaniSecret||supplied.length!==bostaniSecret.length||!crypto.timingSafeEqual(Buffer.from(supplied),Buffer.from(bostaniSecret)))return json(res,401,{error:"رمز دسترسی نادرست است."});
+ const exp=String(Date.now()+8*60*60*1000);res.cookie("chaysa_bostani",exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true});
+});
+app.post("/api/bostani/logout",(_req,res)=>{res.clearCookie("chaysa_bostani",{httpOnly:true,secure:true,sameSite:"strict",path:"/"});return json(res,200,{ok:true});});
+app.get("/api/bostani/questions",requireBostani,(_req,res)=>{const rows=readQuestions().map(q=>({id:q.id,createdAt:q.createdAt,question:q.question,status:q.status||"در انتظار اتصال مشتری",customerLinked:Boolean(q.customerChatId),customerUsername:q.customerUsername||"",reply:q.reply||"",repliedAt:q.repliedAt||""})).reverse();return json(res,200,rows);});
+app.post("/api/bostani/questions/:id/reply",requireBostani,async(req,res)=>{
+ const key="bostani-reply:"+(req.ip||"unknown");if(limited(key,20,10*60*1000))return json(res,429,{ok:false,error:"تعداد پاسخ‌ها زیاد است؛ کمی بعد دوباره تلاش کنید."});
+ const reply=typeof req.body.reply==="string"?req.body.reply.trim():"";if(!reply||reply.length>4000)return json(res,400,{ok:false,error:"متن پاسخ را کامل و معتبر وارد کنید."});
+ const rows=readQuestions(),q=rows.find(x=>x.id===req.params.id);if(!q)return json(res,404,{ok:false,error:"پرسش پیدا نشد."});if(!q.customerChatId)return json(res,409,{ok:false,error:"مشتری هنوز اتصال تلگرام را کامل نکرده است."});
+ const token=process.env.TELEGRAM_BOT_TOKEN||"";if(!token)return json(res,503,{ok:false,error:"اتصال ربات تلگرام آماده نیست."});
+ const message=["پاسخ پرسش شما از چایسا 🌿","شناسه پرسش: "+q.id,"--------------------",reply].join("\\n");
+ try{const response=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:q.customerChatId,text:message,disable_web_page_preview:true})});const result=await response.json();if(!response.ok||result.ok!==true)return json(res,502,{ok:false,error:"ارسال پاسخ به تلگرام مشتری انجام نشد."});}catch(_){return json(res,502,{ok:false,error:"ارتباط با تلگرام برقرار نشد؛ پاسخ ارسال نشد."});}
+ q.reply=reply;q.repliedAt=new Date().toISOString();q.status="پاسخ ارسال‌شده";saveQuestions(rows);return json(res,200,{ok:true,status:q.status,repliedAt:q.repliedAt});
 });
 app.post("/api/questions",async(req,res)=>{
   const key="question:"+(req.ip||"unknown");
