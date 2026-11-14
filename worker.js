@@ -28,6 +28,28 @@ export default {
       }
       return [];
     }
+    if (url.pathname === "/api/orders" && request.method === "POST") {
+      const body = await request.json().catch(() => ({}));
+      const message = typeof body.message === "string" ? body.message.trim() : "";
+      const recipients = String(env.ORDER_CHAT_IDS || "").split(",").map(x => x.trim()).filter(x => /^-?\\d+$/.test(x));
+      if (!message || message.length > 3900) return json({error:"متن سفارش خالی یا بیش از حد طولانی است."},400);
+      if (!env.TELEGRAM_BOT_TOKEN || recipients.length !== 2 || new Set(recipients).size !== 2) {
+        return json({error:"تنظیمات محرمانه ارسال فاکتور هنوز کامل نشده است."},503);
+      }
+      const results = await Promise.all(recipients.map(async chat_id => {
+        try {
+          const response = await fetch(`https://api.telegram.org/bot${env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({chat_id, text:message, disable_web_page_preview:true})
+          });
+          const result = await response.json().catch(() => ({}));
+          return {ok:response.ok && result.ok === true};
+        } catch (_) { return {ok:false}; }
+      }));
+      if (results.some(x => !x.ok)) return json({error:"ارسال فاکتور به هر دو گیرنده کامل نشد.", delivered:results.filter(x=>x.ok).length},502);
+      return json({ok:true, delivered:2});
+    }
     if (url.pathname === "/api/products" && request.method === "GET") {
       return json(await getProducts());
     }
