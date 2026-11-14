@@ -59,7 +59,9 @@ async function loadQuestions(){
 }
 async function saveAll(){try{await api('products',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(products)});render();status('تغییرات با موفقیت ذخیره شد.')}catch(e){status(e.message)}}
 $('loginBtn').onclick=async()=>{try{await api('login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('password').value})});$('login').classList.add('hidden');$('app').classList.remove('hidden');await load();await loadOrders();await loadQuestions()}catch(e){alert(e.message)}};
-$('refreshOrders').onclick=loadOrders;\n$('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reload()};
+$('refreshOrders').onclick=loadOrders;
+$('refreshQuestions').onclick=loadQuestions;
+$('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reload()};
 $('telegramLookup').onclick=async()=>{const out=$('telegramResult');out.textContent='در حال دریافت…';try{const d=await api('telegram/recipients');const info='ربات متصل: '+(d.bot_username?'@'+d.bot_username:'نامشخص')+' | پیام‌های در انتظار: '+(d.pending_update_count??'نامشخص');if(d.recipients.length){out.textContent=info+'\\n'+d.recipients.map(x=>'شناسه: '+x.id+' | کاربر: '+(x.username?'@'+x.username:x.first_name||'بدون نام')).join('\\n')}else if(d.webhook_active){out.textContent=info+'\\nوب‌هوک برای این ربات فعال است؛ دریافت پیام با روش فعلی ممکن نیست. لازم نیست دوباره /start بزنید.'+(d.last_webhook_error?'\\nخطای آخر وب‌هوک: '+d.last_webhook_error:'')}else if(d.telegram_description){out.textContent=info+'\\nخطای تلگرام: '+d.telegram_description}else{out.textContent=info+'\\nصف دریافت خالی است؛ احتمالاً پیام‌ها قبلاً توسط یک دریافت‌کننده دیگر خوانده شده‌اند. لازم نیست فعلاً دوباره /start بزنید.'}}catch(e){out.textContent=e.message}};
 function fill(i){const p=products[i];$('editIndex').value=i;$('name').value=p.name;$('sku').value=p.sku||'';$('price').value=p.price||'';$('category').value=p.category||'چای';$('formTitle').textContent='ویرایش محصول'}
 $('clear').onclick=()=>{['editIndex','name','sku','price','photo'].forEach(x=>$(x).value='');$('formTitle').textContent='افزودن محصول'};
