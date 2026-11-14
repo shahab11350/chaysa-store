@@ -336,7 +336,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const checkout = document.createElement("section");
   checkout.className = "checkout-box";
   checkout.hidden = true;
-  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً تمام فیلدها را تکمیل کنید. ثبت و ارسال سفارش بدون تکمیل همه موارد امکان‌پذیر نیست.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" inputmode="tel" dir="ltr" autocomplete="tel" placeholder="شماره تماس *" required><input class="customer-id" type="text" inputmode="url" lang="en" dir="ltr" autocapitalize="none" spellcheck="false" autocomplete="off" placeholder="شناسه تلگرام یا روبیکا *" required><select class="customer-province" lang="fa" required><option value="">استان را انتخاب کنید *</option></select><select class="customer-city" lang="fa" required disabled><option value="">ابتدا استان را انتخاب کنید *</option></select><textarea class="customer-address wide" inputmode="text" lang="fa" dir="rtl" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" dir="ltr" lang="en" autocomplete="postal-code" pattern="[0-9]{10}" maxlength="10" placeholder="کد پستی (۱۰ رقم) *" required><textarea class="customer-notes wide" inputmode="text" lang="fa" dir="rtl" placeholder="توضیحات تحویل * (اگر توضیحی ندارید، بنویسید: ندارد)" required></textarea></div><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div><p class="checkout-status" role="status" aria-live="polite" hidden></p>';
+  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً تمام فیلدها را تکمیل کنید. ثبت و ارسال سفارش بدون تکمیل همه موارد امکان‌پذیر نیست.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" inputmode="tel" dir="ltr" autocomplete="tel" placeholder="شماره تماس *" required><input class="customer-id" type="text" inputmode="url" lang="en" dir="ltr" autocapitalize="none" spellcheck="false" autocomplete="off" placeholder="شناسه تلگرام یا روبیکا *" required><select class="customer-province" lang="fa" required><option value="">استان را انتخاب کنید *</option></select><select class="customer-city" lang="fa" required disabled><option value="">ابتدا استان را انتخاب کنید *</option></select><textarea class="customer-address wide" inputmode="text" lang="fa" dir="rtl" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" dir="ltr" lang="en" autocomplete="postal-code" pattern="[0-9]{10}" maxlength="10" placeholder="کد پستی (۱۰ رقم) *" required><textarea class="customer-notes wide" inputmode="text" lang="fa" dir="rtl" placeholder="توضیحات تحویل * (اگر توضیحی ندارید، بنویسید: ندارد)" required></textarea></div><label class="terms-confirm"><input class="customer-terms" type="checkbox" required> تمام اطلاعات واردشده، از جمله نام و نام خانوادگی، شماره تماس، شناسه پیام‌رسان، استان، شهر، نشانی و کد پستی را بررسی و تأیید می‌کنم. مسئولیت صحت اطلاعات و پیامدهای ناشی از اشتباه در ثبت آن‌ها بر عهده من است.</label><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div><p class="checkout-status" role="status" aria-live="polite" hidden></p><div class="issued-invoice" hidden><h4>فاکتور ثبت‌شده</h4><pre class="issued-invoice-text"></pre><button type="button" class="copy-issued-invoice">کپی فاکتور</button></div>';
   section.appendChild(checkout);
   function checkoutValue(selector) { return checkout.querySelector(selector).value.trim(); }
   function updateFinalPreview() {
@@ -578,42 +578,30 @@ document.addEventListener("DOMContentLoaded", async function () {
   checkout.querySelector(".checkout-send").addEventListener("click", async function() {
     if (cart.size === 0) { alert("سبد خرید خالی است."); return; }
     if (!validateCheckout()) return;
+    const terms=checkout.querySelector(".customer-terms");
+    if(!terms.checked){alert("برای ثبت سفارش، تأیید اطلاعات الزامی است.");terms.focus();return;}
     updateFinalPreview();
-    const button = checkout.querySelector(".checkout-send");
-    const status = checkout.querySelector(".checkout-status");
-    const message = buildOrderText();
-    button.disabled = true;
-    button.textContent = "در حال ارسال سفارش...";
-    status.hidden = true;
-    status.className = "checkout-status";
-    status.textContent = "";
-    try {
-      const response = await fetch("/api/orders", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({message:message})
-      });
-      let result = {};
-      try { result = await response.json(); } catch(parseError) {}
-      if (!response.ok || !result.ok) {
-        const detail = result.error ? " (" + result.error + ")" : "";
-        throw new Error("ثبت سفارش انجام نشد" + detail);
-      }
-      status.textContent = "سفارش شما با موفقیت ثبت و برای چایسا ارسال شد. برای جلوگیری از ثبت تکراری، این سفارش دیگر ارسال نمی‌شود.";
-      status.classList.add("success");
-      status.hidden = false;
-      button.textContent = "سفارش ثبت شد";
-      button.disabled = true;
-    } catch(error) {
-      status.textContent = error.message || "ارسال سفارش ناموفق بود. لطفاً اتصال اینترنت را بررسی کنید و دوباره تلاش کنید.";
-      status.classList.add("error");
-      status.hidden = false;
-      button.disabled = false;
-      button.textContent = "تلاش دوباره برای ارسال";
-    }
+    const button=checkout.querySelector(".checkout-send"),status=checkout.querySelector(".checkout-status");
+    const customer={name:checkoutValue(".customer-name"),family:checkoutValue(".customer-family"),contact:checkoutValue(".customer-contact"),messengerId:checkoutValue(".customer-id"),province:checkoutValue(".customer-province"),city:checkoutValue(".customer-city"),address:checkoutValue(".customer-address"),postal:checkoutValue(".customer-postal"),notes:checkoutValue(".customer-notes")};
+    const items=Array.from(cart.entries()).map(([sku,item])=>({sku,qty:item.qty}));
+    button.disabled=true;button.textContent="در حال ثبت سفارش...";status.hidden=true;
+    try{
+      const response=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,items,termsAccepted:true,termsAcceptedAt:new Date().toISOString()})});
+      let result={};try{result=await response.json()}catch(_){}
+      if(!response.ok||!result.ok)throw new Error(result.error||"ثبت سفارش انجام نشد.");
+      status.textContent="سفارش با شناسه "+result.orderId+" ثبت شد. فاکتور را کپی و تا زمان تحویل نگهداری کن.";
+      status.classList.add("success");status.hidden=false;
+      checkout.querySelector(".issued-invoice-text").textContent=result.invoice;
+      checkout.querySelector(".issued-invoice").hidden=false;
+      button.textContent="سفارش ثبت شد";button.disabled=true;
+    }catch(error){status.textContent=error.message||"ثبت سفارش ناموفق بود.";status.classList.add("error");status.hidden=false;button.disabled=false;button.textContent="تلاش دوباره برای ثبت سفارش";}
   });
-
-  invoice.querySelector(".clear-invoice").addEventListener("click", function() {
+  checkout.querySelector(".copy-issued-invoice").addEventListener("click",async function(){
+    const value=checkout.querySelector(".issued-invoice-text").textContent;
+    try{await navigator.clipboard.writeText(value);this.textContent="فاکتور کپی شد";}
+    catch(_){const area=document.createElement("textarea");area.value=value;checkout.appendChild(area);area.select();document.execCommand("copy");area.remove();this.textContent="فاکتور کپی شد";}
+  });
+    invoice.querySelector(".clear-invoice").addEventListener("click", function() {
     cart.clear();
     renderInvoice();
     checkout.hidden = true;
