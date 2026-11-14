@@ -6,26 +6,29 @@
 <meta name="theme-color" content="#173b2b">
 <title>دعوت‌نامه اختصاصی چایسا</title>
 <style>
-:root{--green:#173b2b;--green2:#244b37;--gold:#c5a45b;--cream:#f7f5ef;--ink:#26372b}
+:root{--green:#244b37;--green2:#426b4c;--gold:#c5a45b;--cream:#fbf7ec;--ink:#26372b}
 *{box-sizing:border-box}
-body{margin:0;background:var(--cream);color:var(--ink);font-family:Tahoma,sans-serif}
-header{background:var(--green);color:#fff;text-align:center;padding:24px 16px 28px;border-bottom:4px solid var(--gold)}
-.brand{font-size:30px;letter-spacing:4px;color:#e6cc85;font-weight:bold}
-header h1{font-size:20px;margin:9px 0 4px}
-header p{margin:0;color:#eee3c5;font-size:13px;line-height:2}
-main{width:min(960px,calc(100% - 24px));margin:24px auto 40px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:20px;align-items:start}
-.panel{background:#fff;border:1px solid #e6dcc5;border-radius:18px;padding:20px;box-shadow:0 8px 24px #173b2b0b}
+body{margin:0;background:radial-gradient(ellipse at 10% 5%,#e8efdf 0,transparent 34%),linear-gradient(145deg,#f7f4e9,#edf0e5 55%,#f8f0df);color:var(--ink);font-family:Tahoma,sans-serif}
+header{position:relative;overflow:hidden;background:linear-gradient(120deg,#183c2c,#315b40 58%,#52724c);color:#fff;text-align:center;padding:30px 16px 34px;border-bottom:0}
+header:before,header:after{content:"";position:absolute;border:1px solid #d8c58b55;border-radius:50%;width:260px;height:260px;transform:rotate(-25deg)}
+header:before{right:-105px;top:-150px}header:after{left:-130px;bottom:-190px}
+.brand{font-size:30px;letter-spacing:4px;color:#f0d99a;font-weight:bold;position:relative}
+header h1{font-size:22px;margin:12px 0 6px;position:relative}
+header p{margin:0;color:#f2e9d2;font-size:13px;line-height:2;position:relative}
+main{width:min(1000px,calc(100% - 24px));margin:24px auto 40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,.95fr);gap:20px;align-items:start}
+.panel{background:#fffdf8ef;border:1px solid #e8dfcb;border-radius:22px;padding:22px;box-shadow:0 14px 36px #244b3710}
 h2{font-size:17px;color:var(--green);margin:0 0 14px}
 label{display:block;font-size:13px;font-weight:bold;margin:14px 0 7px}
-textarea,input{width:100%;font:14px/2 Tahoma,sans-serif;color:var(--ink);background:#fff;border:1px solid #d9d2c2;border-radius:10px;padding:11px;outline-color:var(--gold)}
+textarea,input{width:100%;font:14px/2 Tahoma,sans-serif;color:var(--ink);background:#fff;border:1px solid #d9d2c2;border-radius:13px;padding:12px;outline-color:var(--gold)}
 textarea{min-height:115px;resize:vertical}
-button,a.action{border:0;border-radius:10px;padding:12px 14px;font:bold 13px Tahoma,sans-serif;cursor:pointer;text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:7px}
-.primary{background:var(--green);color:#fff}.gold{background:var(--gold);color:#fff}.light{background:#f2eee3;color:var(--green);border:1px solid #e4d9bf}
+button,a.action{border:0;border-radius:13px;padding:13px 14px;font:bold 13px Tahoma,sans-serif;cursor:pointer;text-decoration:none;text-align:center;display:inline-flex;align-items:center;justify-content:center;gap:7px;transition:transform .18s,box-shadow .18s}
+button:hover,a.action:hover{transform:translateY(-2px);box-shadow:0 7px 16px #173b2b18}
+.primary{background:linear-gradient(120deg,#244b37,#426b4c);color:#fff}.gold{background:var(--gold);color:#fff}.light{background:#f5f0e3;color:var(--green);border:1px solid #e4d9bf}
 .actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
 .full{width:100%;margin-top:10px}
 .note{font-size:11px;color:#777;line-height:2;margin:10px 0 0}
-.preview-wrap{background:#f4f0e6;border-radius:14px;padding:12px}
-canvas{display:block;width:100%;height:auto;border-radius:10px}
+.preview-wrap{background:linear-gradient(145deg,#f0eadb,#e7ecdf);border-radius:18px;padding:12px}
+canvas{display:block;width:100%;height:auto;border-radius:13px;box-shadow:0 12px 26px #173b2b18}
 .platforms{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-top:12px}
 .platforms button{background:#f6f3eb;color:var(--green);border:1px solid #e6dcc5}
 .status{min-height:24px;margin:10px 0 0;text-align:center;font-size:12px;color:var(--green);line-height:1.8}
@@ -77,19 +80,26 @@ footer{text-align:center;color:#777;font-size:11px;padding:0 12px 24px}
    if(line)out.push(line);return out;
  }
  function draw(){
-   ctx.clearRect(0,0,1080,1350);ctx.fillStyle='#f7f5ef';ctx.fillRect(0,0,1080,1350);
-   ctx.strokeStyle='#c5a45b';ctx.lineWidth=12;ctx.strokeRect(42,42,996,1266);
-   ctx.strokeStyle='#173b2b';ctx.lineWidth=3;ctx.strokeRect(65,65,950,1220);
+   const g=ctx.createLinearGradient(0,0,1080,1350);g.addColorStop(0,'#fbf7ec');g.addColorStop(.55,'#f2f0e4');g.addColorStop(1,'#e8efdf');
+   ctx.clearRect(0,0,1080,1350);ctx.fillStyle=g;ctx.fillRect(0,0,1080,1350);
+   ctx.fillStyle='#dfe9d8';ctx.beginPath();ctx.ellipse(80,160,210,290,-.45,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='#efe3c5';ctx.beginPath();ctx.ellipse(1040,1190,240,330,.35,0,Math.PI*2);ctx.fill();
+   function leaf(x,y,s,rot,color){ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.fillStyle=color;ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(42*s,-55*s,105*s,-45*s,112*s,0);ctx.bezierCurveTo(78*s,48*s,30*s,40*s,0,0);ctx.fill();ctx.strokeStyle='#f8f5e9aa';ctx.lineWidth=2*s;ctx.beginPath();ctx.moveTo(5*s,0);ctx.quadraticCurveTo(55*s,-2*s,105*s,0);ctx.stroke();ctx.restore()}
+   leaf(105,250,1.15,-.55,'#52764d');leaf(910,190,.85,2.5,'#6e8b5d');leaf(945,1080,1.2,2.9,'#55794e');leaf(135,1120,.8,-.3,'#82966c');
+   ctx.strokeStyle='#c5a45b';ctx.lineWidth=5;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(360,405);ctx.bezierCurveTo(445,330,610,330,705,405);ctx.stroke();
    ctx.textAlign='center';ctx.direction='rtl';
-   ctx.fillStyle='#173b2b';ctx.font='bold 112px Tahoma';ctx.fillText('CHAYSA',540,290);
-   ctx.fillStyle='#b08d43';ctx.font='bold 54px Tahoma';ctx.fillText('دعوت‌نامه‌ای برای طعم‌های تازه',540,420);
-   ctx.fillStyle='#244b37';ctx.font='46px Tahoma';
-   const message=textEl.value.trim();const rows=lines(message,820);let y=590;
-   rows.slice(0,5).forEach(row=>{ctx.fillText(row,540,y);y+=82});
-   ctx.fillStyle='#c5a45b';ctx.beginPath();ctx.arc(540,980,7,0,Math.PI*2);ctx.fill();
-   ctx.fillStyle='#173b2b';ctx.font='bold 42px Tahoma';ctx.fillText('با مهر، چایسا',540,1080);
-   ctx.font='28px Tahoma';ctx.fillStyle='#6c715f';ctx.fillText('فروشگاهی برای طعم‌های تازه',540,1150);
-   ctx.font='24px Tahoma';ctx.fillText('برای دیدن فروشگاه، پیوند همراه پیام را لمس کنید',540,1210);
+   ctx.fillStyle='#244b37';ctx.font='bold 112px Tahoma';ctx.fillText('CHAYSA',540,285);
+   ctx.fillStyle='#b08d43';ctx.font='bold 50px Tahoma';ctx.fillText('یک دعوتِ دل‌نشین',540,490);
+   ctx.fillStyle='#426b4c';ctx.font='34px Tahoma';ctx.fillText('برای چشیدن طعم‌های تازه',540,555);
+   ctx.fillStyle='#fffdf4cc';ctx.beginPath();ctx.roundRect(115,635,850,300,42);ctx.fill();
+   ctx.fillStyle='#314a35';ctx.font='42px Tahoma';const message=textEl.value.trim();const rows=lines(message,730);let y=735;
+   rows.slice(0,4).forEach(row=>{ctx.fillText(row,540,y);y+=66});
+   ctx.fillStyle='#244b37';ctx.beginPath();ctx.roundRect(435,1010,210,105,28);ctx.fill();
+   ctx.strokeStyle='#244b37';ctx.lineWidth=18;ctx.beginPath();ctx.arc(650,1055,42,-Math.PI/2,Math.PI/2);ctx.stroke();
+   ctx.fillStyle='#c5a45b';ctx.beginPath();ctx.ellipse(540,1010,105,19,0,0,Math.PI*2);ctx.fill();
+   ctx.strokeStyle='#c5a45b';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(490,965);ctx.bezierCurveTo(450,900,530,890,500,835);ctx.moveTo(560,965);ctx.bezierCurveTo(520,900,600,880,570,830);ctx.stroke();
+   ctx.fillStyle='#244b37';ctx.font='bold 40px Tahoma';ctx.fillText('با مهر، چایسا',540,1210);
+   ctx.font='28px Tahoma';ctx.fillStyle='#6c715f';ctx.fillText('فروشگاهی برای طعم‌های تازه',540,1260);
  }
  function invite(){const u=cleanUrl();if(!u){status.textContent='پیوند فروشگاه معتبر نیست.';return null}return textEl.value.trim()+'\n'+u}
  async function copy(){const msg=invite();if(!msg)return;try{await navigator.clipboard.writeText(msg);status.textContent='متن دعوت و پیوند کپی شد.'}catch(e){const t=document.createElement('textarea');t.value=msg;document.body.appendChild(t);t.select();document.execCommand('copy');t.remove();status.textContent='متن دعوت و پیوند کپی شد.'}}
