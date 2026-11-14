@@ -567,7 +567,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     }
     const postal = checkout.querySelector(".customer-postal");
     postal.value = normalizeDigits(postal.value).replace(/[^0-9]/g, "");
-    if (!/^\\d{10}$/.test(postal.value)) {
+    if (!/^\d{10}$/.test(postal.value)) {
       alert("کد پستی باید دقیقاً ۱۰ رقم باشد.");
       postal.focus();
       return false;
