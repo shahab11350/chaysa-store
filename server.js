@@ -62,7 +62,7 @@ function isBostani(req) {
   const token = (raw.match(new RegExp("(?:^|;\\s*)chaysa_bostani=([^;]+)")) || [])[1];
   if (!token) return false;
   const parts=token.split("."), exp=parts[0], sig=parts[1];
-  if (!exp || !sig || !/^\\d+$/.test(exp) || Number(exp)<Date.now()) return false;
+  if (!exp || !sig || !/^\d+$/.test(exp) || Number(exp)<Date.now()) return false;
   const expected=Buffer.from(signBostani(exp)), actual=Buffer.from(sig);
   return expected.length===actual.length && crypto.timingSafeEqual(expected,actual);
 }
