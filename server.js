@@ -72,34 +72,49 @@ app.all("/api/admin/logout", (_req, res) => {
   res.clearCookie("chaysa_admin", { httpOnly: true, secure: true, sameSite: "strict", path: "/" });
   return json(res, 200, { ok: true });
 });
+const TELEGRAM_RECIPIENTS_FILE = path.join(DATA, "telegram-recipients.json");
+function readTelegramRecipients() {
+  try {
+    const rows = JSON.parse(fs.readFileSync(TELEGRAM_RECIPIENTS_FILE, "utf8"));
+    return Array.isArray(rows) ? rows : [];
+  } catch (_) { return []; }
+}
+function saveTelegramRecipient(chat) {
+  if (!chat || chat.type !== "private" || chat.id == null) return;
+  const rows = readTelegramRecipients();
+  const id = String(chat.id);
+  const item = { id, username: chat.username || "", first_name: chat.first_name || "", type: "private" };
+  const index = rows.findIndex(x => String(x.id) === id);
+  if (index >= 0) rows[index] = item; else rows.push(item);
+  fs.writeFileSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", JSON.stringify(rows, null, 2), "utf8");
+  fs.renameSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", TELEGRAM_RECIPIENTS_FILE);
+}
+app.post("/telegram/webhook", (req, res) => {
+  const expected = process.env.TELEGRAM_WEBHOOK_SECRET || "";
+  const supplied = req.get("x-telegram-bot-api-secret-token") || "";
+  if (!expected || supplied !== expected) return res.sendStatus(403);
+  try {
+    const update = req.body || {};
+    const msg = update.message || update.edited_message;
+    if (msg && msg.chat) saveTelegramRecipient(msg.chat);
+    return res.sendStatus(200);
+  } catch (_) { return res.sendStatus(500); }
+});
 app.get("/api/admin/telegram/recipients", requireAdmin, async (_req, res) => {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   if (!token) return json(res, 503, { error: "توکن تلگرام تنظیم نشده است." });
   try {
     const base = "https://api.telegram.org/bot" + token + "/";
-    const [meResponse, webhookResponse, updatesResponse] = await Promise.all([
-      fetch(base + "getMe"), fetch(base + "getWebhookInfo"), fetch(base + "getUpdates")
-    ]);
-    const [me, webhook, updates] = await Promise.all([meResponse.json(), webhookResponse.json(), updatesResponse.json()]);
+    const [meResponse, webhookResponse] = await Promise.all([fetch(base + "getMe"), fetch(base + "getWebhookInfo")]);
+    const [me, webhook] = await Promise.all([meResponse.json(), webhookResponse.json()]);
     if (!meResponse.ok || me.ok !== true) return json(res, 502, { error: "توکن به یک ربات معتبر تلگرام متصل نیست." });
     if (!webhookResponse.ok || webhook.ok !== true) return json(res, 502, { error: "وضعیت وب‌هوک تلگرام قابل دریافت نیست." });
-    if (!updatesResponse.ok || updates.ok !== true) return json(res, 200, {
-      recipients: [], bot_username: me.result.username || "", webhook_active: Boolean(webhook.result.url),
-      pending_update_count: webhook.result.pending_update_count || 0,
-      telegram_error_code: updates.error_code || updatesResponse.status,
-      telegram_description: updates.description || "دریافت پیام‌ها از صف تلگرام ممکن نشد."
-    });
-    const chats = new Map();
-    for (const update of (updates.result || [])) {
-      const msg = update.message || update.edited_message || update.my_chat_member;
-      const chat = msg && msg.chat;
-      if (chat && chat.id != null && (chat.type === "private" || chat.type === "group")) {
-        chats.set(String(chat.id), { id: String(chat.id), username: chat.username || "", first_name: chat.first_name || "" });
-      }
-    }
     return json(res, 200, {
-      recipients: Array.from(chats.values()), bot_username: me.result.username || "",
-      webhook_active: Boolean(webhook.result.url), pending_update_count: webhook.result.pending_update_count || 0,
+      recipients: readTelegramRecipients(),
+      bot_username: me.result.username || "",
+      webhook_active: Boolean(webhook.result.url),
+      webhook_url_matches: Boolean(webhook.result.url && webhook.result.url.endsWith("/telegram/webhook")),
+      pending_update_count: webhook.result.pending_update_count || 0,
       last_webhook_error: webhook.result.last_error_message || ""
     });
   } catch (_) { return json(res, 502, { error: "ارتباط با تلگرام برقرار نشد." }); }
@@ -163,4 +178,17 @@ app.use((err, _req, res, _next) => {
   return json(res, 500, { error: "خطای داخلی سرور." });
 });
 const port = Number(process.env.PORT || 3000);
-app.listen(port, "0.0.0.0", () => console.log("CHAYSA backup listening on " + port));
+app.listen(port, "0.0.0.0", () => {
+  console.log("CHAYSA backup listening on " + port);
+  const token = process.env.TELEGRAM_BOT_TOKEN || "";
+  const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
+  if (token && webhookSecret) {
+    const webhookUrl = "https://chaysa-backup-store-production.up.railway.app/telegram/webhook";
+    fetch("https://api.telegram.org/bot" + token + "/setWebhook", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: webhookUrl, secret_token: webhookSecret, allowed_updates: ["message"], drop_pending_updates: false })
+    }).then(r => r.json()).then(result => console.log("Telegram webhook registration:", result.ok ? "ok" : "failed"))
+      .catch(() => console.log("Telegram webhook registration failed"));
+  }
+});
