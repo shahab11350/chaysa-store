@@ -20,7 +20,7 @@ export default {
     }
     async function getProducts() {
       const stored = env.CHSY_PRODUCTS ? await env.CHSY_PRODUCTS.get("products", "json") : null;
-      if (Array.isArray(stored) && stored.length) return stored;
+      if (stored !== null) return Array.isArray(stored) ? stored : [];
       const seedResponse = await env.ASSETS.fetch(new Request(new URL("/products-seed.json", request.url)));
       if (seedResponse.ok) {
         const seed = await seedResponse.json().catch(() => []);
