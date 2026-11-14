@@ -183,7 +183,7 @@ if(document.readyState==="loading"){
 
 <section id="questions" class="about" style="max-width:760px">
   <h2>پرسش از شما، پاسخ از ما</h2>
-  <p>سؤال، ابهام یا پیشنهادت رو برامون بنویس. پرسشت مستقیم برای همکارمون در تلگرام فرستاده می‌شه.</p>
+  <p>سؤال، ابهام یا پیشنهادت رو برامون بنویس. بعد از ثبت پرسش، برای دریافت پاسخ از همکارمون، اتصال تلگرام رو کامل کن.</p>
   <form id="chaysaQuestionForm" style="background:#fff;border:1px solid #e6d9b8;border-radius:16px;padding:20px;text-align:right;box-shadow:0 4px 16px #0000000a">
     <label for="chaysaQuestionText" style="display:block;font-weight:bold;margin:0 0 8px">متن سؤال یا درخواست</label>
     <textarea id="chaysaQuestionText" required maxlength="2000" rows="4" placeholder="سؤالت رو اینجا بنویس..." style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px/2 Tahoma;resize:vertical"></textarea>
@@ -327,8 +327,18 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
       });
       const result=await response.json();
       if(!response.ok||!result.ok)throw new Error(result.error||"ارسال ناموفق");
-      status.textContent="پرسش شما با موفقیت برای همکارمون در تلگرام ارسال شد. سپاس از همراهی شما.";
       status.style.color="#24613d";
+      status.replaceChildren(
+        document.createTextNode("پرسشت با موفقیت ثبت و برای همکارمون در تلگرام فرستاده شد. برای اینکه پاسخ رو دریافت کنی، دکمه زیر رو بزن و در ربات چایسا گزینه Start رو انتخاب کن. "),
+        document.createElement("br")
+      );
+      const connect=document.createElement("a");
+      connect.href="https://t.me/Chaysa113502026bot?start="+encodeURIComponent(result.requestId);
+      connect.target="_blank";
+      connect.rel="noopener noreferrer";
+      connect.textContent="اتصال به تلگرام برای دریافت پاسخ";
+      connect.style.cssText="display:inline-block;margin-top:10px;padding:10px 14px;background:#244b37;color:#fff;border-radius:9px;text-decoration:none;font-weight:bold";
+      status.appendChild(connect);
       form.reset();
     }catch(error){
       status.textContent=(error&&error.message)||"ارسال پرسش انجام نشد. لطفاً دوباره تلاش کن.";
