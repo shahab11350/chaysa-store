@@ -183,7 +183,7 @@ if(document.readyState==="loading"){
 
 <section id="questions" class="about" style="max-width:760px">
   <h2>پرسش از شما، پاسخ از ما</h2>
-  <p>سؤال، ابهام یا پیشنهادت رو برامون بنویس. پرسشت مستقیم برای همکاران چایسا در تلگرام فرستاده می‌شه.</p>
+  <p>سؤال، ابهام یا پیشنهادت رو برامون بنویس. پرسشت مستقیم برای همکارمون در تلگرام فرستاده می‌شه.</p>
   <form id="chaysaQuestionForm" style="background:#fff;border:1px solid #e6d9b8;border-radius:16px;padding:20px;text-align:right;box-shadow:0 4px 16px #0000000a">
     <label for="chaysaQuestionText" style="display:block;font-weight:bold;margin:0 0 8px">متن سؤال یا درخواست</label>
     <textarea id="chaysaQuestionText" required maxlength="2000" rows="4" placeholder="سؤالت رو اینجا بنویس..." style="width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px/2 Tahoma;resize:vertical"></textarea>
@@ -327,7 +327,7 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
       });
       const result=await response.json();
       if(!response.ok||!result.ok)throw new Error(result.error||"ارسال ناموفق");
-      status.textContent="پرسش شما با موفقیت برای هر دو همکار چایسا در تلگرام ارسال شد. سپاس از همراهی شما.";
+      status.textContent="پرسش شما با موفقیت برای همکارمون در تلگرام ارسال شد. سپاس از همراهی شما.";
       status.style.color="#24613d";
       form.reset();
     }catch(error){
