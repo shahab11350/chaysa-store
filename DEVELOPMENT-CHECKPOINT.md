@@ -114,3 +114,9 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Worker: unknown `/api/admin/*` paths now return JSON 404 rather than falling through to static assets.
 - Worker API and static-asset responses now include baseline anti-sniffing, referrer, framing, and permissions headers; R2 media keys are constrained to generated UUID filenames and media responses include `nosniff`.
 - These are source-level changes only. They have not been deployed or runtime-tested. Reliable login rate limiting and full end-to-end runtime testing remain release gates.
+
+
+## 2026-11-15 — Native login/recovery rate limiting
+- Added Cloudflare's native Rate Limiting binding `CHAYSA_LOGIN_LIMITER` to `wrangler.toml` (namespace ID `1150115`, 5 requests per 60 seconds).
+- Login and password-recovery routes use separate keys based on Cloudflare's connecting-IP header. The Worker fails closed if the binding is absent and returns HTTP 429 with a one-minute Retry-After when limited.
+- This is approximate, per-Cloudflare-location limiting, not a strict global limit. It must be runtime-tested after deployment. No deployment was performed.
