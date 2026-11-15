@@ -15,7 +15,7 @@ main{width:min(100%,700px);margin:auto;padding:12px 10px 30px}
 .wheel-wrap{position:relative;width:min(94vw,640px);aspect-ratio:1;margin:0 auto}
 #wheel{display:block;width:100%;height:100%;filter:drop-shadow(0 16px 20px #0009)}
 .pointer{position:absolute;z-index:3;top:-2px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:17px solid transparent;border-right:17px solid transparent;border-top:34px solid #f5cc78;filter:drop-shadow(0 3px 3px #0009)}
-.logo{position:absolute;z-index:2;width:19%;height:19%;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;object-fit:contain;background:#fffdf6;border:5px solid #d5a64f;box-shadow:0 2px 12px #1c1008aa;padding:8px}
+.logo{position:absolute;z-index:5;width:25%;height:25%;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;object-fit:contain;background:#fffdf6;border:6px solid #f0c879;box-shadow:0 3px 18px #090502;padding:3px}
 .controls{margin:22px auto 0}
 #spin{border:1px solid #f1d49a;border-radius:14px;padding:14px 48px;background:linear-gradient(145deg,#e5c58b,#a97839);color:#29190d;font:bold 19px Tahoma;box-shadow:0 6px 0 #63411f,0 12px 22px #0008;cursor:pointer}
 #spin:active{transform:translateY(4px);box-shadow:0 2px 0 #63411f,0 6px 12px #0008}
@@ -85,21 +85,21 @@ function draw(){
    ctx.beginPath();ctx.moveTo(Math.cos(mid)*112,Math.sin(mid)*112);ctx.quadraticCurveTo(Math.cos(mid)*225,Math.sin(mid)*225,Math.cos(mid)*292,Math.sin(mid)*292);
    ctx.strokeStyle='rgba(255,239,204,.32)';ctx.lineWidth=3;ctx.stroke();
    // Keep each Persian prize block upright and centered on its blade.
-   ctx.save();ctx.rotate(mid);ctx.translate(0,-214);
-   let rot=Math.PI/2;if(mid>Math.PI/2&&mid<Math.PI*1.5)rot=-Math.PI/2;
-   ctx.rotate(rot);ctx.direction='rtl';ctx.textAlign='center';ctx.textBaseline='middle';
    const lines=prizes[i].lines;
-   const fontSize= i===6 ? 17 : (i===7 ? 19 : 21);
-   ctx.font='bold '+fontSize+'px Tahoma,Arial';ctx.fillStyle='#fff9e9';
-   ctx.shadowColor='#24140d';ctx.shadowBlur=5;ctx.shadowOffsetY=2;
-   const lineH= i===6 ? 24 : 28,startY=-(lines.length-1)*lineH/2;
-   lines.forEach((line,j)=>ctx.fillText(line,0,startY+j*lineH,158));
+   const lx=Math.cos(mid)*216,ly=Math.sin(mid)*216;
+   const lineH=lines.length===3?19:22,boxH=lines.length*lineH+14,boxW=136;
+   ctx.save();ctx.translate(lx,ly);ctx.direction='rtl';ctx.textAlign='center';ctx.textBaseline='middle';
+   ctx.beginPath();ctx.roundRect(-boxW/2,-boxH/2,boxW,boxH,12);
+   ctx.fillStyle='rgba(31,19,12,.78)';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='rgba(246,213,157,.9)';ctx.stroke();
+   ctx.font='bold '+(lines.length===3?15:18)+'px Tahoma,Arial';ctx.fillStyle='#fffdf5';
+   ctx.shadowColor='#000';ctx.shadowBlur=2;
+   lines.forEach((line,j)=>ctx.fillText(line,0,-(lines.length-1)*lineH/2+j*lineH,120));
    ctx.restore();
-   // Alternating partner names near the blade tips.
-   ctx.save();ctx.rotate(mid);ctx.translate(0,-294);ctx.rotate(rot);
-   ctx.direction='ltr';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 13px Arial';
-   ctx.fillStyle='#fff0ca';ctx.shadowColor='#2b170b';ctx.shadowBlur=3;
-   ctx.fillText(prizes[i].brand,0,0,100);ctx.restore();
+   // Fixed, upright partner name in the space between blade tips.
+   const bx=Math.cos(mid)*300,by=Math.sin(mid)*300;
+   ctx.save();ctx.translate(bx,by);ctx.direction='ltr';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 15px Arial';
+   ctx.fillStyle='#fff4d8';ctx.shadowColor='#160b05';ctx.shadowBlur=5;
+   ctx.fillText(prizes[i].brand,0,0,110);ctx.restore();
  }
  // Decorative central fan grille beneath the fixed approved logo.
  ctx.beginPath();ctx.arc(0,0,82,0,Math.PI*2);ctx.fillStyle='#f9f2df';ctx.fill();
