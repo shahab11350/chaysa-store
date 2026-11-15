@@ -137,32 +137,10 @@ export default {
         }));
         return json({ok:true});
       }
-      if (url.pathname === "/api/admin/upload" && request.method === "POST") {
-        if (!env.CHSY_IMAGES) return json({error:"فضای ذخیره عکس‌ها تنظیم نشده است."},503);
-        const form = await request.formData(), file = form.get("image");
-        const extensions = {"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","image/avif":"avif"};
-        if (!file || !extensions[file.type] || file.size < 1 || file.size > 5*1024*1024) return json({error:"فقط عکس JPEG، PNG، WebP، GIF یا AVIF تا ۵ مگابایت مجاز است."},400);
-        const bytes = new Uint8Array(await file.slice(0,12).arrayBuffer());
-        const ascii = (start, length) => String.fromCharCode(...bytes.slice(start,start+length));
-        const validImage =
-          (file.type==="image/jpeg" && bytes[0]===0xff && bytes[1]===0xd8 && bytes[2]===0xff) ||
-          (file.type==="image/png" && ascii(0,8)==="\x89PNG\r\n\x1a\n") ||
-          (file.type==="image/gif" && ["GIF87a","GIF89a"].includes(ascii(0,6))) ||
-          (file.type==="image/webp" && ascii(0,4)==="RIFF" && ascii(8,4)==="WEBP") ||
-          (file.type==="image/avif" && ascii(4,4)==="ftyp" && ["avif","avis"].includes(ascii(8,4)));
-        if (!validImage) return json({error:"محتوای فایل با قالب تصویر اعلام‌شده مطابقت ندارد."},400);
-        const key = crypto.randomUUID()+"."+extensions[file.type];
-        await env.CHSY_IMAGES.put(key,file.stream(),{httpMetadata:{contentType:file.type}});
-        return json({url:"/media/"+key});
-      }
+
     }
     if (url.pathname.startsWith("/api/admin/")) return json({error:"مسیر مدیریتی پیدا نشد."},404);
-    if (url.pathname.startsWith("/media/") && env.CHSY_IMAGES) {
-      const key = url.pathname.slice(7);
-      if (!/^[a-f0-9-]{36}\.(?:jpg|png|webp|gif|avif)$/.test(key)) return new Response("Not found",{status:404});
-      const obj = await env.CHSY_IMAGES.get(key);
-      return obj ? new Response(obj.body,{headers:{"Content-Type":obj.httpMetadata?.contentType||"application/octet-stream","Cache-Control":"public, max-age=31536000","X-Content-Type-Options":"nosniff"}}) : new Response("Not found",{status:404});
-    }
+
     const asset = await env.ASSETS.fetch(request);
     const headers = new Headers(asset.headers);
     headers.set("X-Content-Type-Options","nosniff");
