@@ -126,3 +126,11 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Added a last-confirmed-data snapshot to `owner.html`. If saving owner orders, invoices, messages, or status changes fails, the panel now restores the last successfully loaded/saved data and re-renders instead of retaining unsaved in-memory edits.
 - Static JavaScript syntax checks passed for `worker.js`, `owner.html`, and `admin.html` after the change. These checks do not replace deployed runtime tests.
 - Commit: `f1a880c44db0d5efbfa2c09c3bd302d1555e8a89`.
+
+
+## Cloudflare dashboard binding and baseline deployment — 2026-11-15
+- Owner configured the Production Worker bindings in the Cloudflare dashboard: secret `ADMIN_PASSWORD`, KV binding `CHSY_PRODUCTS` (namespace ID `fbd00c90aba34b7184c264b448426089`), and Rate Limiter binding `CHAYSA_LOGIN_LIMITER` (namespace ID `1150115`, 5 requests per 60 seconds).
+- Cloudflare dashboard shows active deployment version `c028244f`, status Ready, 100% traffic, 0% error rate. Its commit message is `Added Rate limiter binding CHAYSA_LOGIN_LIMITER`.
+- The Worker URL currently returns `Hello world`. This confirms the deployed script is still the baseline Hello World Worker; the development-branch `worker.js` and static assets have NOT yet been deployed.
+- Rate limiter binding is configured on Production, but its application to the CHAYSA login/recovery routes is not yet runtime-tested because the application Worker code is not deployed.
+- Next safe step: finish a static/security/compatibility review of the development branch and establish a deployment path targeting only `admin-panel-development` and the existing test Worker. Do not merge to `main`, alter GitHub Pages, or deploy the application Worker until the owner gives explicit release approval.
