@@ -96,7 +96,7 @@ function draw(){
    lines.forEach((line,j)=>ctx.fillText(line,0,-(lines.length-1)*lineH/2+j*lineH,120));
    ctx.restore();
    // Fixed, upright partner name in the space between blade tips.
-   const bx=Math.cos(mid)*300,by=Math.sin(mid)*300;
+   const gapAngle=-Math.PI/2+i*slice;const bx=Math.cos(gapAngle)*300,by=Math.sin(gapAngle)*300;
    ctx.save();ctx.translate(bx,by);ctx.direction='ltr';ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 15px Arial';
    ctx.fillStyle='#fff4d8';ctx.shadowColor='#160b05';ctx.shadowBlur=5;
    ctx.fillText(prizes[i].brand,0,0,110);ctx.restore();
