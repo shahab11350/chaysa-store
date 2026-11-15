@@ -23,3 +23,10 @@
 - پیش از انتشار عمومی، محدودسازی تلاش‌های ورود (rate limiting)، بررسی CSRF و آزمون کامل نشست ورود لازم است.
 - فایل seed فعلی ۴۷ محصول از HTML موجود استخراج کرده است؛ شمارش دسته‌ها با عنوان‌های نمایشی صفحه فعلی کاملاً یکسان نیست و باید پیش از انتقال نهایی بازبینی شود.
 - این شاخه هنوز روی سایت زنده منتشر نشده است.
+
+
+## Owner password recovery
+
+The owner panel includes a one-time recovery-code flow. Before it can be used, configure the Worker secret `OWNER_RECOVERY_CODE` with a long, random value (at least 32 characters) using the hosting provider's secret/variable settings. Never commit this value to Git or paste it into source files. The first successful recovery stores a PBKDF2-SHA-256 password hash (310,000 iterations, random salt) in the existing `CHSY_PRODUCTS` KV namespace and marks the recovery code as used. Subsequent logins use the stored password hash; the original `ADMIN_PASSWORD` remains the HMAC session-signing secret. The recovery code is intentionally one-time; to issue another recovery code, an operator must securely clear KV key `owner-recovery-used-v1` and rotate the `OWNER_RECOVERY_CODE` secret. Do not clear the used marker as a routine action.
+
+The recovery feature is not operational until `CHSY_PRODUCTS`, `ADMIN_PASSWORD`, and `OWNER_RECOVERY_CODE` are configured and the updated Worker is deployed.
