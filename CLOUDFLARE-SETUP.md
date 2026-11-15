@@ -44,3 +44,11 @@ The recovery feature is not operational until `CHSY_PRODUCTS`, `ADMIN_PASSWORD`,
 - The development Worker config declares the native Cloudflare Rate Limiting binding `CHAYSA_LOGIN_LIMITER` (namespace ID `1150115`), with 5 requests per 60 seconds per key.
 - Login and recovery use separate IP-based keys. The Worker fails closed with HTTP 503 if the binding is missing and returns HTTP 429 with Retry-After when the configured threshold is exceeded.
 - Cloudflare documents these limits as approximate and local to each Cloudflare location; they are a useful low-friction abuse barrier, not a strict global lockout. Validate behavior after deployment. See https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/.
+
+
+## Cloudflare dashboard status — 2026-11-15 (verified by owner)
+- Production Worker `soft-rain-89bbchaysa-api` now has `ADMIN_PASSWORD`, KV binding `CHSY_PRODUCTS`, and Rate Limiter binding `CHAYSA_LOGIN_LIMITER` configured.
+- Active dashboard deployment `c028244f` is Ready and serves 100% of traffic, but the Worker URL still responds with `Hello world`. This is only the baseline script with the bindings attached; it is NOT the CHAYSA application Worker.
+- Do not treat the rate limiter as protecting the CHAYSA login endpoint until the branch's application Worker code is deployed and its behavior is tested.
+- No R2 bucket or `CHSY_IMAGES` binding has been created; image upload remains intentionally deferred. `OWNER_RECOVERY_CODE` is also not configured, so password recovery is not operational.
+- Next step is code review and a safe deployment path for the development branch. Production application deployment and any change to `main` or the public GitHub Pages site still require explicit owner approval.
