@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#17130f">
+<title>گردونهٔ چایسا | نمونهٔ آزمایشی</title>
+<style>
+:root{--gold:#d8bd79;--cream:#f3e7c9;--dark:#17130f;--green:#274334}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--cream);font-family:Tahoma,Arial,sans-serif;background:radial-gradient(ellipse at 50% 34%,#4a3928 0,#211b15 43%,#100e0c 100%);overflow-x:hidden}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.28;background:radial-gradient(circle at 18% 22%,#e4c77a 0 1px,transparent 2px),radial-gradient(circle at 82% 32%,#e4c77a 0 1px,transparent 2px),radial-gradient(circle at 30% 76%,#e4c77a 0 1px,transparent 2px);background-size:170px 170px,230px 230px,190px 190px}
+header{text-align:center;padding:25px 14px 0}
+header .eyebrow{font-size:11px;letter-spacing:3px;color:#c5a965}
+h1{font-size:clamp(24px,5vw,34px);margin:10px 0 7px;color:#f5e7c8;font-weight:500}
+header p{font-size:12px;color:#c8b99b;margin:0}
+main{width:min(100%,560px);margin:auto;padding:16px 12px 34px;text-align:center}
+.stage{position:relative;width:min(94vw,390px);height:510px;margin:0 auto}
+.pointer{position:absolute;z-index:8;top:12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:30px solid #f1d58e;filter:drop-shadow(0 3px 3px #000); }
+.saucer-shadow{position:absolute;top:28px;left:50%;transform:translateX(-50%);width:min(88vw,354px);height:min(88vw,354px);border-radius:50%;background:#080706;filter:blur(15px);opacity:.7}
+.rim{position:absolute;top:17px;left:50%;transform:translateX(-50%);width:min(91vw,366px);height:min(91vw,366px);border-radius:50%;padding:12px;background:radial-gradient(circle at 35% 25%,#fff1c8,#b9944d 37%,#5b4427 73%,#d8bd79 100%);box-shadow:0 15px 30px #0009,inset 0 2px 5px #fff8}
+.wheel{position:relative;width:100%;height:100%;border-radius:50%;overflow:hidden;border:3px solid #f0d99e;background:conic-gradient(from -22.5deg,#355440 0 45deg,#80643a 45deg 90deg,#28483b 90deg 135deg,#725536 135deg 180deg,#355440 180deg 225deg,#80643a 225deg 270deg,#28483b 270deg 315deg,#725536 315deg 360deg);transition:transform 5.2s cubic-bezier(.12,.72,.08,1);box-shadow:inset 0 0 0 4px #3b2b1b,inset 0 0 28px #0008}
+.wheel:after{content:"";position:absolute;inset:8px;border:1px solid #e5cb8a;border-radius:50%;pointer-events:none}
+.prize{position:absolute;left:50%;top:50%;width:112px;margin-left:-56px;margin-top:-13px;text-align:center;font-size:11px;line-height:1.65;font-weight:bold;color:#fff4d9;text-shadow:0 1px 3px #000;transform:rotate(var(--a)) translateY(-103px) rotate(calc(var(--a) * -1));}
+.brand{position:absolute;left:50%;top:50%;width:75px;margin-left:-37.5px;margin-top:-8px;text-align:center;font: bold 10px Arial,sans-serif;letter-spacing:.5px;color:#f5d994;text-shadow:0 1px 3px #000;transform:rotate(var(--a)) translateY(-150px) rotate(calc(var(--a) * -1))}
+.hub{position:absolute;z-index:5;left:50%;top:50%;transform:translate(-50%,-50%);width:94px;height:94px;border-radius:50%;background:radial-gradient(circle at 35% 25%,#fff4d5,#d8bd79 60%,#80643a);border:4px solid #f5e6bd;box-shadow:0 4px 14px #0009;display:grid;place-items:center}
+.hub img{width:74px;height:74px;object-fit:contain;border-radius:50%;background:#fff}
+.cup{position:absolute;z-index:0;top:353px;left:50%;transform:translateX(-50%);width:175px;height:100px;background:linear-gradient(100deg,#6b4d2d,#e1c486 25%,#9c7642 62%,#ead39b);clip-path:polygon(0 0,100% 0,84% 82%,72% 100%,28% 100%,16% 82%);filter:drop-shadow(0 12px 8px #0009)}
+.cup:after{content:"";position:absolute;left:50%;top:9px;transform:translateX(-50%);width:138px;height:16px;border-radius:50%;background:linear-gradient(#4b3521,#b38b4c);border:2px solid #f0d99e}
+.cup-base{position:absolute;z-index:1;top:444px;left:50%;transform:translateX(-50%);width:190px;height:17px;border-radius:50%;background:linear-gradient(#f0d99e,#8c6839);box-shadow:0 8px 12px #0009}
+.sugar-wrap{position:absolute;z-index:4;top:469px;left:50%;transform:translateX(-50%)}
+.sugar{border:0;cursor:pointer;position:relative;width:82px;height:39px;border-radius:8px;background:linear-gradient(145deg,#fff9e9,#dfd0ad 60%,#aa9877);color:#4b3a25;font-family:inherit;font-weight:bold;font-size:13px;box-shadow:0 7px 0 #8b795d,0 12px 18px #0008,inset 0 2px 4px #fff;transform:skewY(-5deg);transition:transform .15s,box-shadow .15s}
+.sugar:before{content:"";position:absolute;left:8px;right:8px;top:-7px;height:12px;border-radius:5px;background:linear-gradient(90deg,#fff9e9,#d9c9a4);transform:skewY(5deg)}
+.sugar:active{transform:translateY(5px) skewY(-5deg);box-shadow:0 2px 0 #8b795d,0 5px 10px #0008}
+.sugar:disabled{opacity:.65;cursor:wait}
+.hint{font-size:12px;color:#d4c5a5;margin:10px 0 0}
+.counter{display:inline-block;margin-top:10px;padding:7px 13px;border:1px solid #927746;border-radius:30px;color:#f2dfb5;font-size:12px;background:#211b15aa}
+.result{min-height:62px;margin:14px auto 0;padding:13px 15px;max-width:420px;border:1px solid #947744;border-radius:14px;background:linear-gradient(135deg,#30271d,#1c1712);color:#f7e8c5;line-height:1.8;font-size:14px;box-shadow:0 8px 22px #0004}
+.note{max-width:430px;margin:15px auto 0;color:#b9a98a;font-size:10px;line-height:1.9}
+@media(max-width:380px){.stage{height:480px}.cup{top:335px}.cup-base{top:426px}.sugar-wrap{top:451px}.prize{font-size:9px;transform:rotate(var(--a)) translateY(-94px) rotate(calc(var(--a) * -1))}.brand{transform:rotate(var(--a)) translateY(-137px) rotate(calc(var(--a) * -1));font-size:9px}}
+</style>
+</head>
+<body>
+<header><div class="eyebrow">CHAYSA · TEA & MOMENTS</div><h1>گردونهٔ شانس چایسا</h1><p>یک چرخش، یک لحظهٔ شیرین</p></header>
+<main>
+<div class="stage" aria-label="گردونه آزمایشی چایسا">
+ <div class="saucer-shadow"></div><div class="pointer"></div>
+ <div class="rim"><div class="wheel" id="wheel"></div><div class="hub"><img src="https://raw.githubusercontent.com/shahab11350/chaysapp-android/main/assets/chaysa_logo.png" alt="لوگوی اصلی چایسا"></div></div>
+ <div class="cup"></div><div class="cup-base"></div>
+ <div class="sugar-wrap"><button class="sugar" id="spin">بچرخون!</button></div>
+</div>
+<div class="hint">برای شروع، حبه‌قند را لمس کن</div>
+<div class="counter" id="counter">فرصت آزمایشی: ۲ از ۲</div>
+<div class="result" id="result" aria-live="polite">منتظر یک چرخش هیجان‌انگیز باش…</div>
+<p class="note">نسخهٔ نمایشی برای بررسی ظاهر و حرکت است. نتیجه‌ها تصادفی و صرفاً آزمایشی‌اند؛ این صفحه به سفارش، پرداخت یا سامانهٔ جوایز واقعی متصل نیست.</p>
+</main>
+<script>
+const prizes=[
+ "جایزهٔ ویژهٔ چایسا",
+ "تخفیف خرید",
+ "محصول رایگان",
+ "پوچ",
+ "جایزهٔ نقدی",
+ "پوچ",
+ "انتخاب محصول با تخفیف",
+ "کمک به خیریه به نام برنده"
+];
+const wheel=document.getElementById('wheel');
+const ns=prizes.length;
+prizes.forEach((p,i)=>{
+ const a=i*45;
+ const label=document.createElement('div');
+ label.className='prize';label.style.setProperty('--a',a+'deg');label.textContent=p;wheel.appendChild(label);
+ const brand=document.createElement('div');
+ brand.className='brand';brand.style.setProperty('--a',(a+22.5)+'deg');brand.textContent=i%2===0?'TAKSOO':'CHAYSA';wheel.appendChild(brand);
+});
+let remaining=2,rotation=0,busy=false;
+const btn=document.getElementById('spin'),result=document.getElementById('result'),counter=document.getElementById('counter');
+btn.addEventListener('click',()=>{
+ if(busy||remaining<=0)return;
+ busy=true;remaining--;btn.disabled=true;counter.textContent='فرصت آزمایشی: '+remaining+' از ۲';
+ const index=Math.floor(Math.random()*ns);
+ const center=index*45+22.5;
+ const target=360-(center)+360*5;
+ rotation+=target;
+ wheel.style.transform='rotate('+rotation+'deg)';
+ result.textContent='چرخونه در حال چرخشه…';
+ window.setTimeout(()=>{
+  result.textContent='نتیجهٔ آزمایشی: '+prizes[index];
+  busy=false;btn.disabled=remaining<=0;
+  if(remaining===0)counter.textContent='هر دو فرصت آزمایشی استفاده شد';
+ },5350);
+});
+</script>
+</body></html>
