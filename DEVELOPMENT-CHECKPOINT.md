@@ -109,6 +109,7 @@ When continuing, first inspect the actual current files on admin-panel-developme
 
 ## Owner/admin hardening follow-up — 2026-11-15
 - Product manager: failed saves now restore the previous in-memory product list instead of leaving the UI showing unsaved edits; add/edit/delete/active-toggle use this rollback path.
+- Rollback snapshots clone product records, so a failed active/inactive toggle also restores the previous state rather than retaining a mutated object.
 - Product form: Persian and Arabic-Indic digits are normalized for prices; unsafe/invalid prices, duplicate SKUs, missing edit targets, non-image files, and files over 5 MB are rejected before saving.
 - Worker: unknown `/api/admin/*` paths now return JSON 404 rather than falling through to static assets.
 - Worker API and static-asset responses now include baseline anti-sniffing, referrer, framing, and permissions headers; R2 media keys are constrained to generated UUID filenames and media responses include `nosniff`.
