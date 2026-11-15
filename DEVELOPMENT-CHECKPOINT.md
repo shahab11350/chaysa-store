@@ -80,3 +80,11 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Category counts in the current catalogue are 24 tea, 14 herbal tea, and 9 spices. The visible tea category heading says 25, so the mismatch is in the displayed count versus the 24 actual tea rows; the identity of any intended 25th tea must be confirmed from the source product list before release.
 - Fixed `products.html` so a successful API response containing an empty product array is respected instead of silently falling back to the old embedded catalogue. Commit: `7de731a15fa1c0ac6f9a48d071f1b9a84b2465af`.
 - Remaining blockers before deployment: R2 bucket/binding, optional recovery secret if recovery is required, rate limiting/security review, and runtime tests. No Worker deployment has been performed.
+
+
+## Worker static audit — 2026-11-15
+- Audited the current Worker source and found three incorrectly double-escaped regular expressions: cookie parsing whitespace, numeric session-expiry validation, and upload filename sanitization.
+- Corrected those patterns on `admin-panel-development` so session cookies can be parsed, expiry timestamps can be validated, and uploaded filenames are sanitized as intended.
+- Commit: `b6bdc27feefda0bb8d53d279f72f607f42a92994`.
+- Verified the corrected source text on GitHub. This is a static source verification only; no Worker deployment or runtime test has been performed.
+- Remaining before deployment: configure the R2 bucket/binding `CHSY_IMAGES`, decide whether to enable password recovery by setting `OWNER_RECOVERY_CODE`, add reliable login rate limiting, complete endpoint/session/security review, then deploy and runtime-test the development Worker. Do not deploy or change `main`/the public GitHub Pages site without explicit owner approval.
