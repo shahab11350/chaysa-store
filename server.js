@@ -73,6 +73,59 @@ function requireBostani(req,res,next) {
   next();
 }
 app.get("/api/health", (_req, res) => json(res, 200, { ok: true, service: "chaysa-backup" }));
+
+const ANALYTICS_FILE = path.join(DATA, "analytics.json");
+function readAnalytics() {
+  try {
+    const value = JSON.parse(fs.readFileSync(ANALYTICS_FILE, "utf8"));
+    if (value && value.site && value.apk) return value;
+  } catch (_) {}
+  return { site: { views: 0, visitors: [], daily: {} }, apk: { installs: {} } };
+}
+function saveAnalytics(value) {
+  const tmp = ANALYTICS_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(value), "utf8");
+  fs.renameSync(tmp, ANALYTICS_FILE);
+}
+function tehranDay(date = new Date()) {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Tehran", year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+}
+app.post("/api/analytics/apk-open", (req, res) => {
+  const key = "apk-open:" + (req.ip || "unknown");
+  if (limited(key, 60, 60 * 1000)) return json(res, 429, { error: "درخواست‌های زیادی ثبت شده است." });
+  const installationId = typeof req.body.installationId === "string" ? req.body.installationId.trim() : "";
+  if (!/^[A-Za-z0-9_-]{16,100}$/.test(installationId)) return json(res, 400, { error: "شناسه نصب معتبر نیست." });
+  const data = readAnalytics();
+  const id = crypto.createHash("sha256").update(installationId).digest("hex");
+  const now = new Date().toISOString();
+  const existing = data.apk.installs[id];
+  data.apk.installs[id] = { firstOpenedAt: existing ? existing.firstOpenedAt : now, lastSeenAt: now };
+  try { saveAnalytics(data); } catch (_) { return json(res, 500, { error: "ثبت آمار نصب انجام نشد." }); }
+  return json(res, 200, { ok: true, firstOpen: !existing });
+});
+app.get("/api/admin/analytics", requireAdmin, (_req, res) => {
+  const data = readAnalytics();
+  const days = Object.entries(data.site.daily || {}).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 30).map(([date, value]) => ({
+    date, views: value.views || 0, visitors: (value.visitors || []).length
+  }));
+  const installs = Object.values(data.apk.installs || {});
+  const cutoff = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const active30 = installs.filter(x => Date.parse(x.lastSeenAt) >= cutoff).length;
+  return json(res, 200, {
+    site: {
+      totalViews: data.site.views || 0,
+      uniqueVisitors: (data.site.visitors || []).length,
+      todayViews: (data.site.daily[tehranDay()] || {}).views || 0,
+      daily: days
+    },
+    apk: {
+      firstOpens: installs.length,
+      active30Days: active30,
+      note: "نصب بر اساس اولین اجرای اپ ثبت می‌شود؛ برای شروع ثبت، اپ باید به API آمار متصل شود."
+    }
+  });
+});
+
 app.get("/api/products", (_req, res) => json(res, 200, readProducts()));
 
 app.post("/api/admin/login", (req, res) => {
@@ -309,6 +362,28 @@ app.use((req, res, next) => {
   if (blocked.has(name) || name.startsWith(".")) return res.sendStatus(404);
   next();
 });
+
+app.use((req, res, next) => {
+  const page = req.method === "GET" && (req.path === "/" || req.path === "/index.html" || /\\.html$/i.test(req.path));
+  if (!page || req.path === "/admin.html" || req.path === "/bostani.html") return next();
+  let visitor = (req.headers.cookie || "").match(/(?:^|;\\s*)chaysa_visitor=([A-Za-z0-9_-]+)/);
+  let visitorId = visitor && visitor[1];
+  if (!visitorId) {
+    visitorId = crypto.randomBytes(18).toString("hex");
+    res.cookie("chaysa_visitor", visitorId, { httpOnly: true, secure: true, sameSite: "lax", path: "/", maxAge: 365 * 24 * 60 * 60 * 1000 });
+  }
+  const hashed = crypto.createHash("sha256").update(visitorId).digest("hex");
+  const data = readAnalytics();
+  const day = tehranDay();
+  if (!data.site.daily[day]) data.site.daily[day] = { views: 0, visitors: [] };
+  data.site.views = (data.site.views || 0) + 1;
+  data.site.daily[day].views = (data.site.daily[day].views || 0) + 1;
+  if (!data.site.visitors.includes(hashed)) data.site.visitors.push(hashed);
+  if (!data.site.daily[day].visitors.includes(hashed)) data.site.daily[day].visitors.push(hashed);
+  try { saveAnalytics(data); } catch (_) {}
+  next();
+});
+
 app.use(express.static(ROOT, { index: "index.html", dotfiles: "ignore" }));
 app.use((err, _req, res, _next) => {
   if (err && err.code === "LIMIT_FILE_SIZE") return json(res, 400, { error: "حجم عکس نباید بیشتر از ۵ مگابایت باشد." });
