@@ -73,3 +73,10 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Configured `ADMIN_PASSWORD` as a Cloudflare Secret; its value is intentionally not recorded here or in Git.
 - Updated `wrangler.toml` on `admin-panel-development` to use the existing Worker name `soft-rain-89bbchaysa-api`, preventing an accidental deploy to a differently named Worker.
 - Still outstanding: create R2 bucket `chaysa-product-images` and bind it as `CHSY_IMAGES`; configure `OWNER_RECOVERY_CODE` if recovery is to be enabled; review rate limiting and security; deploy and runtime-test only after configuration review. No deployment has occurred.
+
+
+## Static audit follow-up — 2026-11-15
+- Compared the current `products.html` catalogue rows against `products-seed.json`: both contain the same 47 unique SKUs; no row in the HTML catalogue is missing from the seed, and no seed row is absent from the HTML catalogue.
+- Category counts in the current catalogue are 24 tea, 14 herbal tea, and 9 spices. The visible tea category heading says 25, so the mismatch is in the displayed count versus the 24 actual tea rows; the identity of any intended 25th tea must be confirmed from the source product list before release.
+- Fixed `products.html` so a successful API response containing an empty product array is respected instead of silently falling back to the old embedded catalogue. Commit: `7de731a15fa1c0ac6f9a48d071f1b9a84b2465af`.
+- Remaining blockers before deployment: R2 bucket/binding, optional recovery secret if recovery is required, rate limiting/security review, and runtime tests. No Worker deployment has been performed.
