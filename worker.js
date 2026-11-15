@@ -14,9 +14,11 @@ export default {
     const hex = b => [...b].map(x=>x.toString(16).padStart(2,"0")).join("");
     async function valid() {
       if (!token || !secret) return false;
-      const [exp, sig] = token.split(".");
-      if (!exp || !sig || !/^\d+$/.test(exp) || Number(exp) < Date.now()) return false;
-      return hex(await sign(exp)) === sig;
+      const parts = token.split(".");
+      if (parts.length !== 2) return false;
+      const [exp, sig] = parts;
+      if (!/^\d{13}$/.test(exp) || !/^[a-f0-9]{64}$/i.test(sig) || Number(exp) < Date.now()) return false;
+      return equalSecret(hex(await sign(exp)), sig.toLowerCase());
     }
     async function getProducts() {
       const stored = env.CHSY_PRODUCTS ? await env.CHSY_PRODUCTS.get("products", "json") : null;
@@ -67,8 +69,12 @@ export default {
     if (url.pathname === "/api/admin/login" && request.method === "POST") {
       if (request.headers.get("Origin") !== url.origin) return json({error:"درخواست نامعتبر است."},403);
       if (!env.CHSY_PRODUCTS) return json({error:"فضای ذخیره‌سازی مرکزی تنظیم نشده است."},503);
-      const body = await request.json().catch(()=>({}));
-      if (!await passwordMatches(body.password)) return json({error:"رمز عبور نادرست است."},401);
+      const declaredLength = Number(request.headers.get("Content-Length") || 0);
+      if (declaredLength > 4096) return json({error:"درخواست بیش از حد مجاز است."},413);
+      const raw = await request.text();
+      if (raw.length > 4096) return json({error:"درخواست بیش از حد مجاز است."},413);
+      let body; try { body = JSON.parse(raw); } catch { body = {}; }
+      if (typeof body.password !== "string" || !await passwordMatches(body.password)) return json({error:"رمز عبور نادرست است."},401);
       const exp = String(Date.now()+8*60*60*1000), value = exp+"."+hex(await sign(exp));
       return json({ok:true},200,{"Set-Cookie":"chaysa_admin="+value+"; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800"});
     }
@@ -78,7 +84,11 @@ export default {
       const recoverySecret = env.OWNER_RECOVERY_CODE;
       if (!recoverySecret) return json({error:"کد بازیابی هنوز توسط مالک تنظیم نشده است."},503);
       if (await env.CHSY_PRODUCTS.get(recoveryUsedKey)) return json({error:"کد بازیابی قبلاً استفاده شده و باطل است."},403);
-      const body = await request.json().catch(()=>({}));
+      const declaredLength = Number(request.headers.get("Content-Length") || 0);
+      if (declaredLength > 8192) return json({error:"درخواست بیش از حد مجاز است."},413);
+      const raw = await request.text();
+      if (raw.length > 8192) return json({error:"درخواست بیش از حد مجاز است."},413);
+      let body; try { body = JSON.parse(raw); } catch { body = {}; }
       if (!equalSecret(body.recoveryCode, recoverySecret)) return json({error:"کد بازیابی معتبر نیست."},403);
       if (typeof body.newPassword !== "string" || body.newPassword.length < 12 || body.newPassword.length > 128) return json({error:"رمز جدید باید بین ۱۲ تا ۱۲۸ نویسه باشد."},400);
       const hashed = await hashPassword(body.newPassword);
@@ -86,7 +96,9 @@ export default {
       await env.CHSY_PRODUCTS.put(recoveryUsedKey, "used");
       return json({ok:true});
     }
-    if (url.pathname === "/api/admin/logout" && request.method === "POST") {
+    if (url.pathname === "/api/admin/logout") {
+      if (request.method !== "POST") return json({error:"روش درخواست مجاز نیست."},405);
+      if (request.headers.get("Origin") !== url.origin) return json({error:"درخواست نامعتبر است."},403);
       return json({ok:true},200,{"Set-Cookie":"chaysa_admin=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0"});
     }
     if (url.pathname.startsWith("/api/admin/")) {
@@ -120,8 +132,18 @@ export default {
       if (url.pathname === "/api/admin/upload" && request.method === "POST") {
         if (!env.CHSY_IMAGES) return json({error:"فضای ذخیره عکس‌ها تنظیم نشده است."},503);
         const form = await request.formData(), file = form.get("image");
-        if (!file || !file.type.startsWith("image/") || file.size > 5*1024*1024) return json({error:"فقط عکس تا ۵ مگابایت مجاز است."},400);
-        const key = crypto.randomUUID()+"-"+file.name.replace(/[^\w.-]/g,"_");
+        const extensions = {"image/jpeg":"jpg","image/png":"png","image/webp":"webp","image/gif":"gif","image/avif":"avif"};
+        if (!file || !extensions[file.type] || file.size < 1 || file.size > 5*1024*1024) return json({error:"فقط عکس JPEG، PNG، WebP، GIF یا AVIF تا ۵ مگابایت مجاز است."},400);
+        const bytes = new Uint8Array(await file.slice(0,12).arrayBuffer());
+        const ascii = (start, length) => String.fromCharCode(...bytes.slice(start,start+length));
+        const validImage =
+          (file.type==="image/jpeg" && bytes[0]===0xff && bytes[1]===0xd8 && bytes[2]===0xff) ||
+          (file.type==="image/png" && ascii(0,8)==="\x89PNG\r\n\x1a\n") ||
+          (file.type==="image/gif" && ["GIF87a","GIF89a"].includes(ascii(0,6))) ||
+          (file.type==="image/webp" && ascii(0,4)==="RIFF" && ascii(8,4)==="WEBP") ||
+          (file.type==="image/avif" && ascii(4,4)==="ftyp" && ["avif","avis"].includes(ascii(8,4)));
+        if (!validImage) return json({error:"محتوای فایل با قالب تصویر اعلام‌شده مطابقت ندارد."},400);
+        const key = crypto.randomUUID()+"."+extensions[file.type];
         await env.CHSY_IMAGES.put(key,file.stream(),{httpMetadata:{contentType:file.type}});
         return json({url:"/media/"+key});
       }
