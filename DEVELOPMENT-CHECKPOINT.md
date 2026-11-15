@@ -138,7 +138,7 @@ When continuing, first inspect the actual current files on admin-panel-developme
 
 ## Static asset exposure hardening — 2026-11-15
 - Reviewed the Workers Static Assets configuration. Because `assets.directory = "."`, internal root files could otherwise be included in the public asset bundle.
-- Added root `.assetsignore` on `admin-panel-development` to exclude `worker.js`, `wrangler.toml`, Markdown documentation, and `.github/` from uploaded public assets.
+- Added root `.assetsignore` on `admin-panel-development` to exclude `worker.js`, `wrangler.toml`, Markdown documentation, `.github/`, and the auxiliary `cloudflare/` Worker folder from uploaded public assets.
 - Kept `products-seed.json` included because the Worker intentionally reads it through `env.ASSETS.fetch()` when KV has no saved product list.
 - This is a source/configuration hardening change only; it has not been deployed or runtime-tested.
 
