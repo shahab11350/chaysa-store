@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#173b2b">
+<title>گردونه چایسا | نسخه آزمایشی</title>
+<style>
+:root{--green:#173b2b;--green2:#244b37;--gold:#c7a45c;--cream:#f7f3e8;--ink:#25352a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 15%,#fffdf7 0,#f3efe3 52%,#e8e2d2 100%);color:var(--ink);font-family:Tahoma,Arial,sans-serif;display:flex;flex-direction:column;align-items:center}
+header{text-align:center;padding:26px 16px 8px}
+.brand{font-family:Georgia,serif;font-size:30px;letter-spacing:4px;color:var(--gold);font-weight:bold;text-shadow:0 1px 0 #fff}
+h1{font-size:25px;color:var(--green);margin:8px 0}
+.sub{font-size:13px;color:#687568;margin:0}
+main{width:min(100%,560px);padding:18px 16px 34px;display:flex;flex-direction:column;align-items:center;gap:16px}
+.demo{font-size:12px;line-height:1.9;text-align:center;background:#fff8e7;border:1px solid #e5d5a9;border-radius:12px;padding:9px 13px;color:#755d2c;width:100%}
+.wheel-wrap{position:relative;width:min(88vw,430px);aspect-ratio:1;display:grid;place-items:center;filter:drop-shadow(0 12px 18px #183b2b25)}
+canvas{width:100%;height:100%;display:block}
+.pointer{position:absolute;top:-5px;left:50%;transform:translateX(-50%);z-index:2;width:0;height:0;border-left:17px solid transparent;border-right:17px solid transparent;border-top:38px solid #173b2b;filter:drop-shadow(0 3px 2px #0003)}
+.hub{position:absolute;width:22%;aspect-ratio:1;border-radius:50%;background:linear-gradient(145deg,#fff9e9,#d6bd7c);border:6px solid #173b2b;box-shadow:inset 0 0 0 2px #f9e9b9,0 3px 7px #0003;display:flex;align-items:center;justify-content:center;text-align:center;color:#173b2b;font-weight:bold;font-size:clamp(10px,2.8vw,14px);line-height:1.4}
+button{border:0;border-radius:999px;background:linear-gradient(135deg,#b99a52,#e1c982);color:#173b2b;font:bold 17px Tahoma;padding:15px 42px;box-shadow:0 5px 0 #8d7138,0 9px 18px #0002;cursor:pointer;transition:transform .15s,filter .15s}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 #8d7138}
+button:disabled{opacity:.6;cursor:wait}
+.result{min-height:62px;width:100%;border-radius:14px;background:#fff;border:1px solid #e5dfd0;padding:14px;text-align:center;box-shadow:0 4px 14px #00000008}
+.result small{display:block;color:#8b805f;font-size:11px;margin-bottom:6px}
+.result strong{color:var(--green);font-size:18px}
+.note{font-size:11px;line-height:1.9;color:#7b8077;text-align:center;max-width:440px}
+footer{margin-top:auto;padding:14px;color:#8a8b80;font-size:11px}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">CHAYSA</div>
+  <h1>گردونه شانس چایسا</h1>
+  <p class="sub">یک چرخش، یک لبخند 🍃</p>
+</header>
+<main>
+  <div class="demo">نسخهٔ آزمایشی — نتیجه‌ها نمایشی هستند و فعلاً جایزه یا تعهد واقعی ایجاد نمی‌کنند.</div>
+  <div class="wheel-wrap" aria-label="گردونه هشت‌بخشی چایسا">
+    <div class="pointer" aria-hidden="true"></div>
+    <canvas id="wheel" width="900" height="900"></canvas>
+    <div class="hub">CHAYSA<br><span style="font-size:.72em">چایسا</span></div>
+  </div>
+  <button id="spin" type="button">بچرخون!</button>
+  <div class="result" role="status" aria-live="polite"><small>نتیجهٔ گردونه</small><strong id="result">منتظر چرخش تو هستیم…</strong></div>
+  <p class="note">درصد احتمال هر جایزه، مبلغ‌ها و شرایط دریافت بعداً با هماهنگی چایسا نهایی می‌شود. نشان تصویری لوگوی تأییدشده هنوز در فایل‌های قابل‌دسترسی این مخزن پیدا نشده؛ فعلاً عنوان متنی جایگزین آن است.</p>
+</main>
+<footer>CHAYSA · نسخهٔ آزمایشی مستقل</footer>
+<script>
+(() => {
+  const prizes = [
+    {label:"نشان ویژه\nچایسا", color:"#1d4935", text:"#f7e8b5"},
+    {label:"تخفیف\nخرید", color:"#e5c77d", text:"#25352a"},
+    {label:"محصول\nرایگان", color:"#315d45", text:"#fff8e8"},
+    {label:"پوچ", color:"#eee7d6", text:"#596354"},
+    {label:"جایزه\nنقدی", color:"#c69d50", text:"#243629"},
+    {label:"پوچ", color:"#f4eddf", text:"#596354"},
+    {label:"جایزه\nنقدی", color:"#a77d39", text:"#fff8e8"},
+    {label:"کمک خیریه\nبه نام برنده", color:"#52745a", text:"#fff8e8"}
+  ];
+  const canvas = document.getElementById("wheel");
+  const ctx = canvas.getContext("2d");
+  const button = document.getElementById("spin");
+  const result = document.getElementById("result");
+  const tau = Math.PI * 2;
+  const sector = tau / prizes.length;
+  let rotation = 0;
+  let busy = false;
+
+  function draw(angle=rotation) {
+    const c = 450, r = 420;
+    ctx.clearRect(0,0,900,900);
+    ctx.save();
+    ctx.translate(c,c);
+    ctx.rotate(angle);
+    prizes.forEach((p,i) => {
+      const start = -Math.PI/2 + i*sector;
+      const end = start + sector;
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,r,start,end); ctx.closePath();
+      ctx.fillStyle = p.color; ctx.fill();
+      ctx.lineWidth = 8; ctx.strokeStyle = "#f8edce"; ctx.stroke();
+      ctx.save();
+      ctx.rotate(start + sector/2);
+      ctx.translate(0,-r*.68);
+      ctx.rotate(Math.PI/2);
+      ctx.fillStyle = p.text;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const lines = p.label.split("\n");
+      const fontSize = i===7 ? 29 : 34;
+      ctx.font = "bold " + fontSize + "px Tahoma";
+      lines.forEach((line,j)=>ctx.fillText(line,0,(j-(lines.length-1)/2)*43));
+      ctx.restore();
+    });
+    ctx.beginPath(); ctx.arc(0,0,r,0,tau); ctx.lineWidth=18; ctx.strokeStyle="#c6a45d"; ctx.stroke();
+    ctx.restore();
+  }
+  draw();
+  button.addEventListener("click", () => {
+    if (busy) return;
+    busy = true; button.disabled = true;
+    result.textContent = "گردونه در حال چرخشه…";
+    const winner = Math.floor(Math.random()*prizes.length);
+    const targetCenter = (winner + .5)*sector;
+    const delta = ((-targetCenter - rotation) % tau + tau) % tau + tau*6;
+    const start = rotation, finish = rotation + delta;
+    const duration = 5200, began = performance.now();
+    function frame(now) {
+      const t = Math.min(1,(now-began)/duration);
+      const eased = 1-Math.pow(1-t,5);
+      rotation = start + (finish-start)*eased;
+      draw(rotation);
+      if (t<1) requestAnimationFrame(frame);
+      else {
+        rotation = finish; draw();
+        result.textContent = prizes[winner].label.replace("\n"," ");
+        busy = false; button.disabled = false;
+      }
+    }
+    requestAnimationFrame(frame);
+  });
+})();
+</script>
+</body>
+</html>
