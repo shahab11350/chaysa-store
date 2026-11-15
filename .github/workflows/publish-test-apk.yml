@@ -1,8 +1,6 @@
 name: Publish CHAYSA test APK
 on:
   push:
-    paths:
-      - ".github/workflows/publish-test-apk.yml"
 permissions:
   contents: write
 jobs:
