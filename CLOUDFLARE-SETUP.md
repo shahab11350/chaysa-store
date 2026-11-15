@@ -58,3 +58,7 @@ The recovery feature is not operational until `CHSY_PRODUCTS`, `ADMIN_PASSWORD`,
 - The assets directory is currently the repository root (`.`). The development branch now contains a root `.assetsignore` that excludes `worker.js`, `wrangler.toml`, Markdown documentation, and `.github/` from public static asset uploads.
 - `products-seed.json` remains included because the Worker uses the ASSETS binding to load the initial product catalogue.
 - This safeguard must be included in the eventual deployment and verified by requesting `/worker.js` and internal documentation paths; those paths should not expose source or internal notes.
+
+
+## Recommended no-cutover build setup
+For the existing test Worker, connect GitHub under Settings > Builds and select repository `shahab11350/chaysa-store`. Use the repository root (`/`) so Cloudflare reads the root `wrangler.toml`. Set the production branch to `admin-panel-development` under Settings > Build > Branch control. To avoid replacing the active Hello World deployment while reviewing the application, set the deploy command to `npx wrangler versions upload` (not `npx wrangler deploy`). This uploads a non-active Worker version and provides a Version URL for testing. Only promote/deploy after explicit owner approval. See Cloudflare's official Workers Builds documentation: https://developers.cloudflare.com/workers/ci-cd/builds/.
