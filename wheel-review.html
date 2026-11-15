@@ -214,6 +214,25 @@ const prizes=[
 const colors=['#7d3444','#b78348','#315d4b','#786044','#8b4b37','#b28b58','#3d6957','#79506a'];
 const slice=Math.PI/4,center=360,radius=326;
 let angle=0,busy=false;
+// Natural recorded sound effects from Mixkit, used under its free sound-effects license.
+const clickAudio=new Audio('https://cdn.mixkit.co/audio/download/mixkit-mouse-click-close-1349.wav');
+const spinAudio=new Audio('https://cdn.mixkit.co/artworks/8190/spinning-electric-machine-9603708_online-preview.wav');
+const cheerAudio=new Audio('https://assets.mixkit.co/active_storage/sfx/518/518.wav');
+const oooAudio=new Audio('https://cdn.mixkit.co/audio/download/mixkit-character-voice-wow-7799.wav');
+[clickAudio,spinAudio,cheerAudio,oooAudio].forEach(a=>{a.preload='auto';a.volume=.65});
+spinAudio.loop=true;
+let spinFade=null;
+function playSound(audio,volume=.65){try{audio.pause();audio.currentTime=0;audio.volume=volume;const p=audio.play();if(p&&p.catch)p.catch(()=>{});}catch(e){}}
+function clickSound(){playSound(clickAudio,.5)}
+function startSpinSound(){playSound(spinAudio,.42)}
+function stopSpinSound(){
+ if(spinFade)clearInterval(spinFade);
+ const initial=spinAudio.volume,steps=10;let n=0;
+ spinFade=setInterval(()=>{n++;spinAudio.volume=Math.max(0,initial*(1-n/steps));if(n>=steps){clearInterval(spinFade);spinFade=null;spinAudio.pause();spinAudio.currentTime=0;spinAudio.volume=.42}},55);
+}
+function cheerSound(){playSound(cheerAudio,.72)}
+function oooSound(){playSound(oooAudio,.78)}
+
 function woodTexture(){
  const g=ctx.createRadialGradient(320,280,40,360,360,370);g.addColorStop(0,'#d6ad70');g.addColorStop(.55,'#a8733e');g.addColorStop(1,'#4b2a16');return g;
 }
@@ -271,8 +290,25 @@ function draw(){
  for(let i=0;i<24;i++){const a=i*Math.PI/12;ctx.beginPath();ctx.arc(center+Math.cos(a)*339,center+Math.sin(a)*339,3.2,0,Math.PI*2);ctx.fillStyle='#f2d39a';ctx.fill()}
 }
 draw();
+
+function showOutcome(message,isWin){
+ let overlay=document.getElementById('outcome-overlay');
+ if(!overlay){
+  overlay=document.createElement('div');overlay.id='outcome-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(15,9,5,.72);padding:22px;box-sizing:border-box;';
+  overlay.innerHTML='<div id="outcome-card" role="dialog" aria-modal="true" style="width:min(88vw,390px);box-sizing:border-box;padding:34px 24px;border:3px solid #d6ad70;border-radius:22px;background:linear-gradient(145deg,#fff4dc,#e8c995);box-shadow:0 16px 55px rgba(0,0,0,.5);text-align:center;color:#4b2a16;font-family:Tahoma,Arial"><div id="outcome-symbol" style="font-size:42px;margin-bottom:14px"></div><div id="outcome-message" style="font-size:28px;font-weight:800;line-height:1.6"></div><button id="outcome-close" type="button" style="margin-top:24px;padding:11px 30px;border:0;border-radius:12px;background:#68432a;color:#fff8e9;font: bold 16px Tahoma,Arial;cursor:pointer">باشه</button></div>';
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.remove()});
+  overlay.querySelector('#outcome-close').addEventListener('click',()=>overlay.remove());
+ }
+ overlay.querySelector('#outcome-symbol').textContent=isWin?'🎉':'💛';
+ overlay.querySelector('#outcome-message').textContent=message;
+ overlay.style.display='flex';
+}
+
 spinBtn.addEventListener('click',()=>{
  if(busy)return;
+ clickSound();startSpinSound();
  busy=true;spinBtn.disabled=true;
  const index=Math.floor(Math.random()*8);
  const target=-(index*slice+slice/2);
@@ -285,7 +321,7 @@ spinBtn.addEventListener('click',()=>{
   const p=Math.min(1,(now-t0)/duration),ease=1-Math.pow(1-p,4);
   angle=start+(end-start)*ease;draw();
   if(p<1)requestAnimationFrame(frame);
-  else{angle=((angle%(Math.PI*2))+Math.PI*2)%(Math.PI*2);draw();result.textContent='نتیجهٔ آزمایشی: '+prizes[index].lines.join(' — ');busy=false;spinBtn.disabled=false}
+  else{stopSpinSound();angle=((angle%(Math.PI*2))+Math.PI*2)%(Math.PI*2);draw();const isEmpty=prizes[index].lines.includes('پوچ');result.textContent='نتیجهٔ آزمایشی: '+prizes[index].lines.join(' — ');if(isEmpty){oooSound();showOutcome('واقعا متاسفم',false)}else{cheerSound();showOutcome('ای خوش شانس',true)}busy=false;spinBtn.disabled=false}
  }
  requestAnimationFrame(frame);
 });
