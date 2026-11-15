@@ -105,3 +105,11 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Disabled the product image file picker in `admin.html` for now; product creation without a new image remains available, and an existing image is preserved when editing without selecting a replacement.
 - Worker image-upload code remains ready for a later R2 binding; until then the endpoint returns a clear storage-not-configured response.
 - This is a development-branch configuration change only; no deployment has occurred.
+
+
+## Owner/admin hardening follow-up — 2026-11-15
+- Product manager: failed saves now restore the previous in-memory product list instead of leaving the UI showing unsaved edits; add/edit/delete/active-toggle use this rollback path.
+- Product form: Persian and Arabic-Indic digits are normalized for prices; unsafe/invalid prices, duplicate SKUs, missing edit targets, non-image files, and files over 5 MB are rejected before saving.
+- Worker: unknown `/api/admin/*` paths now return JSON 404 rather than falling through to static assets.
+- Worker API and static-asset responses now include baseline anti-sniffing, referrer, framing, and permissions headers; R2 media keys are constrained to generated UUID filenames and media responses include `nosniff`.
+- These are source-level changes only. They have not been deployed or runtime-tested. Reliable login rate limiting and full end-to-end runtime testing remain release gates.
