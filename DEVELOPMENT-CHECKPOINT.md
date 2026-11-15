@@ -44,3 +44,15 @@ Last updated: 2026-11-14
 
 ## Resume instruction
 When continuing, first inspect the actual current files on admin-panel-development and verify this checkpoint against GitHub. Do not repeat completed work blindly. Report only changes actually committed or tested.
+
+## Owner panel upgrade — 2026-11-15
+- Upgraded `owner.html` from a mostly-static module launcher into an authenticated owner workspace with dashboard, order records, invoices, message templates, and customer summaries.
+- Added authenticated `/api/admin/owner-data` GET/PUT endpoints in `worker.js`; data is stored centrally under `owner-data-v1` in the existing `CHSY_PRODUCTS` KV namespace.
+- Public `/api/products` now excludes products explicitly marked inactive.
+- Owner panel links to the existing product-management page at `/admin.html`.
+- Commits on `admin-panel-development`:
+  - `cfdcafc79296e81ccecc4784ed1436dc45ed9577` — owner workspace UI
+  - `5aac9fceceec7b17e4bfb46895f377940158e323` — owner data API and public active-product filtering
+- Not deployed and not yet runtime-tested. The KV namespace ID is still a placeholder and the R2/secret setup is still outstanding.
+- Important functional boundaries: orders entered in the owner panel are manual records; automatic checkout-to-order integration is not implemented. The current owner login still shares the existing ADMIN_PASSWORD; separate staff credentials/roles (including the Bostani reply-only panel) are not implemented. Do not represent these as complete.
+- Before deployment, test JavaScript/runtime behavior, API validation, login/session/logout, data persistence, active-product filtering, and existing product CRUD/upload. Review rate limiting and CSRF/origin enforcement further; this is not yet production-certified.
