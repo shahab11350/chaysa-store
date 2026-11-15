@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#21170f">
+<title>نسخهٔ آزمایشی گردونهٔ چایسا</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 22%,#654329 0,#302116 55%,#130d08 100%);color:#fff4dc;font-family:Tahoma,Arial,sans-serif;text-align:center}
+header{padding:22px 12px 8px}
+header small{font:11px Arial,sans-serif;letter-spacing:4px;color:#e5bd75}
+h1{font-size:clamp(23px,5vw,32px);margin:9px 0 5px;color:#fff2d5}
+header p{font-size:13px;color:#e0c9a4;margin:0}
+main{width:min(100%,700px);margin:auto;padding:12px 10px 30px}
+.wheel-wrap{position:relative;width:min(94vw,640px);aspect-ratio:1;margin:0 auto}
+#wheel{display:block;width:100%;height:100%;filter:drop-shadow(0 16px 20px #0009)}
+.pointer{position:absolute;z-index:3;top:-2px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:17px solid transparent;border-right:17px solid transparent;border-top:34px solid #f5cc78;filter:drop-shadow(0 3px 3px #0009)}
+.logo{position:absolute;z-index:20;width:29%;height:29%;left:50%;top:50%;transform:translate(-50%,-50%);border-radius:50%;object-fit:contain;background:#fffdf6;border:7px solid #f0c879;box-shadow:0 3px 22px #090502;padding:5px;display:block;opacity:1;visibility:visible}
+.controls{margin:22px auto 0}
+#spin{border:1px solid #f1d49a;border-radius:14px;padding:14px 48px;background:linear-gradient(145deg,#e5c58b,#a97839);color:#29190d;font:bold 19px Tahoma;box-shadow:0 6px 0 #63411f,0 12px 22px #0008;cursor:pointer}
+#spin:active{transform:translateY(4px);box-shadow:0 2px 0 #63411f,0 6px 12px #0008}
+#spin:disabled{opacity:.65;cursor:wait}
+.hint{margin:15px 0 0;color:#e5cda7;font-size:12px}
+.counter{display:inline-block;margin-top:12px;padding:8px 17px;border:1px solid #b98b4c;border-radius:30px;background:#20150dcc;color:#f9e6c1;font-size:12px}
+.result{min-height:54px;max-width:480px;margin:14px auto 0;padding:12px 16px;border:1px solid #b98b4c;border-radius:13px;background:linear-gradient(135deg,#50341e,#21160e);color:#fff0d1;line-height:1.9;font-size:14px}
+.note{max-width:470px;margin:14px auto;color:#cbb38d;font-size:10px;line-height:1.9}
+</style>
+</head>
+<body>
+<header><small>CHAYSA · TEA & MOMENTS</small><h1>گردونهٔ آزمایشی چایسا</h1><p>نسخهٔ بررسی و اعلام نظر</p></header>
+<main>
+<div class="wheel-wrap" aria-label="پنکهٔ جایزه با هشت پره">
+ <canvas id="wheel" width="720" height="720" role="img" aria-label="هشت پرهٔ جایزه روی پنکه"></canvas>
+ <div class="pointer" aria-hidden="true"></div>
+ <img class="logo" src="data:image/png;base64,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
+gJHFAwAAAABJRU5ErkJggg==
+" alt="لوگوی اصلی چایسا">
+</div>
+<div class="controls"><button id="spin" type="button">شروع</button></div>
+<div class="hint">برای چرخاندن گردونه، دکمهٔ شروع را بزن.</div>
+<div class="counter" id="counter">حالت آزمایشی: چرخش نامحدود</div>
+<div class="result" id="result" aria-live="polite">آماده‌ای یک جایزه را کشف کنی؟</div>
+<p class="note">این نسخه فقط نمونهٔ نمایشی است؛ نتیجه‌ها تصادفی و آزمایشی‌اند و هنوز به سفارش، پرداخت یا سامانهٔ جوایز واقعی متصل نیستند.</p>
+</main>
+<script>
+(() => {
+const canvas=document.getElementById('wheel'),ctx=canvas.getContext('2d');
+const spinBtn=document.getElementById('spin'),result=document.getElementById('result');
+const prizes=[
+ {lines:['جایزهٔ ویژه','لوگوی چایسا'],brand:'TAKSOO'},
+ {lines:['تخفیف خرید'],brand:'CHAYSA'},
+ {lines:['محصول رایگان'],brand:'TAKSOO'},
+ {lines:['پوچ'],brand:'CHAYSA'},
+ {lines:['جایزهٔ نقدی'],brand:'TAKSOO'},
+ {lines:['پوچ'],brand:'CHAYSA'},
+ {lines:['انتخاب یک محصول','دلخواه از چایسا','با درصدی تخفیف'],brand:'TAKSOO'},
+ {lines:['کمک به خیریه','به نام برنده'],brand:'CHAYSA'}
+];
+const colors=['#7d3444','#b78348','#315d4b','#786044','#8b4b37','#b28b58','#3d6957','#79506a'];
+const slice=Math.PI/4,center=360,radius=326;
+let angle=0,busy=false;
+function woodTexture(){
+ const g=ctx.createRadialGradient(320,280,40,360,360,370);g.addColorStop(0,'#d6ad70');g.addColorStop(.55,'#a8733e');g.addColorStop(1,'#4b2a16');return g;
+}
+function draw(){
+ ctx.clearRect(0,0,720,720);
+ ctx.save();ctx.translate(center,center);ctx.rotate(angle);
+ // Outer fan housing and polished wooden rim.
+ ctx.beginPath();ctx.arc(0,0,radius+18,0,Math.PI*2);ctx.fillStyle='#3a2114';ctx.fill();
+ ctx.lineWidth=18;ctx.strokeStyle='#c28d4b';ctx.stroke();
+ ctx.beginPath();ctx.arc(0,0,radius+5,0,Math.PI*2);ctx.lineWidth=6;ctx.strokeStyle='#f3d9a5';ctx.stroke();
+ for(let i=0;i<8;i++){
+   const mid=-Math.PI/2+(i+.5)*slice;
+   const a=-Math.PI/2+i*slice,b=a+slice;
+   // Broad, rounded fan blades radiating from the hub.
+   ctx.beginPath();
+   ctx.moveTo(Math.cos(a+.12)*82,Math.sin(a+.12)*82);
+   ctx.quadraticCurveTo(Math.cos(a+.04)*225,Math.sin(a+.04)*225,Math.cos(mid)*322,Math.sin(mid)*322);
+   ctx.quadraticCurveTo(Math.cos(b-.04)*225,Math.sin(b-.04)*225,Math.cos(b-.12)*82,Math.sin(b-.12)*82);
+   ctx.quadraticCurveTo(Math.cos(mid+Math.PI)*35,Math.sin(mid+Math.PI)*35,Math.cos(a+.12)*82,Math.sin(a+.12)*82);
+   ctx.closePath();
+   const grad=ctx.createLinearGradient(Math.cos(mid)*90,Math.sin(mid)*90,Math.cos(mid)*320,Math.sin(mid)*320);
+   grad.addColorStop(0,'#e2c28b');grad.addColorStop(.22,colors[i]);grad.addColorStop(1,'#4b2c1d');
+   ctx.fillStyle=grad;ctx.fill();
+   ctx.lineWidth=4;ctx.strokeStyle='#f2d7a5';ctx.stroke();
+   // Fine fan-blade highlight.
+   ctx.beginPath();ctx.moveTo(Math.cos(mid)*112,Math.sin(mid)*112);ctx.quadraticCurveTo(Math.cos(mid)*225,Math.sin(mid)*225,Math.cos(mid)*292,Math.sin(mid)*292);
+   ctx.strokeStyle='rgba(255,239,204,.32)';ctx.lineWidth=3;ctx.stroke();
+   // Prize wording follows the radial direction of its own fan blade; no card or box.
+   const lines=prizes[i].lines;
+   const lx=Math.cos(mid)*210,ly=Math.sin(mid)*210;
+   let textAngle=mid;
+   if(textAngle>Math.PI/2 || textAngle<-Math.PI/2) textAngle+=Math.PI;
+   const lineH=lines.length===3?23:28;
+   ctx.save();ctx.translate(lx,ly);ctx.rotate(textAngle);ctx.direction='rtl';
+   ctx.textAlign='center';ctx.textBaseline='middle';
+   ctx.font='bold '+(lines.length===3?20:24)+'px Tahoma,Arial';
+   ctx.fillStyle='#fffdf5';ctx.shadowColor='#160b05';ctx.shadowBlur=4;
+   lines.forEach((line,j)=>ctx.fillText(line,0,-(lines.length-1)*lineH/2+j*lineH,178));
+   ctx.restore();
+ }
+ // Decorative central fan grille beneath the fixed approved logo.
+ ctx.beginPath();ctx.arc(0,0,82,0,Math.PI*2);ctx.fillStyle='#f9f2df';ctx.fill();
+ ctx.lineWidth=10;ctx.strokeStyle='#c99546';ctx.stroke();
+ for(let r=27;r<=65;r+=19){ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.strokeStyle='rgba(123,79,35,.28)';ctx.lineWidth=2;ctx.stroke()}
+ for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.beginPath();ctx.moveTo(Math.cos(a)*23,Math.sin(a)*23);ctx.lineTo(Math.cos(a)*69,Math.sin(a)*69);ctx.strokeStyle='rgba(123,79,35,.24)';ctx.lineWidth=2;ctx.stroke()}
+ ctx.restore();
+ // Fixed partner names: remain stationary while the fan blades rotate.
+ for(let i=0;i<8;i++){
+   const gapAngle=-Math.PI/2+i*slice;
+   const bx=center+Math.cos(gapAngle)*278,by=center+Math.sin(gapAngle)*278;
+   ctx.save();ctx.translate(bx,by);ctx.direction='ltr';ctx.textAlign='center';ctx.textBaseline='middle';
+   ctx.font='bold 18px Arial';ctx.fillStyle='#fff4d8';ctx.shadowColor='#160b05';ctx.shadowBlur=5;
+   ctx.fillText(i%2===0?'TAKSOO':'CHAYSA',0,0,110);ctx.restore();
+ }
+ for(let i=0;i<24;i++){const a=i*Math.PI/12;ctx.beginPath();ctx.arc(center+Math.cos(a)*339,center+Math.sin(a)*339,3.2,0,Math.PI*2);ctx.fillStyle='#f2d39a';ctx.fill()}
+}
+draw();
+spinBtn.addEventListener('click',()=>{
+ if(busy)return;
+ busy=true;spinBtn.disabled=true;
+ const index=Math.floor(Math.random()*8);
+ const target=-(index*slice+slice/2);
+ const current=((angle%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+ let delta=((target-current)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+ delta+=Math.PI*2*6;
+ const start=angle,end=angle+delta,t0=performance.now(),duration=5600;
+ result.textContent='گردونه در حال چرخش است…';
+ function frame(now){
+  const p=Math.min(1,(now-t0)/duration),ease=1-Math.pow(1-p,4);
+  angle=start+(end-start)*ease;draw();
+  if(p<1)requestAnimationFrame(frame);
+  else{angle=((angle%(Math.PI*2))+Math.PI*2)%(Math.PI*2);draw();result.textContent='نتیجهٔ آزمایشی: '+prizes[index].lines.join(' — ');busy=false;spinBtn.disabled=false}
+ }
+ requestAnimationFrame(frame);
+});
+})();
+</script>
+</body></html>
