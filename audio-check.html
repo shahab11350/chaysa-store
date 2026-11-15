@@ -1,0 +1,9 @@
+<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Audio test</title><body style="font-family:Tahoma;background:#21170f;color:#fff;padding:24px"><h2>آزمایش صداهای چایسا</h2><p>برای هر صدا دکمهٔ پخش را بزنید.</p><div id="items"></div><script>
+const sounds=[
+["کلیک دکمه","https://assets.mixkit.co/active_storage/sfx/1113/1113.wav"],
+["چرخش چرخ","https://assets.mixkit.co/active_storage/sfx/1613/1613.wav"],
+["تشویق و شادی","https://assets.mixkit.co/active_storage/sfx/518/518.wav"]
+];
+for(const [name,url] of sounds){const a=new Audio(url);a.preload="auto";const b=document.createElement("button");b.textContent="پخش "+name;b.style="display:block;margin:14px 0;padding:14px;font-size:18px";b.onclick=()=>{a.currentTime=0;a.play().catch(e=>document.getElementById("status").textContent=name+": "+e.message)};document.getElementById("items").append(b)}
+const s=document.createElement("p");s.id="status";document.body.append(s);
+</script></body></html>
