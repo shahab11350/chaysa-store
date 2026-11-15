@@ -3,3 +3,4 @@ worker.js
 wrangler.toml
 *.md
 .github/
+cloudflare/
