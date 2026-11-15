@@ -134,3 +134,10 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - The Worker URL currently returns `Hello world`. This confirms the deployed script is still the baseline Hello World Worker; the development-branch `worker.js` and static assets have NOT yet been deployed.
 - Rate limiter binding is configured on Production, but its application to the CHAYSA login/recovery routes is not yet runtime-tested because the application Worker code is not deployed.
 - Next safe step: finish a static/security/compatibility review of the development branch and establish a deployment path targeting only `admin-panel-development` and the existing test Worker. Do not merge to `main`, alter GitHub Pages, or deploy the application Worker until the owner gives explicit release approval.
+
+
+## Static asset exposure hardening — 2026-11-15
+- Reviewed the Workers Static Assets configuration. Because `assets.directory = "."`, internal root files could otherwise be included in the public asset bundle.
+- Added root `.assetsignore` on `admin-panel-development` to exclude `worker.js`, `wrangler.toml`, Markdown documentation, and `.github/` from uploaded public assets.
+- Kept `products-seed.json` included because the Worker intentionally reads it through `env.ASSETS.fetch()` when KV has no saved product list.
+- This is a source/configuration hardening change only; it has not been deployed or runtime-tested.
