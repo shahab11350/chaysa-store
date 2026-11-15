@@ -2,7 +2,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const json = (data, status=200, extra={}) => new Response(JSON.stringify(data), {
-      status, headers: { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", ...extra }
+      status, headers: { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", "X-Content-Type-Options":"nosniff", "Referrer-Policy":"strict-origin-when-cross-origin", "X-Frame-Options":"DENY", "Permissions-Policy":"camera=(), microphone=(), geolocation=()", ...extra }
     });
     const cookie = request.headers.get("Cookie") || "";
     const token = (cookie.match(/(?:^|;\s*)chaysa_admin=([^;]+)/) || [])[1];
@@ -148,10 +148,19 @@ export default {
         return json({url:"/media/"+key});
       }
     }
+    if (url.pathname.startsWith("/api/admin/")) return json({error:"مسیر مدیریتی پیدا نشد."},404);
     if (url.pathname.startsWith("/media/") && env.CHSY_IMAGES) {
-      const obj = await env.CHSY_IMAGES.get(url.pathname.slice(7));
-      return obj ? new Response(obj.body,{headers:{"Content-Type":obj.httpMetadata?.contentType||"application/octet-stream","Cache-Control":"public, max-age=31536000"}}) : new Response("Not found",{status:404});
+      const key = url.pathname.slice(7);
+      if (!/^[a-f0-9-]{36}\.(?:jpg|png|webp|gif|avif)$/.test(key)) return new Response("Not found",{status:404});
+      const obj = await env.CHSY_IMAGES.get(key);
+      return obj ? new Response(obj.body,{headers:{"Content-Type":obj.httpMetadata?.contentType||"application/octet-stream","Cache-Control":"public, max-age=31536000","X-Content-Type-Options":"nosniff"}}) : new Response("Not found",{status:404});
     }
-    return env.ASSETS.fetch(request);
+    const asset = await env.ASSETS.fetch(request);
+    const headers = new Headers(asset.headers);
+    headers.set("X-Content-Type-Options","nosniff");
+    headers.set("Referrer-Policy","strict-origin-when-cross-origin");
+    headers.set("X-Frame-Options","DENY");
+    headers.set("Permissions-Policy","camera=(), microphone=(), geolocation=()");
+    return new Response(asset.body,{status:asset.status,statusText:asset.statusText,headers});
   }
 };
