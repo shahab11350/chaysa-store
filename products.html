@@ -270,7 +270,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const response = await fetch("/api/products", {cache:"no-store"});
     if (response.ok) {
       const liveProducts = await response.json();
-      if (Array.isArray(liveProducts) && liveProducts.length) {
+      if (Array.isArray(liveProducts)) {
         const categories = ["چای","دمنوش","ادویه","عسل","سایر"];
         categories.forEach(function(name) {
           let card = Array.from(categoryGrid.querySelectorAll(".category-card")).find(function(item) {
