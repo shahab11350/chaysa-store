@@ -29,6 +29,27 @@ export default {
       return [];
     }
     const ownerKey = "owner-data-v1";
+    const recoveryUsedKey = "owner-recovery-used-v1";
+    const passwordHashKey = "owner-password-hash-v1";
+    const equalSecret = (a,b) => {
+      if (typeof a !== "string" || typeof b !== "string" || a.length !== b.length) return false;
+      let diff = 0; for (let i=0;i<a.length;i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+      return diff === 0;
+    };
+    async function hashPassword(password, saltHex) {
+      const salt = saltHex ? Uint8Array.from(saltHex.match(/.{2}/g).map(x=>parseInt(x,16))) : crypto.getRandomValues(new Uint8Array(16));
+      const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+      const bits = await crypto.subtle.deriveBits({name:"PBKDF2",salt,iterations:310000,hash:"SHA-256"},key,256);
+      return {salt:[...salt].map(x=>x.toString(16).padStart(2,"0")).join(""),hash:hex(new Uint8Array(bits))};
+    }
+    async function passwordMatches(password) {
+      const saved = await env.CHSY_PRODUCTS.get(passwordHashKey, "json");
+      if (saved && saved.salt && saved.hash) {
+        const candidate = await hashPassword(password, saved.salt);
+        return equalSecret(candidate.hash, saved.hash);
+      }
+      return !!secret && equalSecret(password, secret);
+    }
     const defaultOwnerData = {orders:[], invoices:[], messages:[]};
     async function getOwnerData() {
       const stored = await env.CHSY_PRODUCTS.get(ownerKey, "json");
@@ -44,19 +65,32 @@ export default {
       return json(products.filter(p => p && p.active !== false));
     }
     if (url.pathname === "/api/admin/login" && request.method === "POST") {
+      if (request.headers.get("Origin") !== url.origin) return json({error:"درخواست نامعتبر است."},403);
+      if (!env.CHSY_PRODUCTS) return json({error:"فضای ذخیره‌سازی مرکزی تنظیم نشده است."},503);
       const body = await request.json().catch(()=>({}));
-      if (!secret || body.password !== secret) return json({error:"رمز عبور نادرست است."},401);
+      if (!await passwordMatches(body.password)) return json({error:"رمز عبور نادرست است."},401);
       const exp = String(Date.now()+8*60*60*1000), value = exp+"."+hex(await sign(exp));
       return json({ok:true},200,{"Set-Cookie":"chaysa_admin="+value+"; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=28800"});
+    }
+    if (url.pathname === "/api/admin/recover" && request.method === "POST") {
+      if (request.headers.get("Origin") !== url.origin) return json({error:"درخواست نامعتبر است."},403);
+      if (!env.CHSY_PRODUCTS) return json({error:"فضای ذخیره‌سازی مرکزی تنظیم نشده است."},503);
+      const recoverySecret = env.OWNER_RECOVERY_CODE;
+      if (!recoverySecret) return json({error:"کد بازیابی هنوز توسط مالک تنظیم نشده است."},503);
+      if (await env.CHSY_PRODUCTS.get(recoveryUsedKey)) return json({error:"کد بازیابی قبلاً استفاده شده و باطل است."},403);
+      const body = await request.json().catch(()=>({}));
+      if (!equalSecret(body.recoveryCode, recoverySecret)) return json({error:"کد بازیابی معتبر نیست."},403);
+      if (typeof body.newPassword !== "string" || body.newPassword.length < 12 || body.newPassword.length > 128) return json({error:"رمز جدید باید بین ۱۲ تا ۱۲۸ نویسه باشد."},400);
+      const hashed = await hashPassword(body.newPassword);
+      await env.CHSY_PRODUCTS.put(passwordHashKey, JSON.stringify(hashed));
+      await env.CHSY_PRODUCTS.put(recoveryUsedKey, "used");
+      return json({ok:true});
     }
     if (url.pathname === "/api/admin/logout" && request.method === "POST") {
       return json({ok:true},200,{"Set-Cookie":"chaysa_admin=; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=0"});
     }
     if (url.pathname.startsWith("/api/admin/")) {
-      if (request.method !== "GET") {
-        const origin = request.headers.get("Origin");
-        if (origin && origin !== url.origin) return json({error:"درخواست نامعتبر است."},403);
-      }
+      if (request.method !== "GET" && request.headers.get("Origin") !== url.origin) return json({error:"درخواست نامعتبر است."},403);
       if (!(await valid())) return json({error:"ابتدا وارد پنل مدیریت شوید."},401);
       if (!env.CHSY_PRODUCTS) return json({error:"فضای ذخیره‌سازی مرکزی تنظیم نشده است."},503);
       if (url.pathname === "/api/admin/products" && request.method === "GET") return json(await getProducts());
