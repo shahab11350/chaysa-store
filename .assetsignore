@@ -1,0 +1,5 @@
+# Keep server-side code and internal project notes out of public static assets.
+worker.js
+wrangler.toml
+*.md
+.github/
