@@ -68,6 +68,10 @@ export default {
     }
     if (url.pathname === "/api/admin/login" && request.method === "POST") {
       if (request.headers.get("Origin") !== url.origin) return json({error:"درخواست نامعتبر است."},403);
+      if (!env.CHAYSA_LOGIN_LIMITER) return json({error:"محدودکننده تلاش ورود تنظیم نشده است."},503);
+      const loginIp = request.headers.get("CF-Connecting-IP") || "unknown";
+      const loginLimit = await env.CHAYSA_LOGIN_LIMITER.limit({key:"login:"+loginIp});
+      if (!loginLimit.success) return json({error:"تعداد تلاش‌های ورود زیاد است. یک دقیقه بعد دوباره امتحان کن."},429,{"Retry-After":"60"});
       if (!env.CHSY_PRODUCTS) return json({error:"فضای ذخیره‌سازی مرکزی تنظیم نشده است."},503);
       const declaredLength = Number(request.headers.get("Content-Length") || 0);
       if (declaredLength > 4096) return json({error:"درخواست بیش از حد مجاز است."},413);
@@ -80,6 +84,10 @@ export default {
     }
     if (url.pathname === "/api/admin/recover" && request.method === "POST") {
       if (request.headers.get("Origin") !== url.origin) return json({error:"درخواست نامعتبر است."},403);
+      if (!env.CHAYSA_LOGIN_LIMITER) return json({error:"محدودکننده تلاش بازیابی تنظیم نشده است."},503);
+      const recoveryIp = request.headers.get("CF-Connecting-IP") || "unknown";
+      const recoveryLimit = await env.CHAYSA_LOGIN_LIMITER.limit({key:"recover:"+recoveryIp});
+      if (!recoveryLimit.success) return json({error:"تعداد تلاش‌های بازیابی زیاد است. یک دقیقه بعد دوباره امتحان کن."},429,{"Retry-After":"60"});
       if (!env.CHSY_PRODUCTS) return json({error:"فضای ذخیره‌سازی مرکزی تنظیم نشده است."},503);
       const recoverySecret = env.OWNER_RECOVERY_CODE;
       if (!recoverySecret) return json({error:"کد بازیابی هنوز توسط مالک تنظیم نشده است."},503);
