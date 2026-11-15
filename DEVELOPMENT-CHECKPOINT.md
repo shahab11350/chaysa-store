@@ -88,3 +88,12 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Commit: `b6bdc27feefda0bb8d53d279f72f607f42a92994`.
 - Verified the corrected source text on GitHub. This is a static source verification only; no Worker deployment or runtime test has been performed.
 - Remaining before deployment: configure the R2 bucket/binding `CHSY_IMAGES`, decide whether to enable password recovery by setting `OWNER_RECOVERY_CODE`, add reliable login rate limiting, complete endpoint/session/security review, then deploy and runtime-test the development Worker. Do not deploy or change `main`/the public GitHub Pages site without explicit owner approval.
+
+
+## Owner/admin functional and security fixes — 2026-11-15
+- Fixed product creation so a new product never inherits the first product's image or inactive state when the edit index is blank.
+- Changed both admin and owner login flows to reveal the management interface only after the initial authenticated data load succeeds; this avoids leaving the login form hidden after a post-login API/storage error.
+- Hardened Worker session token parsing: exactly two token parts, 13-digit expiry, 64-hex signature, and constant-time signature comparison.
+- Added small request-body limits and strict password type checking for login/recovery; logout now requires POST and same-origin Origin.
+- Restricted image uploads to JPEG/PNG/WebP/GIF/AVIF, validates basic file signatures, and generates server-side random keys with fixed extensions (SVG is rejected).
+- These are source-level changes only. They have not been deployed or runtime-tested. Login rate limiting still needs a reliable Cloudflare-side control; do not treat the panel as production-ready until runtime/security tests pass.
