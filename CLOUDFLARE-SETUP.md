@@ -52,3 +52,9 @@ The recovery feature is not operational until `CHSY_PRODUCTS`, `ADMIN_PASSWORD`,
 - Do not treat the rate limiter as protecting the CHAYSA login endpoint until the branch's application Worker code is deployed and its behavior is tested.
 - No R2 bucket or `CHSY_IMAGES` binding has been created; image upload remains intentionally deferred. `OWNER_RECOVERY_CODE` is also not configured, so password recovery is not operational.
 - Next step is code review and a safe deployment path for the development branch. Production application deployment and any change to `main` or the public GitHub Pages site still require explicit owner approval.
+
+
+## Static asset publishing safeguard
+- The assets directory is currently the repository root (`.`). The development branch now contains a root `.assetsignore` that excludes `worker.js`, `wrangler.toml`, Markdown documentation, and `.github/` from public static asset uploads.
+- `products-seed.json` remains included because the Worker uses the ASSETS binding to load the initial product catalogue.
+- This safeguard must be included in the eventual deployment and verified by requesting `/worker.js` and internal documentation paths; those paths should not expose source or internal notes.
