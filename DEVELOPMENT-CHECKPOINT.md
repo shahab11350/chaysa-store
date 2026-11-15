@@ -141,3 +141,10 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Added root `.assetsignore` on `admin-panel-development` to exclude `worker.js`, `wrangler.toml`, Markdown documentation, and `.github/` from uploaded public assets.
 - Kept `products-seed.json` included because the Worker intentionally reads it through `env.ASSETS.fetch()` when KV has no saved product list.
 - This is a source/configuration hardening change only; it has not been deployed or runtime-tested.
+
+
+## Safe deployment path researched — 2026-11-15
+- Cloudflare Workers Builds can connect the existing Worker to the GitHub repository from Settings > Builds; the production branch can be explicitly selected under Settings > Build > Branch control.
+- Recommended safe configuration for this test Worker: repository `shahab11350/chaysa-store`, root directory `/`, production branch `admin-panel-development`, and deploy command `npx wrangler versions upload`.
+- This command uploads a Worker version without promoting it to Active Deployment. Cloudflare provides a Version URL for read-only smoke testing; do not switch to `wrangler deploy` or promote a version until the owner explicitly approves.
+- This is a researched plan only. Git integration has not been connected, no build has been triggered, and the active Hello World deployment remains unchanged.
