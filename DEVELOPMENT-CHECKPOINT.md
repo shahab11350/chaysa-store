@@ -120,3 +120,9 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Added Cloudflare's native Rate Limiting binding `CHAYSA_LOGIN_LIMITER` to `wrangler.toml` (namespace ID `1150115`, 5 requests per 60 seconds).
 - Login and password-recovery routes use separate keys based on Cloudflare's connecting-IP header. The Worker fails closed if the binding is absent and returns HTTP 429 with a one-minute Retry-After when limited.
 - This is approximate, per-Cloudflare-location limiting, not a strict global limit. It must be runtime-tested after deployment. No deployment was performed.
+
+
+## Owner panel save rollback — 2026-11-15
+- Added a last-confirmed-data snapshot to `owner.html`. If saving owner orders, invoices, messages, or status changes fails, the panel now restores the last successfully loaded/saved data and re-renders instead of retaining unsaved in-memory edits.
+- Static JavaScript syntax checks passed for `worker.js`, `owner.html`, and `admin.html` after the change. These checks do not replace deployed runtime tests.
+- Commit: `f1a880c44db0d5efbfa2c09c3bd302d1555e8a89`.
