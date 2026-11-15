@@ -20,7 +20,7 @@
 ## نکات امنیتی و عملیاتی
 - رمز مدیر فقط باید به‌صورت Secret در Cloudflare ذخیره شود.
 - URL پنل به‌تنهایی محرمانه نیست؛ امنیت واقعی با کنترل سمت Worker انجام می‌شود.
-- پیش از انتشار، محدودسازی قابل‌اتکای تلاش‌های ورود (rate limiting)، بازبینی CSRF و آزمون کامل نشست ورود لازم است. در Worker فعلی کنترل rate limiting هنوز پیاده‌سازی/پیکربندی نشده است.
+- برای ورود و بازیابی رمز، binding بومی Rate Limiting با سقف ۵ تلاش در ۶۰ ثانیه برای هر IP و هر مسیر تعریف شده است. این محدودسازی تقریبی و محلی به هر نقطه Cloudflare است، نه سقف سخت جهانی؛ پیش از انتشار باید پس از deploy عملاً آزمایش شود. بازبینی CSRF و آزمون کامل نشست ورود نیز لازم است.
 - فایل seed فعلی ۴۷ محصول از HTML موجود استخراج کرده است؛ شمارش دسته‌ها با عنوان‌های نمایشی صفحه فعلی کاملاً یکسان نیست و باید پیش از انتقال نهایی بازبینی شود.
 - این شاخه هنوز روی سایت زنده منتشر نشده است.
 
@@ -38,3 +38,9 @@ The recovery feature is not operational until `CHSY_PRODUCTS`, `ADMIN_PASSWORD`,
 - هنوز هیچ deployment یا runtime test انجام نشده است.
 - R2 و بارگذاری عکس‌ها عمداً به مرحلهٔ بعد موکول شده‌اند.
 - تصمیم درباره secret بازیابی، rate limiting و بازبینی نهایی امنیتی باقی مانده‌اند.
+
+
+## Login and recovery rate limiting
+- The development Worker config declares the native Cloudflare Rate Limiting binding `CHAYSA_LOGIN_LIMITER` (namespace ID `1150115`), with 5 requests per 60 seconds per key.
+- Login and recovery use separate IP-based keys. The Worker fails closed with HTTP 503 if the binding is missing and returns HTTP 429 with Retry-After when the configured threshold is exceeded.
+- Cloudflare documents these limits as approximate and local to each Cloudflare location; they are a useful low-friction abuse barrier, not a strict global lockout. Validate behavior after deployment. See https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/.
