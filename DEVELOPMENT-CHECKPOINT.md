@@ -97,3 +97,11 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Added small request-body limits and strict password type checking for login/recovery; logout now requires POST and same-origin Origin.
 - Restricted image uploads to JPEG/PNG/WebP/GIF/AVIF, validates basic file signatures, and generates server-side random keys with fixed extensions (SVG is rejected).
 - These are source-level changes only. They have not been deployed or runtime-tested. Login rate limiting still needs a reliable Cloudflare-side control; do not treat the panel as production-ready until runtime/security tests pass.
+
+
+## Image storage deferred by owner — 2026-11-15
+- Owner explicitly deferred creation of the R2 bucket and image-storage binding until a later phase.
+- Removed the not-yet-created R2 bucket binding from `wrangler.toml` so the current development Worker can be configured without R2.
+- Disabled the product image file picker in `admin.html` for now; product creation without a new image remains available, and an existing image is preserved when editing without selecting a replacement.
+- Worker image-upload code remains ready for a later R2 binding; until then the endpoint returns a clear storage-not-configured response.
+- This is a development-branch configuration change only; no deployment has occurred.
