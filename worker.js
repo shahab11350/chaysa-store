@@ -5,7 +5,7 @@ export default {
       status, headers: { "Content-Type":"application/json; charset=utf-8", "Cache-Control":"no-store", ...extra }
     });
     const cookie = request.headers.get("Cookie") || "";
-    const token = (cookie.match(/(?:^|;\\s*)chaysa_admin=([^;]+)/) || [])[1];
+    const token = (cookie.match(/(?:^|;\s*)chaysa_admin=([^;]+)/) || [])[1];
     const secret = env.ADMIN_PASSWORD;
     async function sign(value) {
       const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), {name:"HMAC",hash:"SHA-256"}, false, ["sign"]);
@@ -15,7 +15,7 @@ export default {
     async function valid() {
       if (!token || !secret) return false;
       const [exp, sig] = token.split(".");
-      if (!exp || !sig || !/^\\d+$/.test(exp) || Number(exp) < Date.now()) return false;
+      if (!exp || !sig || !/^\d+$/.test(exp) || Number(exp) < Date.now()) return false;
       return hex(await sign(exp)) === sig;
     }
     async function getProducts() {
@@ -121,7 +121,7 @@ export default {
         if (!env.CHSY_IMAGES) return json({error:"فضای ذخیره عکس‌ها تنظیم نشده است."},503);
         const form = await request.formData(), file = form.get("image");
         if (!file || !file.type.startsWith("image/") || file.size > 5*1024*1024) return json({error:"فقط عکس تا ۵ مگابایت مجاز است."},400);
-        const key = crypto.randomUUID()+"-"+file.name.replace(/[^\\w.-]/g,"_");
+        const key = crypto.randomUUID()+"-"+file.name.replace(/[^\w.-]/g,"_");
         await env.CHSY_IMAGES.put(key,file.stream(),{httpMetadata:{contentType:file.type}});
         return json({url:"/media/"+key});
       }
