@@ -56,3 +56,13 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Not deployed and not yet runtime-tested. The KV namespace ID is still a placeholder and the R2/secret setup is still outstanding.
 - Important functional boundaries: orders entered in the owner panel are manual records; automatic checkout-to-order integration is not implemented. The current owner login still shares the existing ADMIN_PASSWORD; separate staff credentials/roles (including the Bostani reply-only panel) are not implemented. Do not represent these as complete.
 - Before deployment, test JavaScript/runtime behavior, API validation, login/session/logout, data persistence, active-product filtering, and existing product CRUD/upload. Review rate limiting and CSRF/origin enforcement further; this is not yet production-certified.
+
+
+## 2026-11-15 — Owner password recovery
+
+- Added a “فراموشی رمز عبور” action to `owner.html`.
+- Added `POST /api/admin/recover` to `worker.js`; it validates a one-time `OWNER_RECOVERY_CODE`, enforces a 12–128 character new password, stores a salted PBKDF2-SHA-256 hash in KV, and permanently marks the recovery code as used.
+- Login now checks the stored password hash after recovery, falling back to `ADMIN_PASSWORD` before the first recovery.
+- Same-origin checks are now strict for state-changing admin/login/recovery requests.
+- Commits: owner UI `39d7129c0857a8ed1f7bfd6fd01bd6370501eaaa`; Worker `9ef4aadc8e71e7e31503dbcc3785d4b168419e41`.
+- Not deployed or runtime-tested. Recovery remains unavailable until the Worker has a configured KV binding, `ADMIN_PASSWORD`, and `OWNER_RECOVERY_CODE` secret.
