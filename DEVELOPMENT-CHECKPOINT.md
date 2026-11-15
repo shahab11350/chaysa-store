@@ -6,14 +6,14 @@ Last updated: 2026-11-14
 - Working branch: admin-panel-development
 - Production branch: main (not changed)
 - Production site: https://shahab11350.github.io/chaysa-store/
-- No Cloudflare deployment has been completed.
+- No Cloudflare deployment has been completed. The existing test Worker is named `soft-rain-89bbchaysa-api` and its URL is `https://soft-rain-89bbchaysa-api.faryadereza.workers.dev/`.
 - No merge or pull request to main has been made.
 - Keep all further development on admin-panel-development until the owner approves release.
 
 ## Work already committed on the development branch
 - admin.html: Persian mobile-friendly admin UI; product editing, active/inactive toggles, and save flow.
 - worker.js: API for public product listing, admin login/session, KV product storage, and R2 image handling.
-- wrangler.toml: Worker configuration scaffold; KV namespace ID is still a placeholder.
+- wrangler.toml: Worker configuration targets the existing test Worker `soft-rain-89bbchaysa-api`; KV namespace binding `CHSY_PRODUCTS` is configured with ID `fbd00c90aba34b7184c264b448426089`.
 - products-seed.json: 47 products extracted from the existing store HTML.
 - products.html: attempts to fetch /api/products and dynamically render live products; falls back to existing static content if API is unavailable.
 - CLOUDFLARE-SETUP.md: setup instructions for KV, R2, ADMIN_PASSWORD secret, and deployment.
@@ -66,3 +66,10 @@ When continuing, first inspect the actual current files on admin-panel-developme
 - Same-origin checks are now strict for state-changing admin/login/recovery requests.
 - Commits: owner UI `39d7129c0857a8ed1f7bfd6fd01bd6370501eaaa`; Worker `9ef4aadc8e71e7e31503dbcc3785d4b168419e41`.
 - Not deployed or runtime-tested. Recovery remains unavailable until the Worker has a configured KV binding, `ADMIN_PASSWORD`, and `OWNER_RECOVERY_CODE` secret.
+
+
+## Cloudflare setup progress — 2026-11-15
+- Created KV namespace `CHSY_PRODUCTS` (ID `fbd00c90aba34b7184c264b448426089`) and connected it to the existing test Worker as the `CHSY_PRODUCTS` binding.
+- Configured `ADMIN_PASSWORD` as a Cloudflare Secret; its value is intentionally not recorded here or in Git.
+- Updated `wrangler.toml` on `admin-panel-development` to use the existing Worker name `soft-rain-89bbchaysa-api`, preventing an accidental deploy to a differently named Worker.
+- Still outstanding: create R2 bucket `chaysa-product-images` and bind it as `CHSY_IMAGES`; configure `OWNER_RECOVERY_CODE` if recovery is to be enabled; review rate limiting and security; deploy and runtime-test only after configuration review. No deployment has occurred.
