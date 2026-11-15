@@ -214,6 +214,31 @@ const prizes=[
 const colors=['#7d3444','#b78348','#315d4b','#786044','#8b4b37','#b28b58','#3d6957','#79506a'];
 const slice=Math.PI/4,center=360,radius=326;
 let angle=0,remaining=2,busy=false;
+let audioCtx=null,spinTimer=null;
+function audioReady(){const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;if(!audioCtx)audioCtx=new AC();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx}
+function tone(freq,duration,type='sine',volume=.08,when=0){
+ const a=audioReady();if(!a)return;const o=a.createOscillator(),g=a.createGain(),t=a.currentTime+when;
+ o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(volume,t+.012);g.gain.exponentialRampToValueAtTime(.0001,t+duration);
+ o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+duration+.03);
+}
+function clickSound(){tone(900,.055,'square',.045);tone(620,.07,'triangle',.035,.035)}
+function startSpinSound(){
+ const a=audioReady();if(!a)return;let n=0;
+ spinTimer=setInterval(()=>{if(!audioCtx||audioCtx.state!=='running')return;const f=520+(n%4)*75;tone(f,.035,'square',.018);n++},95);
+ tone(180,.35,'sawtooth',.025);
+}
+function stopSpinSound(){if(spinTimer){clearInterval(spinTimer);spinTimer=null}}
+function cheerSound(){
+ // Short celebratory synthesized fanfare and applause-like noise burst.
+ tone(523,.42,'triangle',.07);tone(659,.42,'triangle',.07,.12);tone(784,.65,'triangle',.075,.24);tone(1046,.8,'sine',.055,.38);
+ const a=audioReady();if(!a)return;const len=Math.floor(a.sampleRate*.75),buf=a.createBuffer(1,len,a.sampleRate),d=buf.getChannelData(0);
+ for(let i=0;i<len;i++){const fade=1-i/len;d[i]=(Math.random()*2-1)*fade*(i%3===0?.42:.2)}
+ const src=a.createBufferSource(),g=a.createGain();src.buffer=buf;g.gain.value=.22;src.connect(g);g.connect(a.destination);src.start();
+}
+function oooSound(){
+ // Playful descending group-style "oooo" effect, synthesized without a voice recording.
+ const a=audioReady();if(!a)return;[392,370,349,330].forEach((f,i)=>{const t=a.currentTime+i*.13,o=a.createOscillator(),g=a.createGain();o.type='sawtooth';o.frequency.setValueAtTime(f,t);o.frequency.exponentialRampToValueAtTime(f*.78,t+.72);g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(.055,t+.08);g.gain.linearRampToValueAtTime(.0001,t+.82);o.connect(g);g.connect(a.destination);o.start(t);o.stop(t+.85)});
+}
 function woodTexture(){
  const g=ctx.createRadialGradient(320,280,40,360,360,370);g.addColorStop(0,'#d6ad70');g.addColorStop(.55,'#a8733e');g.addColorStop(1,'#4b2a16');return g;
 }
@@ -273,6 +298,7 @@ function draw(){
 draw();
 spinBtn.addEventListener('click',()=>{
  if(busy||remaining===0)return;
+ clickSound();startSpinSound();
  busy=true;remaining--;spinBtn.disabled=true;counter.textContent='فرصت آزمایشی: '+remaining+' از ۲';
  const index=Math.floor(Math.random()*8);
  const target=-(index*slice+slice/2);
@@ -285,7 +311,7 @@ spinBtn.addEventListener('click',()=>{
   const p=Math.min(1,(now-t0)/duration),ease=1-Math.pow(1-p,4);
   angle=start+(end-start)*ease;draw();
   if(p<1)requestAnimationFrame(frame);
-  else{angle=((angle%(Math.PI*2))+Math.PI*2)%(Math.PI*2);draw();result.textContent='نتیجهٔ آزمایشی: '+prizes[index].lines.join(' — ');busy=false;spinBtn.disabled=remaining===0;if(!remaining)counter.textContent='هر دو فرصت آزمایشی استفاده شد'}
+  else{stopSpinSound();angle=((angle%(Math.PI*2))+Math.PI*2)%(Math.PI*2);draw();result.textContent='نتیجهٔ آزمایشی: '+prizes[index].lines.join(' — ');if(prizes[index].lines.includes('پوچ'))oooSound();else cheerSound();busy=false;spinBtn.disabled=remaining===0;if(!remaining)counter.textContent='هر دو فرصت آزمایشی استفاده شد'}
  }
  requestAnimationFrame(frame);
 });
