@@ -11,9 +11,9 @@
 
 ## موارد لازم در Cloudflare
 1. انجام شده: KV Namespace با نام `CHSY_PRODUCTS` و شناسه `fbd00c90aba34b7184c264b448426089` ساخته و به Worker آزمایشی متصل شده است. همین شناسه در `wrangler.toml` شاخه توسعه ثبت شده است.
-2. یک R2 bucket با نام `chaysa-product-images` بسازید و binding با نام `CHSY_IMAGES` به آن متصل کنید.
+2. فعلاً ساخت R2 به درخواست مالک به مرحلهٔ بعد موکول شده است. تا آن زمان پنل محصولات بدون بارگذاری عکس قابل استفاده خواهد بود و binding مربوط به R2 در `wrangler.toml` وجود ندارد.
 3. انجام شده: secret با نام `ADMIN_PASSWORD` در محیط Production Worker ثبت شده است. مقدار آن هرگز نباید در فایل‌های GitHub یا گفتگو ذخیره شود.
-4. هنوز انجام نشده: پس از تکمیل R2 و کنترل‌های امنیتی، پروژه را از شاخه `admin-panel-development` به‌صورت Cloudflare Worker با Static Assets و فایل پیکربندی همین شاخه مستقر کنید. نام Worker هدف `soft-rain-89bbchaysa-api` است.
+4. هنوز انجام نشده: پس از تکمیل کنترل‌های امنیتی، پروژه را از شاخه `admin-panel-development` به‌صورت Cloudflare Worker با Static Assets و فایل پیکربندی همین شاخه مستقر کنید. نام Worker هدف `soft-rain-89bbchaysa-api` است. اتصال R2 می‌تواند در مرحلهٔ بعد اضافه شود.
 5. پس از استقرار، ابتدا `/admin.html` را باز کنید و ورود مدیر را آزمایش کنید؛ سپس `/api/products` را بررسی کنید.
 6. پس از تأیید پنل و فهرست محصولات، دامنه/مسیر فروشگاه به نسخه Worker منتقل شود. تا قبل از این مرحله، GitHub Pages نسخه قبلی را نمایش می‌دهد.
 
@@ -36,4 +36,5 @@ The recovery feature is not operational until `CHSY_PRODUCTS`, `ADMIN_PASSWORD`,
 - KV و secret مربوط به رمز مدیر در Cloudflare تنظیم شده‌اند.
 - سه regex در `worker.js` برای خواندن کوکی نشست، اعتبارسنجی زمان انقضا و پاک‌سازی نام فایل اصلاح شده‌اند.
 - هنوز هیچ deployment یا runtime test انجام نشده است.
-- R2 bucket و binding، تصمیم درباره secret بازیابی، rate limiting و بازبینی نهایی امنیتی باقی مانده‌اند.
+- R2 و بارگذاری عکس‌ها عمداً به مرحلهٔ بعد موکول شده‌اند.
+- تصمیم درباره secret بازیابی، rate limiting و بازبینی نهایی امنیتی باقی مانده‌اند.
