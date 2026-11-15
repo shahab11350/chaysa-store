@@ -246,12 +246,12 @@ function draw(){
    const lx=Math.cos(mid)*210,ly=Math.sin(mid)*210;
    let textAngle=mid;
    if(textAngle>Math.PI/2 || textAngle<-Math.PI/2) textAngle+=Math.PI;
-   const lineH=lines.length===3?19:23;
+   const lineH=lines.length===3?23:28;
    ctx.save();ctx.translate(lx,ly);ctx.rotate(textAngle);ctx.direction='rtl';
    ctx.textAlign='center';ctx.textBaseline='middle';
-   ctx.font='bold '+(lines.length===3?15:18)+'px Tahoma,Arial';
+   ctx.font='bold '+(lines.length===3?20:24)+'px Tahoma,Arial';
    ctx.fillStyle='#fffdf5';ctx.shadowColor='#160b05';ctx.shadowBlur=4;
-   lines.forEach((line,j)=>ctx.fillText(line,0,-(lines.length-1)*lineH/2+j*lineH,146));
+   lines.forEach((line,j)=>ctx.fillText(line,0,-(lines.length-1)*lineH/2+j*lineH,178));
    ctx.restore();
  }
  // Decorative central fan grille beneath the fixed approved logo.
@@ -263,9 +263,9 @@ function draw(){
  // Fixed partner names: remain stationary while the fan blades rotate.
  for(let i=0;i<8;i++){
    const gapAngle=-Math.PI/2+i*slice;
-   const bx=center+Math.cos(gapAngle)*300,by=center+Math.sin(gapAngle)*300;
+   const bx=center+Math.cos(gapAngle)*278,by=center+Math.sin(gapAngle)*278;
    ctx.save();ctx.translate(bx,by);ctx.direction='ltr';ctx.textAlign='center';ctx.textBaseline='middle';
-   ctx.font='bold 15px Arial';ctx.fillStyle='#fff4d8';ctx.shadowColor='#160b05';ctx.shadowBlur=5;
+   ctx.font='bold 18px Arial';ctx.fillStyle='#fff4d8';ctx.shadowColor='#160b05';ctx.shadowBlur=5;
    ctx.fillText(i%2===0?'TAKSOO':'CHAYSA',0,0,110);ctx.restore();
  }
  for(let i=0;i<24;i++){const a=i*Math.PI/12;ctx.beginPath();ctx.arc(center+Math.cos(a)*339,center+Math.sin(a)*339,3.2,0,Math.PI*2);ctx.fillStyle='#f2d39a';ctx.fill()}
