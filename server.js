@@ -850,7 +850,7 @@ app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
   const meta = getLetterDraftMeta(rows, now);
   const receiptToken = crypto.randomBytes(32).toString("base64url");
   const receiptTokenHash = crypto.createHash("sha256").update(receiptToken).digest("hex");
-  const publicBaseUrl = (process.env.PUBLIC_BASE_URL || "https://chaysa.up.railway.app").replace(/\\/+$/, "");
+  const publicBaseUrl = (process.env.PUBLIC_BASE_URL || "https://chaysa.up.railway.app").replace(/\/+$/, "");
   const receiptUrl = publicBaseUrl + "/letter-receipt.html#" + receiptToken;
   const message = formatGeneralChaysaLetter(meta, body) + "\n\nآیا نامه را دریافت کرده‌اید؟\nبرای ثبت دریافت، پیوند زیر را باز کنید:\n" + receiptUrl;
   if (message.length > 4096)
