@@ -170,6 +170,55 @@ function saveTelegramRecipient(chat) {
   fs.writeFileSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", JSON.stringify(rows, null, 2), "utf8");
   fs.renameSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", TELEGRAM_RECIPIENTS_FILE);
 }
+
+async function sendTelegramText(chatId, text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN || "";
+  if (!token) return false;
+  try {
+    const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true })
+    });
+    const result = await response.json();
+    return response.ok && result.ok === true;
+  } catch (_) { return false; }
+}
+function buildBostaniProgressReport() {
+  const orders = readOrders();
+  const questions = readQuestions();
+  const orderCounts = {};
+  for (const order of orders) {
+    const status = String(order.status || "نامشخص");
+    orderCounts[status] = (orderCounts[status] || 0) + 1;
+  }
+  const unanswered = questions.filter(q => !q.reply && q.status !== "پاسخ ارسال‌شده").length;
+  const answered = questions.length - unanswered;
+  const orderLines = Object.entries(orderCounts).length
+    ? Object.entries(orderCounts).map(([status, count]) => "• " + status + ": " + count)
+    : ["• هنوز سفارشی ثبت نشده است."];
+  return [
+    "گزارش کلی چایسا",
+    "زمان گزارش: " + new Date().toLocaleString("fa-IR", { timeZone: "Asia/Tehran" }),
+    "",
+    "وضعیت سامانه",
+    "• سرویس سایت در حال پاسخ‌گویی است؛ دریافت این گزارش از ربات نیز نشان‌دهنده فعال بودن مسیر وب‌هوک در همین لحظه است.",
+    "• اپلیکیشن اندروید پروژه‌ای مستقل است؛ وضعیت ساخت و انتشار آن از این ربات به‌صورت زنده قابل تأیید نیست.",
+    "",
+    "گزارش سفارش‌ها",
+    "• مجموع سفارش‌های ثبت‌شده: " + orders.length,
+    ...orderLines,
+    "",
+    "گزارش پرسش‌وپاسخ",
+    "• مجموع پرسش‌های ثبت‌شده: " + questions.length,
+    "• پاسخ‌داده‌شده: " + answered,
+    "• در انتظار پاسخ/اتصال: " + unanswered,
+    "",
+    "این گزارش فقط آمار کلی و غیرشخصی را نمایش می‌دهد؛ نام، نشانی، شماره تماس، متن پرسش‌ها، اطلاعات پرداخت، رمزها و تنظیمات مدیریتی در آن ارسال نمی‌شود.",
+    "برای وضعیت جزئی توسعه سایت و اپلیکیشن، گزارش مستندات پروژه باید توسط مالک به‌روزرسانی شود."
+  ].join("\\n");
+}
+
 app.post("/telegram/webhook", async (req, res) => {
   const expected = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   const supplied = req.get("x-telegram-bot-api-secret-token") || "";
@@ -178,6 +227,14 @@ app.post("/telegram/webhook", async (req, res) => {
     const update = req.body || {};
     const msg = update.message || update.edited_message;
     if (msg && msg.chat) saveTelegramRecipient(msg.chat);
+    if (msg && msg.chat && msg.chat.type === "private" && typeof msg.text === "string" &&
+        msg.text.trim() === "چایسا فایل") {
+      const allowedBostaniId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
+      if (allowedBostaniId && String(msg.chat.id) === allowedBostaniId) {
+        await sendTelegramText(msg.chat.id, buildBostaniProgressReport());
+      }
+      return res.sendStatus(200);
+    }
     const startMatch = msg && msg.chat && msg.chat.type === "private" &&
       typeof msg.text === "string" ? msg.text.trim().match(/^\/start(?:@\w+)?\s+(Q-[A-Za-z0-9-]+)$/i) : null;
     if (startMatch) {
