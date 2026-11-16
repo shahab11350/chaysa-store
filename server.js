@@ -1320,12 +1320,21 @@ app.post("/api/orders",async(req,res)=>{
  const catalog=readProducts(),items=[];
  for(const x of b.items){const p=catalog.find(p=>String(p.sku)===String(x.sku)&&p.active!==false),qty=Number(x.qty);if(!p||!Number.isInteger(qty)||qty<1||qty>99)return json(res,400,{error:"کالا یا تعداد آن معتبر نیست؛ سبد را تازه‌سازی کنید."});items.push({sku:String(p.sku),name:String(p.name),qty,unitPrice:Number(p.price),lineTotal:Number(p.price)*qty})}
  const total=items.reduce((n,x)=>n+x.lineTotal,0),now=new Date();
- const order={id:"CH-"+now.toISOString().slice(0,10).replace(/-/g,"")+"-"+crypto.randomBytes(6).toString("hex").toUpperCase(),createdAt:now.toISOString(),status:"در انتظار بررسی",customer:Object.fromEntries(fields.map(k=>[k,String(c[k]).trim()])),termsAccepted:true,termsAcceptedAt:b.termsAcceptedAt,items,total,deliveryRule:"تحویل سفارش باید فقط به خریدار و پس از احراز هویت و تطبیق شناسه سفارش انجام شود. خریدار فاکتور و شناسه اختصاصی را تا زمان دریافت نگهداری کند."};
+ const order={id:"CH-"+now.toISOString().slice(0,10).replace(/-/g,"")+"-"+crypto.randomBytes(6).toString("hex").toUpperCase(),createdAt:now.toISOString(),status:"در انتظار بررسی",customer:Object.fromEntries(fields.map(k=>[k,String(c[k]).trim()])),termsAccepted:true,termsAcceptedAt:b.termsAcceptedAt,items,total,notification:{status:"pending",delivered:0,recipientCount:0,attemptedAt:null},deliveryRule:"تحویل سفارش باید فقط به خریدار و پس از احراز هویت و تطبیق شناسه سفارش انجام شود. خریدار فاکتور و شناسه اختصاصی را تا زمان دریافت نگهداری کند."};
  const rows=readOrders();rows.push(order);try{saveOrders(rows)}catch(_){return json(res,500,{error:"ذخیره سفارش انجام نشد؛ دوباره تلاش کنید."})}
  const invoice=["فاکتور سفارش چایسا","شناسه سفارش: "+order.id,"تاریخ: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"وضعیت: "+order.status,"مشخصات خریدار",c.name+" "+c.family,"تماس: "+c.contact,"شناسه پیام‌رسان: "+c.messengerId,"استان/شهر: "+c.province+" / "+c.city,"نشانی: "+c.address,"کد پستی: "+c.postal,"توضیحات: "+c.notes,"اقلام سفارش",...items.map(x=>x.name+" | "+x.sku+" | "+x.qty+" × "+x.unitPrice.toLocaleString("en-US")+" = "+x.lineTotal.toLocaleString("en-US")+" تومان"),"جمع کل: "+total.toLocaleString("en-US")+" تومان",order.deliveryRule].join("\n");
  const token=process.env.TELEGRAM_BOT_TOKEN||"",recipients=String(process.env.ORDER_CHAT_IDS||"").split(",").map(x=>x.trim()).filter(x=>/^-?\d+$/.test(x));
- let delivered=0;if(token&&recipients.length===2&&new Set(recipients).size===2){const rs=await Promise.all(recipients.map(async id=>{try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:id,text:invoice,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok}catch(_){return false}}));delivered=rs.filter(Boolean).length}
- return json(res,200,{ok:true,orderId:order.id,invoice,delivered});
+ const configured=Boolean(token&&recipients.length===2&&new Set(recipients).size===2);
+ let delivered=0;
+ if(configured){
+  const rs=await Promise.all(recipients.map(async id=>{try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:id,text:invoice,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok}catch(_){return false}}));
+  delivered=rs.filter(Boolean).length;
+ }
+ const notificationStatus=!configured?"not_configured":delivered===recipients.length?"sent":delivered>0?"partial":"failed";
+ order.notification={status:notificationStatus,delivered,recipientCount:configured?recipients.length:0,attemptedAt:configured?new Date().toISOString():null};
+ let notificationStatusSaved=true;
+ try{saveOrders(rows)}catch(_){notificationStatusSaved=false}
+ return json(res,200,{ok:true,orderId:order.id,invoice,delivered,recipientCount:configured?recipients.length:0,notificationStatus,notificationStatusSaved});
 });
 // Do not expose server-side source, package metadata, or deployment configuration.
 app.use((req, res, next) => {
