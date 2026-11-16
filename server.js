@@ -693,7 +693,7 @@ app.get("/api/admin/health-archive", requireAdmin, (_req, res) => {
   const rows = readHealthArchive().slice(-200).reverse().map(({ evidenceFile, ...row }) => row);
   return json(res, 200, rows);
 });
-app.post("/api/admin/health-archive", requireAdmin, healthArchiveUpload.single("evidence"), (req, res) => {
+app.post("/api/admin/health-archive", requireAdmin, healthArchiveUpload.single("evidence"), async (req, res) => {
   const file = req.file;
   const reviewerName = typeof req.body.reviewerName === "string" ? req.body.reviewerName.trim().slice(0,120) : "";
   const decision = typeof req.body.decision === "string" ? req.body.decision.trim() : "";
