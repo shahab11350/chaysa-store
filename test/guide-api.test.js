@@ -371,3 +371,75 @@ test("CHAYSA HEALTH approval link is delivered privately, one-time and archived 
   });
   assert.equal(replay.status, 409);
 });
+
+
+async function postLetterReceiptCallback(callbackData, chatId = "222222", callbackId = "letter-callback-test") {
+  return fetch(baseUrl + "/telegram/webhook", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-telegram-bot-api-secret-token": "test-webhook-secret" },
+    body: JSON.stringify({
+      callback_query: {
+        id: callbackId,
+        from: { id: Number(chatId), username: "test_user" },
+        message: { message_id: 987, chat: { id: Number(chatId), type: "private" } },
+        data: callbackData
+      }
+    })
+  });
+}
+
+test("general letters use a direct Telegram inline receipt button", async () => {
+  const login = await fetch(baseUrl + "/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: "guide-test-only-password" })
+  });
+  assert.equal(login.status, 200);
+  const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
+  const send = await fetch(baseUrl + "/api/admin/letters/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: JSON.stringify({ text: "متن آزمایشی نامه برای آزمون دکمه تلگرام" })
+  });
+  assert.equal(send.status, 201);
+  const sent = await send.json();
+  assert.equal(sent.deliveryStatus, "sent");
+
+  const messages = telegramLog().filter(item => item.url.endsWith("/sendMessage"))
+    .map(item => JSON.parse(item.body))
+    .filter(body => body.text.includes("متن آزمایشی نامه برای آزمون دکمه تلگرام"));
+  assert.equal(messages.length, 2);
+  for (const message of messages) {
+    assert.match(message.text, /آیا نامه را دریافت کرده‌اید؟/);
+    assert.doesNotMatch(message.text, /letter-receipt\.html|https:\/\//);
+    assert.equal(message.reply_markup.inline_keyboard[0][0].text, "بله، دریافت کردم");
+    assert.match(message.reply_markup.inline_keyboard[0][0].callback_data, /^lr:[A-Za-z0-9_-]{43}$/);
+  }
+
+  const callbackData = messages[0].reply_markup.inline_keyboard[0][0].callback_data;
+  const archivePath = path.join(dataDir, "letters-archive.json");
+  let archive = JSON.parse(readFileSync(archivePath, "utf8"));
+  assert.equal(archive[0].receiptStatus, "pending");
+
+  const callback = await postLetterReceiptCallback(callbackData);
+  assert.equal(callback.status, 200);
+  archive = JSON.parse(readFileSync(archivePath, "utf8"));
+  assert.equal(archive[0].receiptStatus, "received");
+  assert.equal(archive[0].receiptMethod, "telegram_inline_button");
+  assert.equal(archive[0].receivedByTelegramId, "222222");
+  assert.ok(archive[0].receivedAt);
+
+  const callbackCalls = telegramLog().filter(item =>
+    item.url.endsWith("/answerCallbackQuery") || item.url.endsWith("/editMessageReplyMarkup")
+  );
+  assert.ok(callbackCalls.some(item => item.url.endsWith("/answerCallbackQuery")));
+  assert.ok(callbackCalls.some(item => item.url.endsWith("/editMessageReplyMarkup")));
+  const receivedAt = archive[0].receivedAt;
+  await postLetterReceiptCallback(callbackData, "222222", "letter-callback-replay");
+  archive = JSON.parse(readFileSync(archivePath, "utf8"));
+  assert.equal(archive[0].receivedAt, receivedAt);
+
+  await postLetterReceiptCallback(callbackData, "333333", "letter-callback-unauthorized");
+  archive = JSON.parse(readFileSync(archivePath, "utf8"));
+  assert.equal(archive[0].receivedByTelegramId, "222222");
+});

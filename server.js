@@ -506,12 +506,76 @@ async function requestGuideApproval(ownerChatId, version, commit, reviewUrl) {
     ? "درخواست تأیید نسخه " + version + " برای خانم بستانی ارسال شد. شناسه: " + id
     : "ارسال درخواست به خانم بستانی ناموفق بود. سابقه درخواست با وضعیت ارسال ناموفق نگهداری شد؛ دوباره‌ارسال خودکار انجام نشد.");
 }
+async function answerTelegramCallback(callbackQueryId, text, showAlert = false) {
+  const token = process.env.TELEGRAM_BOT_TOKEN || "";
+  if (!token || !callbackQueryId) return false;
+  try {
+    const response = await fetch("https://api.telegram.org/bot" + token + "/answerCallbackQuery", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ callback_query_id: callbackQueryId, text, show_alert: showAlert })
+    });
+    const result = await response.json();
+    return response.ok && result.ok === true;
+  } catch (_) { return false; }
+}
+async function removeTelegramReceiptKeyboard(callback) {
+  const token = process.env.TELEGRAM_BOT_TOKEN || "";
+  const message = callback && callback.message;
+  if (!token || !message || !message.chat || !message.message_id) return false;
+  try {
+    const response = await fetch("https://api.telegram.org/bot" + token + "/editMessageReplyMarkup", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: message.chat.id, message_id: message.message_id, reply_markup: { inline_keyboard: [] } })
+    });
+    const result = await response.json();
+    return response.ok && result.ok === true;
+  } catch (_) { return false; }
+}
+async function handleTelegramLetterReceipt(callback) {
+  const match = typeof callback.data === "string" ? callback.data.match(/^lr:([A-Za-z0-9_-]{40,60})$/) : null;
+  const pair = getChaysaTelegramPair();
+  const senderId = String(callback.from && callback.from.id || "");
+  const messageChatId = String(callback.message && callback.message.chat && callback.message.chat.id || "");
+  if (!match || !pair || !pair.some(member => member.id === senderId && member.id === messageChatId)) {
+    await answerTelegramCallback(callback.id, "این دکمه معتبر یا مجاز نیست.", true);
+    return;
+  }
+  const found = findLetterByReceiptToken(match[1]);
+  if (!found || found.row.deliveryStatus !== "sent") {
+    await answerTelegramCallback(callback.id, "نامه معتبر یا ارسال‌شده پیدا نشد.", true);
+    return;
+  }
+  const { rows, row } = found;
+  if (row.receiptStatus !== "received") {
+    row.receiptStatus = "received";
+    row.receivedAt = new Date().toISOString();
+    row.receiptMethod = "telegram_inline_button";
+    row.receivedByTelegramId = senderId;
+    try { saveLettersArchive(rows); }
+    catch (_) {
+      await answerTelegramCallback(callback.id, "ثبت دریافت در بایگانی انجام نشد؛ دوباره تلاش کنید.", true);
+      return;
+    }
+    const notice = "تأیید دریافت نامه در بایگانی چایسا ثبت شد.\nشماره نامه: " + row.letterNumber + "\nزمان دریافت: " +
+      new Date(row.receivedAt).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" });
+    const delivery = await notifyChaysaTelegramPair(notice);
+    row.receiptNotificationStatus = delivery.status;
+    row.receiptNotificationDeliveredCount = delivery.recipients.filter(item => item.sent).length;
+    try { saveLettersArchive(rows); } catch (_) {}
+  }
+  await answerTelegramCallback(callback.id, "دریافت نامه در بایگانی ثبت شد.");
+  await removeTelegramReceiptKeyboard(callback);
+}
 app.post("/telegram/webhook", async (req, res) => {
   const expected = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   const supplied = req.get("x-telegram-bot-api-secret-token") || "";
   if (!expected || supplied !== expected) return res.sendStatus(403);
   try {
     const update = req.body || {};
+    if (update.callback_query && typeof update.callback_query.data === "string" && update.callback_query.data.startsWith("lr:")) {
+      await handleTelegramLetterReceipt(update.callback_query);
+      return res.sendStatus(200);
+    }
     const msg = update.message || update.edited_message;
     if (msg && msg.chat) saveTelegramRecipient(msg.chat);
     if (msg && msg.chat && msg.chat.type === "private" && typeof msg.text === "string") {
@@ -852,8 +916,10 @@ app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
   const receiptToken = crypto.randomBytes(32).toString("base64url");
   const receiptTokenHash = crypto.createHash("sha256").update(receiptToken).digest("hex");
   const publicBaseUrl = (process.env.PUBLIC_BASE_URL || "https://chaysa.up.railway.app").replace(/\/+$/, "");
-  const receiptUrl = publicBaseUrl + "/letter-receipt.html#" + receiptToken;
-  const message = formatGeneralChaysaLetter(meta, body) + "\n\nآیا نامه را دریافت کرده‌اید؟\nبرای ثبت دریافت، پیوند زیر را باز کنید:\n" + receiptUrl;
+  const message = formatGeneralChaysaLetter(meta, body) + "\n\nآیا نامه را دریافت کرده‌اید؟";
+  const receiptKeyboard = {
+    inline_keyboard: [[{ text: "بله، دریافت کردم", callback_data: "lr:" + receiptToken }]]
+  };
   if (message.length > 4096)
     return json(res, 400, { error: "متن نهایی نامه از محدودیت پیام تلگرام بیشتر است." });
   const record = {
@@ -877,7 +943,15 @@ app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
   rows.push(record);
   try { saveLettersArchive(rows.slice(-500)); }
   catch (_) { return json(res, 500, { error: "ذخیره اولیه نامه در بایگانی انجام نشد؛ هیچ پیامی ارسال نشد." }); }
-  const delivery = await notifyChaysaTelegramPair(message);
+  const pair = getChaysaTelegramPair();
+  const recipients = await Promise.all(pair.map(async member => ({
+    chatId: member.id,
+    sent: await sendTelegramText(member.id, message, receiptKeyboard)
+  })));
+  const delivery = {
+    status: recipients.every(x => x.sent) ? "sent" : recipients.some(x => x.sent) ? "partial" : "failed",
+    recipients
+  };
   record.deliveryStatus = delivery.status;
   record.deliveredCount = delivery.recipients.filter(item => item.sent).length;
   record.sentAt = record.deliveredCount ? new Date().toISOString() : null;
