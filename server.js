@@ -209,13 +209,13 @@ app.post("/api/guide/resolve", (req, res) => {
     let q = "";
     if (interactionQuestion) {
       if (!medicine) return json(res, 200, { ok: false, allowed: false, reason: "needs_medicine", message: "برای بررسی تداخل، نام دارو را در فیلد جداگانه وارد کنید؛ اطلاعات شخصی یا شرح پرونده پزشکی را ننویسید." });
-      q = '"' + product.name + '" "' + medicine + '" تداخل مصرف هم‌زمان ایمنی شواهد ';
+      q = '"' + product.name + '" "' + medicine + '" تداخل مصرف هم‌زمان interaction safety شواهد علمی ';
     } else {
       const safetyHits = (rules.safetyTopics || []).filter(t => normalized.includes(guideNormalize(t)));
       if (!safetyHits.length) return json(res, 200, { ok: false, allowed: false, reason: "needs_safety_context", message: "پرسش را درباره عوارض احتمالی، احتیاط، حساسیت، بارداری، شیردهی یا ایمنی مصرف محصول روشن‌تر کنید." });
-      q = '"' + product.name + '" ' + safetyHits.join(" ") + " ایمنی مصرف شواهد علمی ";
+      q = '"' + product.name + '" ' + safetyHits.join(" ") + " ایمنی مصرف safety شواهد علمی ";
     }
-    q += (bank.healthPolicy.sourceDomains || []).map(d => "site:" + d).join(" OR ");
+    q += "(" + (bank.healthPolicy.sourceDomains || []).map(d => "site:" + d).join(" OR ") + ")";
     const url = "https://www.google.com/search?q=" + encodeURIComponent(q);
     return json(res, 200, { ok: true, allowed: true, type: "medical_external_search", url,
       notice: bank.healthPolicy.notice || "", rule: bank.healthPolicy.rule || "" });
