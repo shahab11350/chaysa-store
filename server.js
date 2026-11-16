@@ -848,7 +848,11 @@ app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
   const rows = readLettersArchive();
   const now = new Date();
   const meta = getLetterDraftMeta(rows, now);
-  const message = formatGeneralChaysaLetter(meta, body);
+  const receiptToken = crypto.randomBytes(32).toString("base64url");
+  const receiptTokenHash = crypto.createHash("sha256").update(receiptToken).digest("hex");
+  const publicBaseUrl = (process.env.PUBLIC_BASE_URL || "https://chaysa.up.railway.app").replace(/\\/+$/, "");
+  const receiptUrl = publicBaseUrl + "/letter-receipt.html#" + receiptToken;
+  const message = formatGeneralChaysaLetter(meta, body) + "\\n\\nآیا نامه را دریافت کرده‌اید؟\\nبرای ثبت دریافت، پیوند زیر را باز کنید:\\n" + receiptUrl;
   if (message.length > 4096)
     return json(res, 400, { error: "متن نهایی نامه از محدودیت پیام تلگرام بیشتر است." });
   const record = {
@@ -863,7 +867,11 @@ app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
     signatureRole: "ناظر کیفی و ایده‌پرداز فروشگاه اینترنتی چایسا (CHAYSA)",
     deliveryStatus: "pending",
     deliveredCount: 0,
-    recipientCount: 2
+    recipientCount: 2,
+    receiptTokenHash,
+    receiptStatus: "pending",
+    receivedAt: null,
+    receiptNotificationStatus: null
   };
   rows.push(record);
   try { saveLettersArchive(rows.slice(-500)); }
@@ -901,6 +909,62 @@ app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
     dateTime: record.dateTime,
     deliveredCount: record.deliveredCount,
     deliveryStatus: record.deliveryStatus
+  });
+});
+
+function findLetterByReceiptToken(token) {
+  if (typeof token !== "string" || !/^[A-Za-z0-9_-]{40,60}$/.test(token)) return null;
+  const supplied = Buffer.from(crypto.createHash("sha256").update(token).digest("hex"), "hex");
+  const rows = readLettersArchive();
+  const row = rows.find(item => {
+    if (typeof item.receiptTokenHash !== "string" || !/^[a-f0-9]{64}$/.test(item.receiptTokenHash)) return false;
+    const stored = Buffer.from(item.receiptTokenHash, "hex");
+    return stored.length === supplied.length && crypto.timingSafeEqual(stored, supplied);
+  });
+  return row ? { rows, row } : null;
+}
+function letterReceiptOriginAllowed(req) {
+  const origin = req.get("origin");
+  return !origin || origin === req.protocol + "://" + req.get("host");
+}
+app.post("/api/letter-receipt/view", (req, res) => {
+  if (!letterReceiptOriginAllowed(req)) return json(res, 403, { error: "مبدأ درخواست معتبر نیست." });
+  if (limited("letter-receipt-view:" + (req.ip || "unknown"), 30, 10 * 60 * 1000))
+    return json(res, 429, { error: "تعداد درخواست‌ها زیاد است؛ کمی بعد دوباره تلاش کنید." });
+  const found = findLetterByReceiptToken(req.body && req.body.token);
+  if (!found) return json(res, 404, { error: "پیوند دریافت نامه معتبر نیست." });
+  const { row } = found;
+  if (row.deliveryStatus !== "sent") return json(res, 403, { error: "ارسال این نامه به‌طور کامل تأیید نشده است." });
+  return json(res, 200, {
+    ok: true, letterNumber: row.letterNumber, dateTime: row.dateTime,
+    body: row.body, signatureName: row.signatureName, signatureRole: row.signatureRole,
+    receiptStatus: row.receiptStatus || "pending", receivedAt: row.receivedAt || null
+  });
+});
+app.post("/api/letter-receipt/confirm", async (req, res) => {
+  if (!letterReceiptOriginAllowed(req)) return json(res, 403, { error: "مبدأ درخواست معتبر نیست." });
+  if (limited("letter-receipt-confirm:" + (req.ip || "unknown"), 10, 10 * 60 * 1000))
+    return json(res, 429, { error: "تعداد تلاش‌ها زیاد است؛ کمی بعد دوباره تلاش کنید." });
+  const found = findLetterByReceiptToken(req.body && req.body.token);
+  if (!found) return json(res, 404, { error: "پیوند دریافت نامه معتبر نیست." });
+  const { rows, row } = found;
+  if (row.deliveryStatus !== "sent") return json(res, 403, { error: "ارسال این نامه به‌طور کامل تأیید نشده است." });
+  if (row.receiptStatus === "received")
+    return json(res, 200, { ok: true, alreadyReceived: true, letterNumber: row.letterNumber, receivedAt: row.receivedAt });
+  row.receiptStatus = "received";
+  row.receivedAt = new Date().toISOString();
+  row.receiptMethod = "private_bearer_link";
+  try { saveLettersArchive(rows); }
+  catch (_) { return json(res, 500, { error: "ثبت دریافت نامه در بایگانی انجام نشد؛ دوباره تلاش کنید." }); }
+  const notice = "تأیید دریافت نامه در بایگانی چایسا ثبت شد.\\nشماره نامه: " + row.letterNumber + "\\nزمان دریافت: " +
+    new Date(row.receivedAt).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" });
+  const delivery = await notifyChaysaTelegramPair(notice);
+  row.receiptNotificationStatus = delivery.status;
+  row.receiptNotificationDeliveredCount = delivery.recipients.filter(item => item.sent).length;
+  try { saveLettersArchive(rows); } catch (_) {}
+  return json(res, 200, {
+    ok: true, letterNumber: row.letterNumber, receivedAt: row.receivedAt,
+    notificationStatus: delivery.status
   });
 });
 
