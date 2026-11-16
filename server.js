@@ -689,6 +689,188 @@ function isSupportedEvidence(file) {
   if (file.mimetype === "image/webp") return head.toString("ascii",0,4) === "RIFF" && head.toString("ascii",8,12) === "WEBP";
   return false;
 }
+
+const HEALTH_APPROVAL_REQUESTS_FILE = path.join(DATA, "health-approval-requests.json");
+function readHealthApprovalRequests() {
+  try {
+    const rows = JSON.parse(fs.readFileSync(HEALTH_APPROVAL_REQUESTS_FILE, "utf8"));
+    return Array.isArray(rows) ? rows : [];
+  } catch (_) { return []; }
+}
+function saveHealthApprovalRequests(rows) {
+  const tmp = HEALTH_APPROVAL_REQUESTS_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), { encoding: "utf8", mode: 0o600 });
+  fs.renameSync(tmp, HEALTH_APPROVAL_REQUESTS_FILE);
+}
+function healthApprovalTokenHash(token) {
+  return crypto.createHash("sha256").update(token).digest("hex");
+}
+function findHealthApprovalRequest(token) {
+  if (typeof token !== "string" || !/^[A-Za-z0-9_-]{40,60}$/.test(token)) return null;
+  const hash = Buffer.from(healthApprovalTokenHash(token), "hex");
+  const rows = readHealthApprovalRequests();
+  const row = rows.find(item => {
+    if (typeof item.tokenHash !== "string" || !/^[a-f0-9]{64}$/.test(item.tokenHash)) return false;
+    const stored = Buffer.from(item.tokenHash, "hex");
+    return stored.length === hash.length && crypto.timingSafeEqual(stored, hash);
+  });
+  return row ? { rows, row } : null;
+}
+function healthApprovalOriginAllowed(req) {
+  const origin = req.get("origin");
+  return !origin || origin === req.protocol + "://" + req.get("host");
+}
+const HEALTH_APPROVAL_LETTER = [
+  "درخواست بررسی و اعلام نظر نهایی بخش مشاور سلامت فروشگاه اینترنتی چایسا",
+  "",
+  "سرکار خانم بستانی",
+  "",
+  "با سلام،",
+  "بخش مستقل CHAYSA HEALTH با هدف فراهم‌کردن مرجعی ساختارمند برای آگاهی و انتخاب آگاهانه مشتریان فروشگاه اینترنتی چایسا طراحی شده است.",
+  "",
+  "برنامه توسعه این بخش، ایجاد بانک اطلاعاتی جامع و پویا درباره چای، دمنوش‌ها و محصولات گیاهی است. اطلاعات هر محصول بر پایه مستندات پزشکی و دارویی، منابع علمی معتبر و شواهد پژوهشی قابل استناد بررسی و پس از ارزیابی، دسته‌بندی و ثبت خواهد شد.",
+  "",
+  "با افزوده‌شدن محصولات جدید به فروشگاه، اطلاعات علمی متناسب با ماهیت و نوع محصول، ترکیبات، ویژگی‌ها، موارد احتیاط و تداخلات احتمالی آن‌ها نیز بررسی و به‌روزرسانی می‌شود. هدف، جلوگیری از انتشار ادعاهای درمانی تأییدنشده و توصیه‌های ناایمن است.",
+  "",
+  "این بخش برای افزایش آگاهی مشتریان طراحی شده و جایگزین تشخیص، درمان یا مشاوره تخصصی پزشک و داروساز نخواهد بود.",
+  "",
+  "خواهشمند است موارد زیر را بررسی و نظر نهایی خود را ثبت فرمایید:",
+  "۱. محتوای معرفی و هدف بخش مشاور سلامت",
+  "۲. ساختار و دسته‌بندی اطلاعات",
+  "۳. مبانی علمی، اعتبار منابع و شیوه ارزیابی شواهد",
+  "۴. هشدارهای ایمنی و نحوه بیان موارد احتیاط و تداخلات احتمالی",
+  "۵. برنامه توسعه و به‌روزرسانی بانک اطلاعاتی",
+  "",
+  "لطفاً یکی از سه گزینه «تأیید می‌شود»، «تأیید نمی‌شود» یا «نیاز به اصلاح دارد» را انتخاب کنید. امکان درج توضیح نیز فراهم است.",
+  "",
+  "ثبت این نظر، سابقه بررسی در بایگانی داخلی چایسا ایجاد می‌کند و به‌تنهایی به معنای انتشار عمومی یا امضای الکترونیکی واجد شرایط قانونی نیست. لینک اختصاصی است؛ لطفاً آن را در اختیار دیگران قرار ندهید.",
+  "",
+  "با احترام،",
+  "تیم طراحی و توسعه فروشگاه اینترنتی چایسا (CHAYSA)",
+  "ناظر فنی و ایده‌پرداز: آقای نظام"
+].join("\n");
+app.post("/api/admin/health-approval/send", requireAdmin, async (req, res) => {
+  if (limited("health-approval-send:" + (req.ip || "unknown"), 5, 60 * 60 * 1000))
+    return json(res, 429, { error: "تعداد درخواست‌های ارسال در این ساعت بیش از حد مجاز است." });
+  const bostaniChatId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
+  if (!/^-?\\d+$/.test(bostaniChatId) || !process.env.TELEGRAM_BOT_TOKEN)
+    return json(res, 503, { error: "تنظیمات امن ارسال تلگرام خانم بستانی کامل نیست." });
+  const rows = readHealthApprovalRequests();
+  const active = rows.find(item => item.status === "pending" && item.expiresAt && Date.parse(item.expiresAt) > Date.now());
+  if (active) return json(res, 409, { error: "یک درخواست بررسی فعال وجود دارد؛ برای جلوگیری از ایجاد لینک‌های موازی، ابتدا همان درخواست را پیگیری کنید.", requestId: active.id, expiresAt: active.expiresAt });
+  const token = crypto.randomBytes(32).toString("base64url");
+  const now = new Date();
+  const request = {
+    id: crypto.randomUUID(),
+    section: "CHAYSA HEALTH",
+    status: "pending",
+    tokenHash: healthApprovalTokenHash(token),
+    reviewerChatId: bostaniChatId,
+    version: "نسخه منتشرشده CHAYSA HEALTH در زمان ارسال",
+    commit: process.env.RAILWAY_GIT_COMMIT_SHA || null,
+    createdAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    deliveryStatus: "pending"
+  };
+  rows.push(request);
+  try { saveHealthApprovalRequests(rows); }
+  catch (_) { return json(res, 500, { error: "ایجاد درخواست بررسی در فضای پایدار انجام نشد." }); }
+  const link = "https://chaysa.up.railway.app/health-approval.html#" + token;
+  const message = [
+    "درخواست رسمی بررسی بخش مشاور سلامت فروشگاه اینترنتی چایسا",
+    "",
+    "سرکار خانم بستانی،",
+    "لطفاً متن نامه و موارد بررسی را در لینک اختصاصی زیر مطالعه و یکی از سه نتیجه را ثبت فرمایید:",
+    link,
+    "",
+    "این لینک فقط برای شما صادر شده و تا ۷ روز اعتبار دارد. پس از ثبت نظر، نتیجه به‌صورت خودکار در بایگانی داخلی CHAYSA HEALTH ثبت و به حساب‌های مرتبط اطلاع‌رسانی می‌شود.",
+    "ثبت این نظر، امضای الکترونیکی واجد شرایط قانونی محسوب نمی‌شود."
+  ].join("\n");
+  const sent = await sendTelegramText(bostaniChatId, message);
+  request.deliveryStatus = sent ? "sent" : "failed";
+  request.sentAt = sent ? new Date().toISOString() : null;
+  try { saveHealthApprovalRequests(rows); }
+  catch (_) { return json(res, 500, { error: "وضعیت ارسال ثبت نشد؛ پیش از تلاش مجدد، سوابق درخواست را بررسی کنید.", requestId: request.id }); }
+  if (!sent) return json(res, 502, { error: "ارسال پیام تلگرام ناموفق بود؛ درخواست در سوابق با وضعیت ناموفق نگهداری شد.", requestId: request.id });
+  return json(res, 201, { ok: true, requestId: request.id, deliveryStatus: "sent", expiresAt: request.expiresAt });
+});
+app.post("/api/health-approval/view", (req, res) => {
+  if (!healthApprovalOriginAllowed(req)) return json(res, 403, { error: "مبدأ درخواست معتبر نیست." });
+  if (limited("health-approval-view:" + (req.ip || "unknown"), 30, 10 * 60 * 1000))
+    return json(res, 429, { error: "تعداد درخواست‌ها زیاد است؛ کمی بعد دوباره تلاش کنید." });
+  const found = findHealthApprovalRequest(req.body && req.body.token);
+  if (!found) return json(res, 404, { error: "لینک بررسی معتبر نیست." });
+  const { row } = found;
+  if (row.deliveryStatus !== "sent") return json(res, 403, { error: "این درخواست از مسیر رسمی ارسال نشده است." });
+  if (Date.parse(row.expiresAt) <= Date.now()) return json(res, 410, { error: "مهلت این لینک به پایان رسیده است." });
+  if (row.status !== "pending") return json(res, 409, { error: "این درخواست قبلاً تعیین تکلیف شده است.", decision: row.decision || null });
+  return json(res, 200, { ok: true, letter: HEALTH_APPROVAL_LETTER, version: row.version, expiresAt: row.expiresAt });
+});
+app.post("/api/health-approval/decision", async (req, res) => {
+  if (!healthApprovalOriginAllowed(req)) return json(res, 403, { error: "مبدأ درخواست معتبر نیست." });
+  if (limited("health-approval-decision:" + (req.ip || "unknown"), 10, 10 * 60 * 1000))
+    return json(res, 429, { error: "تعداد تلاش‌ها زیاد است؛ کمی بعد دوباره تلاش کنید." });
+  const token = req.body && req.body.token;
+  const decision = req.body && req.body.decision;
+  const note = typeof (req.body && req.body.note) === "string" ? req.body.note.trim().slice(0, 2000) : "";
+  const allowed = ["تأیید می‌شود", "تأیید نمی‌شود", "نیاز به اصلاح دارد"];
+  if (!allowed.includes(decision)) return json(res, 400, { error: "گزینه ثبت نظر معتبر نیست." });
+  const found = findHealthApprovalRequest(token);
+  if (!found) return json(res, 404, { error: "لینک بررسی معتبر نیست." });
+  const { rows: requests, row: request } = found;
+  if (request.deliveryStatus !== "sent") return json(res, 403, { error: "این درخواست از مسیر رسمی ارسال نشده است." });
+  if (Date.parse(request.expiresAt) <= Date.now()) return json(res, 410, { error: "مهلت این لینک به پایان رسیده است." });
+  if (request.status !== "pending") return json(res, 409, { error: "این درخواست قبلاً ثبت شده است.", decision: request.decision || null });
+  const archive = readHealthArchive();
+  let record = archive.find(item => item.sourceRequestId === request.id);
+  if (!record) {
+    if (archive.length >= 200) return json(res, 413, { error: "ظرفیت بایگانی به سقف مجاز رسیده است." });
+    record = {
+      id: crypto.randomUUID(),
+      section: "CHAYSA HEALTH",
+      reviewerName: "لینک اختصاصی ارسال‌شده به حساب تلگرام خانم بستانی",
+      decision,
+      version: request.version,
+      commit: request.commit,
+      note,
+      recordedAt: new Date().toISOString(),
+      evidenceFile: null,
+      evidenceMime: null,
+      evidenceSize: 0,
+      evidenceType: "online_decision",
+      sourceRequestId: request.id,
+      reviewerIdentityMethod: "private_bearer_link",
+      reviewerIdentityNote: "لینک اختصاصی به حساب تلگرام مقصد ارسال شده است؛ مالکیت لینک به‌تنهایی احراز هویت حقوقی یا امضای الکترونیکی واجد شرایط نیست.",
+      telegramPair: (getChaysaTelegramPair() || []).map(member => ({
+        chatId: member.id,
+        linkedChatId: member.linkedChatId,
+        pairKey: member.pairKey
+      }))
+    };
+    archive.push(record);
+    try { saveHealthArchive(archive); }
+    catch (_) { return json(res, 500, { error: "ثبت نتیجه در بایگانی انجام نشد؛ دوباره تلاش کنید." }); }
+  }
+  request.status = "recorded";
+  request.decision = record.decision;
+  request.note = record.note;
+  request.recordedAt = record.recordedAt;
+  request.archiveRecordId = record.id;
+  try { saveHealthApprovalRequests(requests); }
+  catch (_) { return json(res, 500, { error: "نتیجه در بایگانی ثبت شده، اما وضعیت درخواست کامل نشد؛ برای جلوگیری از ثبت تکراری، پشتیبانی فنی باید بررسی کند." }); }
+  if (!record.telegramNotification) {
+    const notification = await notifyChaysaTelegramPair([
+      "نتیجه بررسی بخش CHAYSA HEALTH در بایگانی ثبت شد.",
+      "شناسه پرونده: " + record.id,
+      "نتیجه: " + record.decision,
+      "زمان ثبت: " + new Date(record.recordedAt).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" }),
+      "این ثبت از طریق لینک اختصاصی ارسال‌شده برای بررسی انجام شده است."
+    ].join("\n"));
+    record.telegramNotification = notification;
+    try { saveHealthArchive(archive); } catch (_) {}
+  }
+  return json(res, 200, { ok: true, decision: record.decision, recordedAt: record.recordedAt, archiveRecordId: record.id });
+});
 app.get("/api/admin/health-archive", requireAdmin, (_req, res) => {
   const rows = readHealthArchive().slice(-200).reverse().map(({ evidenceFile, ...row }) => row);
   return json(res, 200, rows);
@@ -919,6 +1101,12 @@ app.use((req, res, next) => {
   next();
 });
 
+app.get("/health-approval.html", (_req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.set("Referrer-Policy", "no-referrer");
+  res.set("X-Content-Type-Options", "nosniff");
+  return res.sendFile(path.join(ROOT, "health-approval.html"));
+});
 app.use(express.static(ROOT, { index: "index.html", dotfiles: "ignore" }));
 app.use((err, _req, res, _next) => {
   if (err && err.code === "LIMIT_FILE_SIZE") return json(res, 400, { error: "حجم عکس نباید بیشتر از ۵ مگابایت باشد." });
