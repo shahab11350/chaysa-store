@@ -62,6 +62,9 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 
 .chaysa-home-tools{max-width:1100px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;direction:rtl;align-items:start}
 .chaysa-home-tools>section{width:100%;max-width:none;min-width:0;margin:0}
+.chaysa-guide-trial-notice{margin:12px 0 16px;padding:13px 14px;border:1px solid #b99b55;border-right:4px solid #b99b55;border-radius:10px;background:#fffaf0;color:#5b4a25;font-size:12px;line-height:2;text-align:right}
+.chaysa-guide-trial-notice>strong{display:inline-block;margin-bottom:4px;color:#7b5e1b;font-size:13px}
+.chaysa-guide-trial-notice p{margin:4px 0}
 .chaysa-guide-options{display:grid;grid-template-columns:1fr;gap:10px;margin-top:18px}
 .chaysa-guide-option{background:#fff;border:1px solid #eee8d8;border-radius:12px;padding:10px;box-shadow:0 3px 12px #0000000b;text-align:center}
 .chaysa-guide-option summary{list-style:none;cursor:pointer}
@@ -196,6 +199,13 @@ if(document.readyState==="loading"){
 <div class="chaysa-home-tools">
 <section id="chaysaGuide" class="about chaysa-guide" aria-labelledby="chaysaGuideTitle">
   <h2 id="chaysaGuideTitle">راهنمای چایسا</h2>
+  <aside class="chaysa-guide-trial-notice" role="note" aria-label="وضعیت آزمایشی راهنمای چایسا">
+    <strong>نسخه آزمایشی</strong>
+    <p>این بخش در مرحله آزمایش و بررسی قرار دارد و استفاده از آن فعلاً جنبه آزمایشی دارد.</p>
+    <p><strong>تأیید محتوایی و عملکردی:</strong> سرکار خانم بستانی، تأییدکننده اصلی راهنمای چایسا.</p>
+    <p><strong>تأیید فنی:</strong> آقای نظام، مالک پروژه چایسا؛ پس از بررسی صحت عملکرد، امنیت و پایداری سامانه.</p>
+    <p>تا دریافت و ثبت هر دو تأیید، این بخش در وضعیت آزمایشی باقی می‌ماند.</p>
+  </aside>
   <p>راهنمای انتخاب محصول و پرسش‌های مرتبط با محصولات و خدمات چایسا</p>
   <div id="chaysaGuideCategories" class="chaysa-guide-options" aria-label="دسته‌بندی راهنما"></div>
   <div id="chaysaGuidePrompts" class="chaysa-guide-prompts" aria-live="polite"></div>
