@@ -225,6 +225,19 @@ test("medicine interaction requires a named medicine", async () => {
   assert.equal(result.body.reason, "needs_medicine");
 });
 
+test("medicine field rejects personal health context and dosage details", async () => {
+  for (const medicine of ["من بیماری قلبی دارم", "warfarin 5 mg"]) {
+    const result = await resolveQuestion({
+      category: "safety",
+      productSku: "1401008",
+      question: "آیا این محصول با دارو تداخل دارد؟",
+      medicine
+    });
+    assert.equal(result.body.allowed, false);
+    assert.equal(result.body.reason, "needs_medicine");
+  }
+});
+
 test("medicine interaction builds a limited-source search and safety notice", async () => {
   const result = await resolveQuestion({
     category: "safety",
