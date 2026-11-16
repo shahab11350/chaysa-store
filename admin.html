@@ -126,8 +126,8 @@ async function loadLetterArchive(){
   if(!rows.length){host.textContent='هنوز نامه‌ای ارسال نشده است.';return}
   rows.forEach(row=>{
    const item=document.createElement('div');item.className='letter-archive-item';
-   const title=document.createElement('b');title.textContent=row.letterNumber+' · '+(row.deliveryStatus==='sent'?'ارسال به هر دو حساب':row.deliveryStatus==='partial'?'ارسال ناقص':'ارسال ناموفق');
-   const time=document.createElement('div');time.textContent=row.dateTime||row.createdAt||'';
+   const title=document.createElement('b');title.textContent=row.letterNumber+' · '+(row.deliveryStatus==='sent'?'ارسال به هر دو حساب':row.deliveryStatus==='partial'?'ارسال ناقص':'ارسال ناموفق')+' · '+(row.receiptStatus==='received'?'دریافت تأیید شد':'در انتظار تأیید دریافت');
+   const time=document.createElement('div');time.textContent=(row.dateTime||row.createdAt||'')+(row.receivedAt?' · دریافت: '+new Date(row.receivedAt).toLocaleString('fa-IR'):'');
    const excerpt=document.createElement('div');excerpt.textContent=(row.body||'').slice(0,260);
    item.append(title,time,excerpt);host.append(item);
   });

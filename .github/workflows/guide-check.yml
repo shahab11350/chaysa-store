@@ -13,6 +13,7 @@ on:
       - "server.js"
       - "admin.html"
       - "health-approval.html"
+      - "letter-receipt.html"
       - "docs/CHAYSA_PROJECT_MASTER.md"
       - "docs/CHAYSA_SYSTEM_SPEC.md"
       - "guide.js"
@@ -46,5 +47,16 @@ jobs:
           Path('/tmp/chaysa-admin.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
           PY
           node --check /tmp/chaysa-admin.js
+      - name: Check receipt page inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('letter-receipt.html').read_text(encoding='utf-8')
+          scripts = source.split('<script>')
+          if len(scripts) < 2:
+              raise SystemExit('receipt inline script not found')
+          Path('/tmp/chaysa-letter-receipt.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
+          PY
+          node --check /tmp/chaysa-letter-receipt.js
       - name: Run guide API tests
         run: npm run test:guide
