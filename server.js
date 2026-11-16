@@ -292,14 +292,16 @@ function saveTelegramRecipient(chat) {
   fs.renameSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", TELEGRAM_RECIPIENTS_FILE);
 }
 
-async function sendTelegramText(chatId, text) {
+async function sendTelegramText(chatId, text, replyMarkup) {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   if (!token) return false;
   try {
+    const payload = { chat_id: chatId, text, disable_web_page_preview: true };
+    if (replyMarkup) payload.reply_markup = replyMarkup;
     const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true })
+      body: JSON.stringify(payload)
     });
     const result = await response.json();
     return response.ok && result.ok === true;
@@ -380,6 +382,79 @@ function buildBostaniProgressReport() {
   ].join("\n");
 }
 
+const GUIDE_APPROVALS_FILE = path.join(DATA, "guide-approvals.json");
+function readGuideApprovals() {
+  try {
+    const rows = JSON.parse(fs.readFileSync(GUIDE_APPROVALS_FILE, "utf8"));
+    return Array.isArray(rows) ? rows : [];
+  } catch (_) { return []; }
+}
+function saveGuideApprovals(rows) {
+  const tmp = GUIDE_APPROVALS_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), "utf8");
+  fs.renameSync(tmp, GUIDE_APPROVALS_FILE);
+}
+app.get("/api/admin/guide/approvals", requireAdmin, (_req, res) => {
+  return json(res, 200, readGuideApprovals().slice(-100).reverse());
+});
+async function requestGuideApproval(ownerChatId, version, commit, previewUrl) {
+  const token = process.env.TELEGRAM_BOT_TOKEN || "";
+  const bostaniChatId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
+  if (!token || !/^-?\\d+$/.test(bostaniChatId)) {
+    await sendTelegramText(ownerChatId, "درخواست تأیید ارسال نشد؛ اتصال ربات یا شناسه عددی خانم بستانی تنظیم نشده است.");
+    return;
+  }
+  let preview;
+  try {
+    preview = new URL(previewUrl);
+    if (preview.protocol !== "https:" || preview.hostname.toLowerCase() === "chaysa.up.railway.app" ||
+        preview.username || preview.password || preview.href.length > 512) throw new Error("invalid preview");
+  } catch (_) {
+    await sendTelegramText(ownerChatId, "نشانی پیش‌نمایش معتبر نیست. فقط لینک HTTPS محیط آزمایشی مستقل را ارسال کنید؛ نشانی سایت عملیاتی پذیرفته نمی‌شود.");
+    return;
+  }
+  const id = crypto.randomBytes(6).toString("hex").toUpperCase();
+  const record = {
+    id, version, commit: commit.toLowerCase(), previewUrl: preview.href,
+    status: "pending", requestedAt: new Date().toISOString(),
+    requestedByTelegramId: String(ownerChatId), deliveryStatus: "pending"
+  };
+  const rows = readGuideApprovals();
+  rows.push(record);
+  try { saveGuideApprovals(rows); }
+  catch (_) {
+    await sendTelegramText(ownerChatId, "ثبت درخواست تأیید در سابقه پایدار انجام نشد؛ هیچ درخواستی برای خانم بستانی ارسال نشد.");
+    return;
+  }
+  const message = [
+    "درخواست بررسی و تأیید نسخه آزمایشی راهنمای چایسا",
+    "",
+    "نسخه: " + version,
+    "شناسه درخواست: " + id,
+    "Commit: " + commit.toLowerCase(),
+    "لینک پیش‌نمایش: " + preview.href,
+    "",
+    "لطفاً ابتدا نسخه آزمایشی را بررسی کنید و سپس یکی از دو دکمه زیر را انتخاب کنید.",
+    "این تأیید فقط مربوط به همین نسخه و همین Commit است و به‌معنای مجوز انتشار عمومی نیست."
+  ].join("\\n");
+  const keyboard = {
+    keyboard: [[{ text: "تأیید " + id }, { text: "عدم تأیید " + id }]],
+    resize_keyboard: true,
+    one_time_keyboard: true,
+    selective: true
+  };
+  const sent = await sendTelegramText(bostaniChatId, message, keyboard);
+  const current = readGuideApprovals();
+  const saved = current.find(x => x.id === id);
+  if (saved) {
+    saved.deliveryStatus = sent ? "sent" : "failed";
+    saved.sentAt = sent ? new Date().toISOString() : null;
+    try { saveGuideApprovals(current); } catch (_) {}
+  }
+  await sendTelegramText(ownerChatId, sent
+    ? "درخواست تأیید نسخه " + version + " برای خانم بستانی ارسال شد. شناسه: " + id
+    : "ارسال درخواست به خانم بستانی ناموفق بود. سابقه درخواست با وضعیت ارسال ناموفق نگهداری شد؛ دوباره‌ارسال خودکار انجام نشد.");
+}
 app.post("/telegram/webhook", async (req, res) => {
   const expected = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   const supplied = req.get("x-telegram-bot-api-secret-token") || "";
@@ -388,20 +463,78 @@ app.post("/telegram/webhook", async (req, res) => {
     const update = req.body || {};
     const msg = update.message || update.edited_message;
     if (msg && msg.chat) saveTelegramRecipient(msg.chat);
-    if (msg && msg.chat && msg.chat.type === "private" && typeof msg.text === "string" &&
-        msg.text.trim() === "چایسا فایل") {
+    if (msg && msg.chat && msg.chat.type === "private" && typeof msg.text === "string") {
       const senderId = String(msg.chat.id);
+      const text = msg.text.trim();
       const ownerId = String(process.env.CHAYSA_OWNER_CHAT_ID || "").trim();
       const allowedBostaniId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
-      if (ownerId && senderId === ownerId) {
-        await sendTelegramText(msg.chat.id, buildOwnerProgressReport());
-      } else if (allowedBostaniId && senderId === allowedBostaniId) {
-        await sendTelegramText(msg.chat.id, buildBostaniProgressReport());
+      if (text === "چایسا فایل") {
+        if (ownerId && senderId === ownerId) {
+          await sendTelegramText(msg.chat.id, buildOwnerProgressReport());
+        } else if (allowedBostaniId && senderId === allowedBostaniId) {
+          await sendTelegramText(msg.chat.id, buildBostaniProgressReport());
+        }
+        return res.sendStatus(200);
       }
-      return res.sendStatus(200);
+      if (text.startsWith("/guide_approval")) {
+        if (ownerId && senderId === ownerId) {
+          const match = text.match(/^\\/guide_approval(?:@\\w+)?\\s+([A-Za-z0-9._+-]{1,40})\\s+([a-f0-9]{7,40})\\s+(https:\\/\\/\\S+)$/i);
+          if (!match) {
+            await sendTelegramText(msg.chat.id, "قالب دستور:\\n/guide_approval <version> <commit-sha> <preview-url>\\nنمونه: /guide_approval 1.0.0 abcdef123456 https://chaysa-guide-preview.up.railway.app");
+          } else {
+            await requestGuideApproval(msg.chat.id, match[1], match[2], match[3]);
+          }
+        }
+        return res.sendStatus(200);
+      }
+      const decision = text.match(/^(عدم\\s+تأیید|عدم\\s+تایید|تأیید|تایید)\\s+([A-F0-9]{12})$/i);
+      if (senderId === allowedBostaniId && decision) {
+        const id = decision[2].toUpperCase();
+        const rows = readGuideApprovals();
+        const record = rows.find(x => x.id === id);
+        if (!record || record.status !== "pending" || record.deliveryStatus !== "sent") {
+          await sendTelegramText(msg.chat.id, "این درخواست تأیید معتبر یا فعال نیست.");
+        } else {
+          const approved = !decision[1].startsWith("عدم");
+          record.status = approved ? "approved" : "rejected";
+          record.reviewedAt = new Date().toISOString();
+          record.reviewerTelegramId = String(msg.from && msg.from.id || msg.chat.id);
+          try {
+            saveGuideApprovals(rows);
+            await sendTelegramText(msg.chat.id,
+              (approved ? "تأیید نسخه ثبت شد." : "عدم تأیید نسخه ثبت شد.") +
+              "\\nنسخه: " + record.version +
+              "\\nCommit: " + record.commit +
+              "\\nشناسه: " + id +
+              (approved ? "" : "\\nبرای ثبت اشکالات، دستور /guide_note " + id + " <شرح اشکال> را ارسال کنید."),
+              { remove_keyboard: true });
+          } catch (_) {
+            await sendTelegramText(msg.chat.id, "ثبت نتیجه در سابقه پایدار ناموفق بود؛ لطفاً دوباره تلاش کنید.");
+          }
+        }
+        return res.sendStatus(200);
+      }
+      const note = text.match(/^\\/guide_note(?:@\\w+)?\\s+([A-F0-9]{12})\\s+([\\s\\S]{1,1000})$/i);
+      if (senderId === allowedBostaniId && note) {
+        const rows = readGuideApprovals();
+        const record = rows.find(x => x.id === note[1].toUpperCase() && x.status === "rejected");
+        if (!record) {
+          await sendTelegramText(msg.chat.id, "شناسه نسخه پیدا نشد یا هنوز با عدم تأیید ثبت نشده است.");
+        } else {
+          record.reviewNote = note[2].trim();
+          record.noteAt = new Date().toISOString();
+          try {
+            saveGuideApprovals(rows);
+            await sendTelegramText(msg.chat.id, "توضیحات شما برای نسخه " + record.version + " ثبت شد.");
+          } catch (_) {
+            await sendTelegramText(msg.chat.id, "ثبت توضیحات انجام نشد؛ لطفاً دوباره تلاش کنید.");
+          }
+        }
+        return res.sendStatus(200);
+      }
     }
     const startMatch = msg && msg.chat && msg.chat.type === "private" &&
-      typeof msg.text === "string" ? msg.text.trim().match(/^\/start(?:@\w+)?\s+(Q-[A-Za-z0-9-]+)$/i) : null;
+      typeof msg.text === "string" ? msg.text.trim().match(/^\\/start(?:@\\w+)?\\s+(Q-[A-Za-z0-9-]+)$/i) : null;
     if (startMatch) {
       const rows = readQuestions();
       const question = rows.find(x => x.id === startMatch[1]);
