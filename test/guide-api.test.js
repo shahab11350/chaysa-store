@@ -410,9 +410,9 @@ test("general letters use a direct Telegram inline receipt button", async () => 
     .filter(body => body.text.includes("متن آزمایشی نامه برای آزمون دکمه تلگرام"));
   assert.equal(messages.length, 2);
   for (const message of messages) {
-    assert.match(message.text, /آیا نامه را دریافت کرده‌اید؟/);
+    assert.match(message.text, /برای ثبت دریافت نامه، دکمه زیر را انتخاب کنید:/);
     assert.doesNotMatch(message.text, /letter-receipt\.html|https:\/\//);
-    assert.equal(message.reply_markup.inline_keyboard[0][0].text, "بله، دریافت کردم");
+    assert.equal(message.reply_markup.inline_keyboard[0][0].text, "دریافت نامه را تأیید می‌کنم");
     assert.match(message.reply_markup.inline_keyboard[0][0].callback_data, /^lr:[A-Za-z0-9_-]{43}$/);
   }
 
