@@ -916,9 +916,9 @@ app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
   const receiptToken = crypto.randomBytes(32).toString("base64url");
   const receiptTokenHash = crypto.createHash("sha256").update(receiptToken).digest("hex");
   const publicBaseUrl = (process.env.PUBLIC_BASE_URL || "https://chaysa.up.railway.app").replace(/\/+$/, "");
-  const message = formatGeneralChaysaLetter(meta, body) + "\n\nآیا نامه را دریافت کرده‌اید؟";
+  const message = formatGeneralChaysaLetter(meta, body) + "\n\nبرای ثبت دریافت نامه، دکمه زیر را انتخاب کنید:";
   const receiptKeyboard = {
-    inline_keyboard: [[{ text: "بله، دریافت کردم", callback_data: "lr:" + receiptToken }]]
+    inline_keyboard: [[{ text: "دریافت نامه را تأیید می‌کنم", callback_data: "lr:" + receiptToken }]]
   };
   if (message.length > 4096)
     return json(res, 400, { error: "متن نهایی نامه از محدودیت پیام تلگرام بیشتر است." });
@@ -1377,7 +1377,7 @@ app.listen(port, "0.0.0.0", () => {
     fetch("https://api.telegram.org/bot" + token + "/setWebhook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: webhookUrl, secret_token: webhookSecret, allowed_updates: ["message"], drop_pending_updates: false })
+      body: JSON.stringify({ url: webhookUrl, secret_token: webhookSecret, allowed_updates: ["message", "callback_query"], drop_pending_updates: false })
     }).then(r => r.json()).then(result => console.log("Telegram webhook registration:", result.ok ? "ok" : "failed"))
       .catch(() => console.log("Telegram webhook registration failed"));
   }
