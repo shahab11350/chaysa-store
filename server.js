@@ -753,7 +753,7 @@ app.post("/api/admin/health-approval/send", requireAdmin, async (req, res) => {
   if (limited("health-approval-send:" + (req.ip || "unknown"), 5, 60 * 60 * 1000))
     return json(res, 429, { error: "تعداد درخواست‌های ارسال در این ساعت بیش از حد مجاز است." });
   const bostaniChatId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
-  if (!/^-?\\d+$/.test(bostaniChatId) || !process.env.TELEGRAM_BOT_TOKEN)
+  if (!/^-?\d+$/.test(bostaniChatId) || !process.env.TELEGRAM_BOT_TOKEN)
     return json(res, 503, { error: "تنظیمات امن ارسال تلگرام خانم بستانی کامل نیست." });
   const rows = readHealthApprovalRequests();
   const active = rows.find(item => item.status === "pending" && item.expiresAt && Date.parse(item.expiresAt) > Date.now());
