@@ -133,19 +133,19 @@ function readGuideBank() {
 }
 function guideNormalize(value) {
   return String(value || "").toLowerCase()
-    .replace(/[\\u064B-\\u065F\\u0670\\u0640]/g, "")
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
     .replace(/[يى]/g, "ی").replace(/ك/g, "ک")
     .replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
     .replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
-    .replace(/[\\u200c\\u200f\\u200e]/g, " ")
-    .replace(/[^\\p{L}\\p{N}\\s-]/gu, " ")
-    .replace(/\\s+/g, " ").trim();
+    .replace(/[\u200c\u200f\u200e]/g, " ")
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .replace(/\s+/g, " ").trim();
 }
 function guideSafeMedicine(value) {
   const raw = typeof value === "string" ? value.trim() : "";
-  if (!raw || raw.length > 80 || /[@\\d]|https?:|www\\.|\\+|\\b\\d{4,}\\b/i.test(raw)) return "";
-  if (!/^[\\p{L}\\s-]+$/u.test(raw)) return "";
-  return raw.replace(/\\s+/g, " ");
+  if (!raw || raw.length > 80 || /[@]|https?:|www\.|\+|\b\d{4,}\b/i.test(raw)) return "";
+  if (!/^[\p{L}\p{N}\s-]+$/u.test(raw)) return "";
+  return raw.replace(/\s+/g, " ");
 }
 function guideFindProduct(products, sku, question) {
   if (sku) {
