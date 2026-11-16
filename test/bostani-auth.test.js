@@ -65,7 +65,7 @@ test("wrong username and password are rejected", async () => {
   assert.equal((await login("@someoneelse", "test-only-bostani-password")).status, 401);
   assert.equal((await login("@bostani26chaysa", "incorrect-password")).status, 401);
 });
-test("valid credentials create secure signed session; logout revokes it", async () => {
+test("valid credentials create secure signed session; logout clears browser cookie", async () => {
   const response = await login("@bostani26chaysa", "test-only-bostani-password");
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { ok: true });
@@ -79,7 +79,7 @@ test("valid credentials create secure signed session; logout revokes it", async 
   assert.equal((await fetch(baseUrl + "/api/bostani/questions", { headers: { Cookie: cookie } })).status, 200);
   const logout = await fetch(baseUrl + "/api/bostani/logout", { method: "POST", headers: { Cookie: cookie } });
   assert.equal(logout.status, 200);
-  assert.match(logout.headers.get("set-cookie") || "", /Max-Age=0/i);
+  assert.match(logout.headers.get("set-cookie") || "", /Expires=Thu, 01 Jan 1970/i);
 });
 test("legacy key is converted to an eight-hour signed session", async () => {
   const response = await fetch(baseUrl + "/bostani.html?key=test-only-session-secret", { redirect: "manual" });
