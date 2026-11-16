@@ -38,7 +38,12 @@
 <div class="panel">
 <button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button>
 <h2 style="margin-top:16px">بایگانی تأییدیه‌های CHAYSA HEALTH</h2>
-<p class="muted">پرونده فقط پس از دریافت نتیجه بررسی و تصویر تأیید/اعلام نظر ثبت می‌شود. تصویر مدارک در فضای خصوصی سرور نگهداری می‌شود و فقط مدیر واردشده به آن دسترسی دارد.</p>
+<p class="muted">نتیجه‌ای که از طریق لینک اختصاصی ثبت شود، به‌صورت خودکار در همین بایگانی ذخیره خواهد شد. ثبت دستی همراه تصویر نیز برای مدارک تکمیلی در دسترس است.</p>
+<div style="border:1px solid #d8c99f;border-radius:12px;padding:14px;margin:14px 0;background:#fffdf7">
+<h3>ارسال نامه رسمی برای خانم بستانی</h3>
+<p class="muted">با این دکمه، لینک یک‌بارمصرف و هفت‌روزه ساخته و فقط به حساب تلگرام خانم بستانی ارسال می‌شود. پس از ثبت یکی از سه نتیجه، پرونده به‌صورت خودکار در بایگانی ثبت و اعلان آن برای دو حساب مرتبط ارسال می‌شود.</p>
+<button id="sendHealthApproval">ایجاد و ارسال نامه در تلگرام</button><div id="healthApprovalSendStatus" class="muted" aria-live="polite"></div>
+</div>
 <div style="border:1px solid #e8dfca;border-radius:12px;padding:14px;margin:14px 0">
 <h3>ثبت پرونده جدید</h3>
 <label for="healthReviewer">نام و نام خانوادگی بررسی‌کننده</label><input id="healthReviewer" maxlength="120" placeholder="سرکار خانم بستانی">
@@ -76,8 +81,11 @@ async function loadHealthArchive(){
    const title=document.createElement('b');title.textContent=row.section+' · '+row.decision;
    const meta=document.createElement('div');meta.className='muted';meta.textContent='بررسی‌کننده: '+row.reviewerName+' · نسخه: '+row.version+' · ثبت: '+new Date(row.recordedAt).toLocaleString('fa-IR');
    const note=document.createElement('p');note.style.whiteSpace='pre-wrap';note.textContent=row.note||'بدون توضیحات';
-   const evidence=document.createElement('button');evidence.className='secondary';evidence.textContent='نمایش تصویر مدرک';evidence.onclick=()=>window.open('/api/admin/health-archive/'+encodeURIComponent(row.id)+'/evidence','_blank','noopener');
-   box.append(title,meta,note,evidence);host.append(box);
+   const evidence=document.createElement('div');evidence.className='muted';evidence.textContent=row.evidenceType==='online_decision'?'مدرک: ثبت مستقیم نتیجه از طریق لینک اختصاصی (بدون تصویر اسکرین‌شات)':row.evidenceFile?'مدرک تصویری در بایگانی خصوصی ثبت شده است.':'مدرک تصویری ثبت نشده است.';
+   box.append(title,meta,note,evidence);
+   if(row.evidenceFile){const view=document.createElement('button');view.className='secondary';view.textContent='نمایش تصویر مدرک';view.onclick=()=>window.open('/api/admin/health-archive/'+encodeURIComponent(row.id)+'/evidence','_blank','noopener');box.append(view)}
+   if(row.telegramNotification){const delivery=document.createElement('div');delivery.className='muted';delivery.textContent='وضعیت اعلان تلگرام: '+row.telegramNotification.status;box.append(delivery)}
+   host.append(box);
   });
  }catch(e){host.textContent=e.message}
 }
@@ -180,6 +188,16 @@ document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener
 document.querySelectorAll('[data-back]').forEach(button=>button.addEventListener('click',goBackAdminView));
 $('refreshOrders').onclick=loadOrders;
 $('refreshHealthArchive').onclick=loadHealthArchive;
+$('sendHealthApproval').onclick=async()=>{
+ const button=$('sendHealthApproval'),out=$('healthApprovalSendStatus');
+ if(!confirm('نامه رسمی CHAYSA HEALTH برای خانم بستانی از طریق تلگرام ارسال شود؟'))return;
+ button.disabled=true;out.textContent='در حال ایجاد لینک امن و ارسال پیام…';
+ try{
+  const result=await api('health-approval/send',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  out.textContent='نامه با موفقیت به ربات تلگرام خانم بستانی ارسال شد. مهلت لینک: '+new Date(result.expiresAt).toLocaleString('fa-IR')+' · شناسه درخواست: '+result.requestId;
+ }catch(e){out.textContent=e.message}
+ finally{button.disabled=false}
+};
 $('saveHealthArchive').onclick=saveHealthArchive;
 $('refreshAnalytics').onclick=loadAnalytics;
 $('refreshQuestions').onclick=loadQuestions;
