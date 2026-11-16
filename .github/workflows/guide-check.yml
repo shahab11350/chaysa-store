@@ -40,6 +40,17 @@ jobs:
         run: node --check server.js
       - name: Run Bostani authentication tests
         run: npm run test:bostani-auth
+      - name: Check Bostani inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('bostani.html').read_text(encoding='utf-8')
+          scripts = source.split('<script>')
+          if len(scripts) < 2:
+              raise SystemExit('Bostani inline script not found')
+          Path('/tmp/chaysa-bostani.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
+          PY
+          node --check /tmp/chaysa-bostani.js
       - name: Check admin inline JavaScript syntax
         run: |
           python - <<'PY'
