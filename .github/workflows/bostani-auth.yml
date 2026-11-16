@@ -1,0 +1,31 @@
+name: CHAYSA Bostani authentication checks
+
+on:
+  pull_request:
+    branches:
+      - chaysa-backup
+    paths:
+      - "server.js"
+      - "bostani.html"
+      - "test/bostani-auth.test.js"
+      - "package.json"
+      - ".github/workflows/bostani-auth.yml"
+
+jobs:
+  bostani-auth:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Check server JavaScript syntax
+        run: node --check server.js
+      - name: Run Bostani authentication tests
+        run: npm run test:bostani-auth
+      - name: Run guide regression tests
+        run: npm run test:guide
