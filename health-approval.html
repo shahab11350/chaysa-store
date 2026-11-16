@@ -45,10 +45,14 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin-top:22px}
 <div id="letter" aria-live="polite">در حال بررسی اعتبار لینک اختصاصی…</div>
 <div id="version" class="version hidden"></div>
 <div id="decisionArea" class="hidden">
+<label class="note-label" for="reviewerName">نام و نام خانوادگی (الزامی)</label>
+<input id="reviewerName" name="reviewerName" type="text" maxlength="120" autocomplete="name" required placeholder="نام و نام خانوادگی خود را تایپ کنید" style="display:block;width:100%;min-height:48px;padding:10px 12px;border:1px solid #d9d2c2;border-radius:10px;font:14px Tahoma;text-align:right">
+<p id="consentText" style="margin:14px 0;padding:12px;background:#f7f5ed;border-right:3px solid var(--gold);font-size:13px">اینجانب [نام و نام خانوادگی]، مالک فروشگاه اینترنتی چایسا، دریافت و مطالعه نامه را تأیید می‌کنم و با استقرار بخش مشاور سلامت چایسا (CHAYSA HEALTH)، مطابق توضیحات نامه، موافقم.</p>
+<div class="version">تاریخ و ساعت ثبت، هنگام تأیید به‌صورت خودکار در بایگانی چایسا ذخیره می‌شود.</div>
 <label class="note-label" for="reviewNote">توضیحات یا موارد نیازمند اصلاح (اختیاری)</label>
 <textarea id="reviewNote" maxlength="2000" placeholder="در صورت نیاز، توضیحات خود را بنویسید…"></textarea>
 <div class="actions">
-<button type="button" data-decision="تأیید می‌شود">تأیید می‌شود</button>
+<button type="button" data-decision="تأیید می‌شود">تأیید و ثبت موافقت</button>
 <button type="button" data-decision="تأیید نمی‌شود">تأیید نمی‌شود</button>
 <button type="button" data-decision="نیاز به اصلاح دارد">نیاز به اصلاح دارد</button>
 </div>
@@ -66,7 +70,13 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin-top:22px}
   const area = document.getElementById("decisionArea");
   const version = document.getElementById("version");
   const note = document.getElementById("reviewNote");
+  const reviewerName = document.getElementById("reviewerName");
+  const consentText = document.getElementById("consentText");
   const buttons = Array.from(document.querySelectorAll("[data-decision]"));
+  if (reviewerName) reviewerName.addEventListener("input", () => {
+    const name = reviewerName.value.trim();
+    consentText.textContent = "اینجانب " + (name || "[نام و نام خانوادگی]") + "، مالک فروشگاه اینترنتی چایسا، دریافت و مطالعه نامه را تأیید می‌کنم و با استقرار بخش مشاور سلامت چایسا (CHAYSA HEALTH)، مطابق توضیحات نامه، موافقم.";
+  });
   const post = async (path, body) => {
     const response = await fetch(path, {
       method: "POST",
@@ -97,11 +107,17 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin-top:22px}
   });
   buttons.forEach(button => button.addEventListener("click", async () => {
     const decision = button.dataset.decision;
-    if (!window.confirm("نتیجه «" + decision + "» ثبت شود؟ پس از ثبت، لینک قابل استفاده مجدد نخواهد بود.")) return;
+    const name = reviewerName ? reviewerName.value.trim() : "";
+    if (!name) {
+      status.textContent = "لطفاً نام و نام خانوادگی را تایپ کنید.";
+      if (reviewerName) reviewerName.focus();
+      return;
+    }
+    if (!window.confirm("نام ثبت‌شونده: " + name + "\\nنتیجه «" + decision + "» ثبت شود؟ پس از ثبت، لینک قابل استفاده مجدد نخواهد بود.")) return;
     buttons.forEach(item => item.disabled = true);
     status.textContent = "در حال ثبت نظر و بایگانی…";
     try {
-      const result = await post("/api/health-approval/decision", { token, decision, note: note.value });
+      const result = await post("/api/health-approval/decision", { token, decision, reviewerName: name, note: note.value });
       area.classList.add("hidden");
       status.textContent = "نظر شما با موفقیت ثبت شد.\nنتیجه: " + result.decision + "\nشناسه پرونده بایگانی: " + result.archiveRecordId + "\nاین لینک اکنون مصرف شده است.";
       history.replaceState(null, "", window.location.pathname);
