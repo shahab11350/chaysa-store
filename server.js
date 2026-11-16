@@ -205,9 +205,17 @@ app.post("/api/guide/resolve", (req, res) => {
     return json(res, 200, { ok: false, allowed: false, reason: "needs_product", message: "برای ادامه، محصول موردنظر را از فهرست انتخاب کنید و پرسش را درباره همان محصول بنویسید." });
   if (category === "safety") {
     if (!product) return json(res, 200, { ok: false, allowed: false, reason: "needs_product", message: "ابتدا محصول چایسا را انتخاب کنید." });
-    if (!medicine) return json(res, 200, { ok: false, allowed: false, reason: "needs_medicine", message: "نام دارو را در فیلد جداگانه وارد کنید؛ اطلاعات شخصی یا مشخصات پزشکی خود را ننویسید." });
-    const q = '"' + product.name + '" "' + medicine + '" تداخل مصرف هم‌زمان ایمنی شواهد ' +
-      (bank.healthPolicy.sourceDomains || []).map(d => "site:" + d).join(" OR ");
+    const interactionQuestion = guideContainsAny(normalized, ["تداخل", "دارو", "همزمان", "هم زمان"]);
+    let q = "";
+    if (interactionQuestion) {
+      if (!medicine) return json(res, 200, { ok: false, allowed: false, reason: "needs_medicine", message: "برای بررسی تداخل، نام دارو را در فیلد جداگانه وارد کنید؛ اطلاعات شخصی یا شرح پرونده پزشکی را ننویسید." });
+      q = '"' + product.name + '" "' + medicine + '" تداخل مصرف هم‌زمان ایمنی شواهد ';
+    } else {
+      const safetyHits = (rules.safetyTopics || []).filter(t => normalized.includes(guideNormalize(t)));
+      if (!safetyHits.length) return json(res, 200, { ok: false, allowed: false, reason: "needs_safety_context", message: "پرسش را درباره عوارض احتمالی، احتیاط، حساسیت، بارداری، شیردهی یا ایمنی مصرف محصول روشن‌تر کنید." });
+      q = '"' + product.name + '" ' + safetyHits.join(" ") + " ایمنی مصرف شواهد علمی ";
+    }
+    q += (bank.healthPolicy.sourceDomains || []).map(d => "site:" + d).join(" OR ");
     const url = "https://www.google.com/search?q=" + encodeURIComponent(q);
     return json(res, 200, { ok: true, allowed: true, type: "medical_external_search", url,
       notice: bank.healthPolicy.notice || "", rule: bank.healthPolicy.rule || "" });
