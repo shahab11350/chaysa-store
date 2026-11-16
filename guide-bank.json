@@ -1,0 +1,379 @@
+{
+  "schemaVersion": 1,
+  "categories": [
+    {
+      "id": "products",
+      "title": "راهنمای محصولات",
+      "description": "شناخت محصولات، ترکیبات درج‌شده، طعم، کافئین، دم‌آوری و نگهداری."
+    },
+    {
+      "id": "safety",
+      "title": "سلامت و ایمنی مصرف",
+      "description": "بررسی احتیاط‌ها و پرسش درباره تداخل محصول با داروی مشخص."
+    },
+    {
+      "id": "services",
+      "title": "راهنمای خرید و خدمات",
+      "description": "ثبت سفارش، پرداخت، ارسال و پیگیری سفارش‌های چایسا."
+    },
+    {
+      "id": "custom",
+      "title": "پرسش اختصاصی",
+      "description": "پرسش خودت را بنویس؛ موضوع باید به محصول یا خدمات چایسا مرتبط باشد."
+    }
+  ],
+  "questionBank": [
+    {
+      "id": "p-ingredients",
+      "category": "products",
+      "label": "ترکیبات این محصول چیست؟",
+      "prompt": "ترکیبات درج‌شده برای این محصول چیست؟"
+    },
+    {
+      "id": "p-caffeine",
+      "category": "products",
+      "label": "آیا این محصول کافئین دارد؟",
+      "prompt": "میزان کافئین این محصول چقدر است؟"
+    },
+    {
+      "id": "p-brew",
+      "category": "products",
+      "label": "روش دم‌آوری محصول چیست؟",
+      "prompt": "روش مناسب دم‌آوری این محصول چیست؟"
+    },
+    {
+      "id": "p-storage",
+      "category": "products",
+      "label": "چطور از محصول نگهداری کنم؟",
+      "prompt": "روش صحیح نگهداری این محصول چیست؟"
+    },
+    {
+      "id": "s-interaction",
+      "category": "safety",
+      "label": "بررسی تداخل با دارو",
+      "prompt": "آیا مصرف این محصول با داروی مشخص‌شده تداخل دارد؟"
+    },
+    {
+      "id": "s-adverse",
+      "category": "safety",
+      "label": "عوارض و احتیاط‌های مصرف",
+      "prompt": "عوارض احتمالی و احتیاط‌های مصرف این محصول چیست؟"
+    },
+    {
+      "id": "s-pregnancy",
+      "category": "safety",
+      "label": "مصرف در بارداری یا شیردهی",
+      "prompt": "ایمنی مصرف این محصول در بارداری یا شیردهی چگونه بررسی شده است؟"
+    },
+    {
+      "id": "o-order",
+      "category": "services",
+      "label": "ثبت سفارش",
+      "prompt": "چطور از فروشگاه چایسا سفارش ثبت کنم؟"
+    },
+    {
+      "id": "o-payment",
+      "category": "services",
+      "label": "پرداخت سفارش",
+      "prompt": "روش پرداخت سفارش چایسا چیست؟"
+    },
+    {
+      "id": "o-shipping",
+      "category": "services",
+      "label": "ارسال سفارش",
+      "prompt": "شرایط ارسال سفارش چایسا چیست؟"
+    },
+    {
+      "id": "o-track",
+      "category": "services",
+      "label": "پیگیری سفارش",
+      "prompt": "چطور سفارش خودم را پیگیری کنم؟"
+    }
+  ],
+  "topicRules": {
+    "deniedTerms": [
+      "قیمت دلار",
+      "نرخ دلار",
+      "دلار",
+      "یورو",
+      "ارز",
+      "بورس",
+      "سهام",
+      "فوتبال",
+      "نتیجه بازی",
+      "آب و هوا",
+      "هواشناسی",
+      "اخبار سیاسی",
+      "انتخابات",
+      "سیاست",
+      "سرگرمی عمومی"
+    ],
+    "serviceTerms": [
+      "خرید",
+      "سفارش",
+      "ثبت سفارش",
+      "پرداخت",
+      "فاکتور",
+      "ارسال",
+      "مرسوله",
+      "پیگیری",
+      "رهگیری",
+      "مرجوعی",
+      "بازگشت کالا",
+      "فروشگاه",
+      "چایسا",
+      "پشتیبانی"
+    ],
+    "productTopics": [
+      "ترکیبات",
+      "مواد تشکیل دهنده",
+      "طعم",
+      "عطر",
+      "کافئین",
+      "دم آوری",
+      "دم‌آوری",
+      "دم کردن",
+      "نگهداری",
+      "روش مصرف",
+      "مقدار مصرف",
+      "ویژگی",
+      "اطلاعات محصول"
+    ],
+    "unsafeIntentTerms": [
+      "تشخیص بیماری",
+      "تشخیص پزشکی",
+      "درمان",
+      "درمان قطعی",
+      "درمان بیماری",
+      "تجویز",
+      "چه دارویی بخورم",
+      "چه دارویی مصرف کنم",
+      "داروی مناسب",
+      "قطع دارو",
+      "قطع کردن دارو",
+      "قطع مصرف دارو",
+      "دارو را قطع",
+      "دارو رو قطع",
+      "مصرف دارو را متوقف",
+      "تغییر دوز",
+      "دوز دارو",
+      "افزایش دوز",
+      "کاهش دوز",
+      "جایگزین دارو",
+      "به جای دارو",
+      "دارو را عوض",
+      "تغییر دارو"
+    ],
+    "safetyTopics": [
+      "عوارض",
+      "احتیاط",
+      "حساسیت",
+      "بارداری",
+      "شیردهی",
+      "حاملگی",
+      "ایمنی",
+      "منع مصرف",
+      "مصرف",
+      "خطر"
+    ]
+  },
+  "healthPolicy": {
+    "sourceDomains": [
+      "nhs.uk",
+      "nccih.nih.gov",
+      "medlineplus.gov",
+      "ods.od.nih.gov",
+      "accessdata.fda.gov",
+      "pubmed.ncbi.nlm.nih.gov"
+    ],
+    "notice": "نتایج جست‌وجو به معنی بررسی یا تأیید پزشکی از سوی چایسا نیست. داروی تجویزشده را خودسرانه قطع یا تغییر ندهید. برای تصمیم درباره مصرف هم‌زمان، به‌ویژه در بارداری، شیردهی، بیماری زمینه‌ای یا مصرف چند دارو، با پزشک یا داروساز مشورت کنید.",
+    "evidenceStatus": "no_curated_interaction_records",
+    "rule": "نبود اطلاعات ثبت‌شده درباره تداخل، به معنی بی‌خطر بودن مصرف هم‌زمان نیست."
+  },
+  "keywords": [
+    {
+      "match": [
+        "ترکیبات",
+        "مواد تشکیل دهنده",
+        "اجزا",
+        "محتویات"
+      ],
+      "category": "products",
+      "suggestion": "ترکیبات درج‌شده برای این محصول چیست؟"
+    },
+    {
+      "match": [
+        "کافئین",
+        "کافئین دار",
+        "میزان کافئین"
+      ],
+      "category": "products",
+      "suggestion": "میزان کافئین این محصول چقدر است؟"
+    },
+    {
+      "match": [
+        "طعم",
+        "مزه",
+        "عطر",
+        "بو"
+      ],
+      "category": "products",
+      "suggestion": "طعم و عطر این محصول چگونه توصیف شده است؟"
+    },
+    {
+      "match": [
+        "دم آوری",
+        "دم‌آوری",
+        "دم کردن",
+        "زمان دم"
+      ],
+      "category": "products",
+      "suggestion": "روش دم‌آوری این محصول چیست؟"
+    },
+    {
+      "match": [
+        "نگهداری",
+        "ماندگاری",
+        "تاریخ مصرف"
+      ],
+      "category": "products",
+      "suggestion": "روش صحیح نگهداری این محصول چیست؟"
+    },
+    {
+      "match": [
+        "تداخل",
+        "همزمان",
+        "هم‌زمان",
+        "دارو"
+      ],
+      "category": "safety",
+      "suggestion": "آیا مصرف این محصول با داروی مشخص‌شده تداخل دارد؟"
+    },
+    {
+      "match": [
+        "عوارض",
+        "احتیاط",
+        "حساسیت"
+      ],
+      "category": "safety",
+      "suggestion": "عوارض احتمالی و احتیاط‌های مصرف این محصول چیست؟"
+    },
+    {
+      "match": [
+        "بارداری",
+        "شیردهی",
+        "حاملگی"
+      ],
+      "category": "safety",
+      "suggestion": "ایمنی مصرف این محصول در بارداری یا شیردهی چگونه بررسی شده است؟"
+    },
+    {
+      "match": [
+        "ثبت سفارش",
+        "سفارش"
+      ],
+      "category": "services",
+      "suggestion": "چطور از فروشگاه چایسا سفارش ثبت کنم؟"
+    },
+    {
+      "match": [
+        "پرداخت",
+        "فاکتور"
+      ],
+      "category": "services",
+      "suggestion": "روش پرداخت سفارش چایسا چیست؟"
+    },
+    {
+      "match": [
+        "ارسال",
+        "مرسوله"
+      ],
+      "category": "services",
+      "suggestion": "شرایط ارسال سفارش چایسا چیست؟"
+    },
+    {
+      "match": [
+        "رهگیری",
+        "پیگیری"
+      ],
+      "category": "services",
+      "suggestion": "چطور سفارش خودم را پیگیری کنم؟"
+    }
+  ],
+  "interactionRecords": [],
+  "knowledgeSchema": {
+    "product": [
+      "sku",
+      "name",
+      "category",
+      "ingredients",
+      "caffeine",
+      "flavor",
+      "aroma",
+      "brewing",
+      "storage",
+      "officialLabelSource",
+      "lastReviewedAt"
+    ],
+    "medication": [
+      "genericName",
+      "brandNames",
+      "activeIngredient",
+      "drugClass",
+      "source",
+      "lastReviewedAt"
+    ],
+    "interaction": [
+      "productSku",
+      "botanicalIngredient",
+      "medicationGenericName",
+      "interactionType",
+      "severity",
+      "evidenceLevel",
+      "summary",
+      "precautions",
+      "sourceIds",
+      "reviewedAt",
+      "reviewDueAt"
+    ],
+    "specialCondition": [
+      "condition",
+      "productSku",
+      "ingredient",
+      "riskSummary",
+      "evidenceLevel",
+      "sourceIds",
+      "reviewedAt"
+    ],
+    "adverseEffect": [
+      "productSku",
+      "ingredient",
+      "effect",
+      "frequencyIfKnown",
+      "severity",
+      "sourceIds",
+      "reviewedAt"
+    ],
+    "source": [
+      "id",
+      "title",
+      "publisher",
+      "url",
+      "sourceType",
+      "publicationDate",
+      "accessedAt",
+      "reliability",
+      "notes"
+    ],
+    "faq": [
+      "id",
+      "category",
+      "question",
+      "synonyms",
+      "answer",
+      "sourceIds",
+      "status",
+      "reviewedAt"
+    ]
+  }
+}
