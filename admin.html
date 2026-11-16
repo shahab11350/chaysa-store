@@ -18,22 +18,22 @@
 </nav>
 </section>
 <section id="productsView" class="admin-view hidden">
-<div class="panel"><button type="button" class="secondary back-button" data-home>بازگشت به منوی اصلی</button><h2 style="margin-top:16px">مدیریت محصولات</h2><div id="items"></div></div>
+<div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">مدیریت محصولات</h2><div id="items"></div></div>
 </section>
 <section id="addProductView" class="admin-view hidden">
-<div class="panel"><button type="button" class="secondary back-button" data-home>بازگشت به منوی اصلی</button><h2 id="formTitle" style="margin-top:16px">افزودن محصول</h2><input id="editIndex" type="hidden"><label>نام محصول</label><input id="name" placeholder="نام محصول"><div class="row"><div><label>شناسه کالا</label><input id="sku" placeholder="مثلاً 1401001"></div><div><label>قیمت (تومان)</label><input id="price" inputmode="numeric" placeholder="مثلاً ۴۷۹۰۰۰"></div></div><label>دسته‌بندی</label><select id="category"><option>چای</option><option>دمنوش</option><option>ادویه</option><option>عسل</option><option>سایر</option></select><label>عکس محصول</label><input id="photo" type="file" accept="image/*"><p class="muted">فقط عکس را انتخاب کن؛ چایسا اندازه و حجم آن را خودکار بهینه و به WebP تبدیل می‌کند.</p><div class="row"><button id="save">ذخیره محصول</button><button id="clear" class="secondary">پاک‌کردن فرم</button></div></div>
+<div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 id="formTitle" style="margin-top:16px">افزودن محصول</h2><input id="editIndex" type="hidden"><label>نام محصول</label><input id="name" placeholder="نام محصول"><div class="row"><div><label>شناسه کالا</label><input id="sku" placeholder="مثلاً 1401001"></div><div><label>قیمت (تومان)</label><input id="price" inputmode="numeric" placeholder="مثلاً ۴۷۹۰۰۰"></div></div><label>دسته‌بندی</label><select id="category"><option>چای</option><option>دمنوش</option><option>ادویه</option><option>عسل</option><option>سایر</option></select><label>عکس محصول</label><input id="photo" type="file" accept="image/*"><p class="muted">فقط عکس را انتخاب کن؛ چایسا اندازه و حجم آن را خودکار بهینه و به WebP تبدیل می‌کند.</p><div class="row"><button id="save">ذخیره محصول</button><button id="clear" class="secondary">پاک‌کردن فرم</button></div></div>
 </section>
 <section id="ordersView" class="admin-view hidden">
-<div class="panel"><button type="button" class="secondary back-button" data-home>بازگشت به منوی اصلی</button><h2 style="margin-top:16px">سفارش‌ها و پیگیری تحویل</h2><button id="refreshOrders" class="secondary">به‌روزرسانی سفارش‌ها</button><div id="orders" class="muted">در حال بارگذاری…</div></div>
+<div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">سفارش‌ها و پیگیری تحویل</h2><button id="refreshOrders" class="secondary">به‌روزرسانی سفارش‌ها</button><div id="orders" class="muted">در حال بارگذاری…</div></div>
 </section>
 <section id="questionsView" class="admin-view hidden">
-<div class="panel"><button type="button" class="secondary back-button" data-home>بازگشت به منوی اصلی</button><h2 style="margin-top:16px">پرسش و پاسخ چایسا</h2><p class="muted">پاسخ فقط از طریق تلگرام به مشتری‌ای ارسال می‌شود که پیوند اختصاصی همان پرسش را باز کرده و Start را زده باشد.</p><button id="refreshQuestions" class="secondary">به‌روزرسانی پرسش‌ها</button><div id="questions" class="muted">در حال بارگذاری…</div></div>
+<div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">پرسش و پاسخ چایسا</h2><p class="muted">پاسخ فقط از طریق تلگرام به مشتری‌ای ارسال می‌شود که پیوند اختصاصی همان پرسش را باز کرده و Start را زده باشد.</p><button id="refreshQuestions" class="secondary">به‌روزرسانی پرسش‌ها</button><div id="questions" class="muted">در حال بارگذاری…</div></div>
 </section>
 <section id="analyticsView" class="admin-view hidden">
-<div class="panel"><button type="button" class="secondary back-button" data-home>بازگشت به منوی اصلی</button><div class="row" style="margin-top:16px"><h2>آمار سایت و اپلیکیشن</h2><button id="refreshAnalytics" class="secondary">به‌روزرسانی آمار</button></div><div id="analytics" class="muted">در حال دریافت آمار…</div><p class="muted">آمار سایت از زمان انتشار این نسخه ثبت می‌شود. نصب APK پس از اتصال نسخهٔ اندروید به سرویس آمار، با اولین اجرا ثبت خواهد شد.</p></div>
+<div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><div class="row" style="margin-top:16px"><h2>آمار سایت و اپلیکیشن</h2><button id="refreshAnalytics" class="secondary">به‌روزرسانی آمار</button></div><div id="analytics" class="muted">در حال دریافت آمار…</div><p class="muted">آمار سایت از زمان انتشار این نسخه ثبت می‌شود. نصب APK پس از اتصال نسخهٔ اندروید به سرویس آمار، با اولین اجرا ثبت خواهد شد.</p></div>
 </section>
 <section id="telegramView" class="admin-view hidden">
-<div class="panel"><button type="button" class="secondary back-button" data-home>بازگشت به منوی اصلی</button><h2 style="margin-top:16px">اتصال تلگرام</h2><p class="muted">برای شناسایی گیرنده‌ها، پیام‌های شروع ربات خوانده می‌شوند؛ فقط شناسه و نام کاربری نمایش داده می‌شود.</p><button id="telegramLookup" class="secondary">شناسایی گیرنده‌های فاکتور</button><div id="telegramResult" class="muted"></div></div>
+<div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">اتصال تلگرام</h2><p class="muted">برای شناسایی گیرنده‌ها، پیام‌های شروع ربات خوانده می‌شوند؛ فقط شناسه و نام کاربری نمایش داده می‌شود.</p><button id="telegramLookup" class="secondary">شناسایی گیرنده‌های فاکتور</button><div id="telegramResult" class="muted"></div></div>
 </section>
 </main>
 <script>
@@ -111,12 +111,20 @@ async function loadQuestions(){
 }
 async function saveAll(){try{await api('products',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(products)});render();status('تغییرات با موفقیت ذخیره شد.')}catch(e){status(e.message)}}
 $('loginBtn').onclick=async()=>{try{await api('login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('password').value})});$('login').classList.add('hidden');$('app').classList.remove('hidden');showDashboard();await load();await loadOrders();await loadQuestions();await loadAnalytics()}catch(e){alert(e.message)}};
-function showAdminView(viewId){
+let adminViewHistory=[];
+let currentAdminView='adminHome';
+function showAdminView(viewId,options={}){
+ if(options.remember!==false&&viewId!==currentAdminView)adminViewHistory.push(currentAdminView);
  $('adminHome').classList.toggle('hidden',viewId!=='adminHome');
  document.querySelectorAll('.admin-view').forEach(view=>view.classList.toggle('hidden',view.id!==viewId));
+ currentAdminView=viewId;
+}
+function goBackAdminView(){
+ const previousView=adminViewHistory.pop()||'adminHome';
+ showAdminView(previousView,{remember:false});
 }
 document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.view==='addProductView')$('clear').click();showAdminView(button.dataset.view)}));
-document.querySelectorAll('[data-home]').forEach(button=>button.addEventListener('click',()=>showAdminView('adminHome')));
+document.querySelectorAll('[data-back]').forEach(button=>button.addEventListener('click',goBackAdminView));
 $('refreshOrders').onclick=loadOrders;
 $('refreshAnalytics').onclick=loadAnalytics;
 $('refreshQuestions').onclick=loadQuestions;
