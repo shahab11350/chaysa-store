@@ -5,6 +5,7 @@ on:
     branches:
       - feature/home-guide-layout-2026-11-16
       - feature/health-online-approval-2026-11-16
+      - feature/admin-letter-composer-2026-11-16
   pull_request:
     branches:
       - chaysa-backup
@@ -34,5 +35,16 @@ jobs:
         run: npm install --ignore-scripts
       - name: Check server JavaScript syntax
         run: node --check server.js
+      - name: Check admin inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('admin.html').read_text(encoding='utf-8')
+          scripts = source.split('<script>')
+          if len(scripts) < 2:
+              raise SystemExit('admin inline script not found')
+          Path('/tmp/chaysa-admin.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
+          PY
+          node --check /tmp/chaysa-admin.js
       - name: Run guide API tests
         run: npm run test:guide
