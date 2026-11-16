@@ -1061,8 +1061,13 @@ app.post("/api/health-approval/decision", async (req, res) => {
     return json(res, 429, { error: "تعداد تلاش‌ها زیاد است؛ کمی بعد دوباره تلاش کنید." });
   const token = req.body && req.body.token;
   const decision = req.body && req.body.decision;
+  const reviewerName = typeof (req.body && req.body.reviewerName) === "string"
+    ? req.body.reviewerName.replace(/[\u0000-\u001f\u007f]/g, "").replace(/\s+/g, " ").trim()
+    : "";
   const note = typeof (req.body && req.body.note) === "string" ? req.body.note.trim().slice(0, 2000) : "";
   const allowed = ["تأیید می‌شود", "تأیید نمی‌شود", "نیاز به اصلاح دارد"];
+  if (!/^[\p{L}\p{M}][\p{L}\p{M}\s\u200c-]{1,118}$/u.test(reviewerName))
+    return json(res, 400, { error: "نام و نام خانوادگی را با حروف معتبر و بدون عدد وارد کنید." });
   if (!allowed.includes(decision)) return json(res, 400, { error: "گزینه ثبت نظر معتبر نیست." });
   const found = findHealthApprovalRequest(token);
   if (!found) return json(res, 404, { error: "لینک بررسی معتبر نیست." });
@@ -1077,7 +1082,7 @@ app.post("/api/health-approval/decision", async (req, res) => {
     record = {
       id: crypto.randomUUID(),
       section: "CHAYSA HEALTH",
-      reviewerName: "لینک اختصاصی ارسال‌شده به حساب تلگرام خانم بستانی",
+      reviewerName,
       decision,
       version: request.version,
       commit: request.commit,
@@ -1089,7 +1094,7 @@ app.post("/api/health-approval/decision", async (req, res) => {
       evidenceType: "online_decision",
       sourceRequestId: request.id,
       reviewerIdentityMethod: "private_bearer_link",
-      reviewerIdentityNote: "لینک اختصاصی به حساب تلگرام مقصد ارسال شده است؛ مالکیت لینک به‌تنهایی احراز هویت حقوقی یا امضای الکترونیکی واجد شرایط نیست.",
+      reviewerIdentityNote: "نام و نام خانوادگی توسط استفاده‌کننده لینک تایپ شده و مستقلاً احراز هویت نشده است؛ لینک اختصاصی به حساب تلگرام مقصد ارسال شده، اما این روش امضای الکترونیکی واجد شرایط یا احراز هویت حقوقی محسوب نمی‌شود.",
       telegramPair: (getChaysaTelegramPair() || []).map(member => ({
         chatId: member.id,
         linkedChatId: member.linkedChatId,
@@ -1101,6 +1106,7 @@ app.post("/api/health-approval/decision", async (req, res) => {
     catch (_) { return json(res, 500, { error: "ثبت نتیجه در بایگانی انجام نشد؛ دوباره تلاش کنید." }); }
   }
   request.status = "recorded";
+  request.reviewerName = record.reviewerName;
   request.decision = record.decision;
   request.note = record.note;
   request.recordedAt = record.recordedAt;
@@ -1118,7 +1124,7 @@ app.post("/api/health-approval/decision", async (req, res) => {
     record.telegramNotification = notification;
     try { saveHealthArchive(archive); } catch (_) {}
   }
-  return json(res, 200, { ok: true, decision: record.decision, recordedAt: record.recordedAt, archiveRecordId: record.id });
+  return json(res, 200, { ok: true, reviewerName: record.reviewerName, decision: record.decision, recordedAt: record.recordedAt, archiveRecordId: record.id });
 });
 app.get("/api/admin/health-archive", requireAdmin, (_req, res) => {
   const rows = readHealthArchive().slice(-200).reverse().map(({ evidenceFile, ...row }) => ({ ...row, hasEvidence: Boolean(evidenceFile) }));
