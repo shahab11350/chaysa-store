@@ -143,9 +143,13 @@ function guideNormalize(value) {
 }
 function guideSafeMedicine(value) {
   const raw = typeof value === "string" ? value.trim() : "";
-  if (!raw || raw.length > 80 || /[@]|https?:|www\.|\+|\b\d{4,}\b/i.test(raw)) return "";
+  if (!raw || raw.length > 60 || /[@]|https?:|www\.|\+|\b\d{4,}\b/i.test(raw)) return "";
   if ((raw.match(/\d/g) || []).length >= 7 || /آدرس|نشانی|تلفن|موبایل|شماره تماس|کد ملی|خیابان|کوچه|پلاک/i.test(raw)) return "";
   if (!/^[\p{L}\p{N}\s-]+$/u.test(raw)) return "";
+  const normalized = guideNormalize(raw);
+  const blockedWords = new Set(["من", "دارم", "بیماری", "علائم", "نشانه", "دچار", "سابقه", "پرونده", "نسخه", "باردار", "حامله", "شیرده", "پزشک", "دوز", "همسرم", "مادرم", "پدرم", "فرزندم", "کودکم"]);
+  if (normalized.split(" ").some(word => blockedWords.has(word))) return "";
+  if (normalized.split(" ").length > 3 || /(?:^|\s)\d+(?:\.\d+)?(?:\s|$)/.test(normalized)) return "";
   return raw.replace(/\s+/g, " ");
 }
 function guideFindProduct(products, sku, question) {
