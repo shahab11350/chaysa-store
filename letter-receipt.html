@@ -35,7 +35,7 @@ button:disabled{opacity:.55;cursor:default}
  post('view').then(d=>{
   meta.textContent='شماره نامه: '+d.letterNumber+' · تاریخ: '+d.dateTime;
   letter.textContent=[d.body,'',d.signatureName,d.signatureRole].join('\n');letter.hidden=false;
-  if(d.receiptStatus==='received'){status.textContent='دریافت این نامه قبلاً در بایگانی ثبت شده است.'+(d.receivedAt?'\\nزمان ثبت: '+new Date(d.receivedAt).toLocaleString('fa-IR'):'');return}
+  if(d.receiptStatus==='received'){status.textContent='دریافت این نامه قبلاً در بایگانی ثبت شده است.'+(d.receivedAt?'\nزمان ثبت: '+new Date(d.receivedAt).toLocaleString('fa-IR'):'');return}
   question.hidden=false;button.hidden=false;button.disabled=false;
  }).catch(e=>{meta.textContent=e.message});
  button.addEventListener('click',async()=>{
