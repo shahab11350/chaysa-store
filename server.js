@@ -852,7 +852,7 @@ app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
   const receiptTokenHash = crypto.createHash("sha256").update(receiptToken).digest("hex");
   const publicBaseUrl = (process.env.PUBLIC_BASE_URL || "https://chaysa.up.railway.app").replace(/\\/+$/, "");
   const receiptUrl = publicBaseUrl + "/letter-receipt.html#" + receiptToken;
-  const message = formatGeneralChaysaLetter(meta, body) + "\\n\\nآیا نامه را دریافت کرده‌اید؟\\nبرای ثبت دریافت، پیوند زیر را باز کنید:\\n" + receiptUrl;
+  const message = formatGeneralChaysaLetter(meta, body) + "\n\nآیا نامه را دریافت کرده‌اید؟\nبرای ثبت دریافت، پیوند زیر را باز کنید:\n" + receiptUrl;
   if (message.length > 4096)
     return json(res, 400, { error: "متن نهایی نامه از محدودیت پیام تلگرام بیشتر است." });
   const record = {
@@ -956,7 +956,7 @@ app.post("/api/letter-receipt/confirm", async (req, res) => {
   row.receiptMethod = "private_bearer_link";
   try { saveLettersArchive(rows); }
   catch (_) { return json(res, 500, { error: "ثبت دریافت نامه در بایگانی انجام نشد؛ دوباره تلاش کنید." }); }
-  const notice = "تأیید دریافت نامه در بایگانی چایسا ثبت شد.\\nشماره نامه: " + row.letterNumber + "\\nزمان دریافت: " +
+  const notice = "تأیید دریافت نامه در بایگانی چایسا ثبت شد.\nشماره نامه: " + row.letterNumber + "\nزمان دریافت: " +
     new Date(row.receivedAt).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" });
   const delivery = await notifyChaysaTelegramPair(notice);
   row.receiptNotificationStatus = delivery.status;
@@ -1188,7 +1188,7 @@ app.post("/api/bostani/questions/:id/reply",requireBostani,async(req,res)=>{
  const reply=typeof req.body.reply==="string"?req.body.reply.trim():"";if(!reply||reply.length>4000)return json(res,400,{ok:false,error:"متن پاسخ را کامل و معتبر وارد کنید."});
  const rows=readQuestions(),q=rows.find(x=>x.id===req.params.id);if(!q)return json(res,404,{ok:false,error:"پرسش پیدا نشد."});if(!q.customerChatId)return json(res,409,{ok:false,error:"مشتری هنوز اتصال تلگرام را کامل نکرده است."});
  const token=process.env.TELEGRAM_BOT_TOKEN||"";if(!token)return json(res,503,{ok:false,error:"اتصال ربات تلگرام آماده نیست."});
- const message=["پاسخ پرسش شما از چایسا 🌿","شناسه پرسش: "+q.id,"--------------------",reply].join("\\n");
+ const message=["پاسخ پرسش شما از چایسا 🌿","شناسه پرسش: "+q.id,"--------------------",reply].join("\n");
  try{const response=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:q.customerChatId,text:message,disable_web_page_preview:true})});const result=await response.json();if(!response.ok||result.ok!==true)return json(res,502,{ok:false,error:"ارسال پاسخ به تلگرام مشتری انجام نشد."});}catch(_){return json(res,502,{ok:false,error:"ارتباط با تلگرام برقرار نشد؛ پاسخ ارسال نشد."});}
  q.reply=reply;q.repliedAt=new Date().toISOString();q.status="پاسخ ارسال‌شده";saveQuestions(rows);return json(res,200,{ok:true,status:q.status,repliedAt:q.repliedAt});
 });
