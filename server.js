@@ -872,7 +872,7 @@ app.post("/api/health-approval/decision", async (req, res) => {
   return json(res, 200, { ok: true, decision: record.decision, recordedAt: record.recordedAt, archiveRecordId: record.id });
 });
 app.get("/api/admin/health-archive", requireAdmin, (_req, res) => {
-  const rows = readHealthArchive().slice(-200).reverse().map(({ evidenceFile, ...row }) => row);
+  const rows = readHealthArchive().slice(-200).reverse().map(({ evidenceFile, ...row }) => ({ ...row, hasEvidence: Boolean(evidenceFile) }));
   return json(res, 200, rows);
 });
 app.post("/api/admin/health-archive", requireAdmin, healthArchiveUpload.single("evidence"), async (req, res) => {
