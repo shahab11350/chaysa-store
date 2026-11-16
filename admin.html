@@ -169,7 +169,15 @@ async function loadHealthArchive(){
    const evidence=document.createElement('div');evidence.className='muted';evidence.textContent=row.evidenceType==='online_decision'?'مدرک: ثبت مستقیم نتیجه از طریق لینک اختصاصی (بدون تصویر اسکرین‌شات)':row.hasEvidence?'مدرک تصویری در بایگانی خصوصی ثبت شده است.':'مدرک تصویری ثبت نشده است.';
    box.append(title,meta,note,evidence);
    if(row.hasEvidence){const view=document.createElement('button');view.className='secondary';view.textContent='نمایش تصویر مدرک';view.onclick=()=>window.open('/api/admin/health-archive/'+encodeURIComponent(row.id)+'/evidence','_blank','noopener');box.append(view)}
-   if(row.telegramNotification){const delivery=document.createElement('div');delivery.className='muted';delivery.textContent='وضعیت اعلان تلگرام: '+row.telegramNotification.status;box.append(delivery)}
+   const delivery=document.createElement('div');delivery.className='muted';
+   if(row.telegramNotification){
+    const sent=Array.isArray(row.telegramNotification.recipients)?row.telegramNotification.recipients.filter(x=>x.sent).length:null;
+    const total=Array.isArray(row.telegramNotification.recipients)?row.telegramNotification.recipients.length:null;
+    delivery.textContent='وضعیت اعلان تلگرام: '+row.telegramNotification.status+(sent!==null?' · ارسال موفق: '+sent+' از '+total:'');
+   }else{
+    delivery.textContent='وضعیت اعلان تلگرام: ثبت نشده؛ نتیجه ارسال از روی این پرونده قابل تأیید نیست.';
+   }
+   box.append(delivery);
    host.append(box);
   });
  }catch(e){host.textContent=e.message}

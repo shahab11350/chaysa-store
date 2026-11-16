@@ -1113,18 +1113,33 @@ app.post("/api/health-approval/decision", async (req, res) => {
   request.archiveRecordId = record.id;
   try { saveHealthApprovalRequests(requests); }
   catch (_) { return json(res, 500, { error: "نتیجه در بایگانی ثبت شده، اما وضعیت درخواست کامل نشد؛ برای جلوگیری از ثبت تکراری، پشتیبانی فنی باید بررسی کند." }); }
+  let notificationStatusSaved = true;
   if (!record.telegramNotification) {
-    const notification = await notifyChaysaTelegramPair([
-      "نتیجه بررسی بخش CHAYSA HEALTH در بایگانی ثبت شد.",
-      "شناسه پرونده: " + record.id,
-      "نتیجه: " + record.decision,
-      "زمان ثبت: " + new Date(record.recordedAt).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" }),
-      "این ثبت از طریق لینک اختصاصی ارسال‌شده برای بررسی انجام شده است."
-    ].join("\n"));
+    let notification;
+    try {
+      notification = await notifyChaysaTelegramPair([
+        "نتیجه بررسی بخش CHAYSA HEALTH در بایگانی ثبت شد.",
+        "شناسه پرونده: " + record.id,
+        "نتیجه: " + record.decision,
+        "زمان ثبت: " + new Date(record.recordedAt).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" }),
+        "این ثبت از طریق لینک اختصاصی ارسال‌شده برای بررسی انجام شده است."
+      ].join("\n"));
+    } catch (_) {
+      notification = { status: "failed", recipients: [], error: "send_exception" };
+    }
     record.telegramNotification = notification;
-    try { saveHealthArchive(archive); } catch (_) {}
+    try { saveHealthArchive(archive); }
+    catch (_) { notificationStatusSaved = false; }
   }
-  return json(res, 200, { ok: true, reviewerName: record.reviewerName, decision: record.decision, recordedAt: record.recordedAt, archiveRecordId: record.id });
+  return json(res, 200, {
+    ok: true,
+    reviewerName: record.reviewerName,
+    decision: record.decision,
+    recordedAt: record.recordedAt,
+    archiveRecordId: record.id,
+    notificationStatus: record.telegramNotification ? record.telegramNotification.status : "unknown",
+    notificationStatusSaved
+  });
 });
 app.get("/api/admin/health-archive", requireAdmin, (_req, res) => {
   const rows = readHealthArchive().slice(-200).reverse().map(({ evidenceFile, ...row }) => ({ ...row, hasEvidence: Boolean(evidenceFile) }));

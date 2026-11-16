@@ -359,6 +359,8 @@ test("CHAYSA HEALTH approval link is delivered privately, one-time and archived 
   assert.ok(result.archiveRecordId);
   assert.equal(result.reviewerName, "خانم بستانی");
   assert.ok(result.recordedAt);
+  assert.equal(result.notificationStatus, "sent");
+  assert.equal(result.notificationStatusSaved, true);
 
   const archiveResponse = await fetch(baseUrl + "/api/admin/health-archive", {
     headers: { Cookie: cookie }
@@ -371,6 +373,9 @@ test("CHAYSA HEALTH approval link is delivered privately, one-time and archived 
   assert.equal(record.reviewerName, "خانم بستانی");
   assert.equal(record.evidenceType, "online_decision");
   assert.equal(record.evidenceFile, undefined);
+  assert.equal(record.telegramNotification.status, "sent");
+  assert.equal(record.telegramNotification.recipients.length, 2);
+  assert.ok(record.telegramNotification.recipients.every(item => item.sent));
   assert.match(record.reviewerIdentityNote, /احراز هویت حقوقی/);
 
   const notifications = telegramLog().filter(item => {
