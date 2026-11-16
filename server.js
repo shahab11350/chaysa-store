@@ -440,8 +440,7 @@ async function requestGuideApproval(ownerChatId, version, commit, previewUrl) {
   const keyboard = {
     keyboard: [[{ text: "تأیید " + id }, { text: "عدم تأیید " + id }]],
     resize_keyboard: true,
-    one_time_keyboard: true,
-    selective: true
+    one_time_keyboard: true
   };
   const sent = await sendTelegramText(bostaniChatId, message, keyboard);
   const current = readGuideApprovals();
