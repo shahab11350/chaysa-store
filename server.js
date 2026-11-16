@@ -401,25 +401,26 @@ function saveGuideApprovals(rows) {
 app.get("/api/admin/guide/approvals", requireAdmin, (_req, res) => {
   return json(res, 200, readGuideApprovals().slice(-100).reverse());
 });
-async function requestGuideApproval(ownerChatId, version, commit, previewUrl) {
+async function requestGuideApproval(ownerChatId, version, commit, reviewUrl) {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   const bostaniChatId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
   if (!token || !/^-?\d+$/.test(bostaniChatId)) {
     await sendTelegramText(ownerChatId, "درخواست تأیید ارسال نشد؛ اتصال ربات یا شناسه عددی خانم بستانی تنظیم نشده است.");
     return;
   }
-  let preview;
+  let review;
   try {
-    preview = new URL(previewUrl);
-    if (preview.protocol !== "https:" || preview.hostname.toLowerCase() === "chaysa.up.railway.app" ||
-        preview.username || preview.password || preview.href.length > 512) throw new Error("invalid preview");
+    review = new URL(reviewUrl);
+    const allowedReviewHost = (process.env.CHAYSA_GUIDE_REVIEW_HOST || "chaysa.up.railway.app").trim().toLowerCase();
+    if (review.protocol !== "https:" || review.hostname.toLowerCase() !== allowedReviewHost ||
+        review.username || review.password || review.href.length > 512) throw new Error("invalid review URL");
   } catch (_) {
-    await sendTelegramText(ownerChatId, "نشانی پیش‌نمایش معتبر نیست. فقط لینک HTTPS محیط آزمایشی مستقل را ارسال کنید؛ نشانی سایت عملیاتی پذیرفته نمی‌شود.");
+    await sendTelegramText(ownerChatId, "نشانی نسخه مورد بررسی معتبر نیست. فقط نشانی HTTPS مجازِ راهنمای آزمایشی چایسا پذیرفته می‌شود.");
     return;
   }
   const id = crypto.randomBytes(6).toString("hex").toUpperCase();
   const record = {
-    id, version, commit: commit.toLowerCase(), previewUrl: preview.href,
+    id, version, commit: commit.toLowerCase(), reviewUrl: review.href,
     status: "pending", requestedAt: new Date().toISOString(),
     requestedByTelegramId: String(ownerChatId), deliveryStatus: "pending"
   };
@@ -436,7 +437,7 @@ async function requestGuideApproval(ownerChatId, version, commit, previewUrl) {
     "نسخه: " + version,
     "شناسه درخواست: " + id,
     "Commit: " + commit.toLowerCase(),
-    "لینک پیش‌نمایش: " + preview.href,
+    "لینک نسخه مورد بررسی: " + review.href,
     "",
     "لطفاً ابتدا نسخه آزمایشی را بررسی کنید و سپس یکی از دو دکمه زیر را انتخاب کنید.",
     "این تأیید فقط مربوط به همین نسخه و همین Commit است و به‌معنای مجوز انتشار عمومی نیست."
@@ -483,7 +484,7 @@ app.post("/telegram/webhook", async (req, res) => {
         if (ownerId && senderId === ownerId) {
           const match = text.match(/^\/guide_approval(?:@\w+)?\s+([A-Za-z0-9._+-]{1,40})\s+([a-f0-9]{7,40})\s+(https:\/\/\S+)$/i);
           if (!match) {
-            await sendTelegramText(msg.chat.id, "قالب دستور:\n/guide_approval <version> <commit-sha> <preview-url>\nنمونه: /guide_approval 1.0.0 abcdef123456 https://chaysa-guide-preview.up.railway.app");
+            await sendTelegramText(msg.chat.id, "قالب دستور:\n/guide_approval <version> <commit-sha> <review-url>\nنمونه: /guide_approval 1.0.0 abcdef123456 https://chaysa.up.railway.app");
           } else {
             await requestGuideApproval(msg.chat.id, match[1], match[2], match[3]);
           }
