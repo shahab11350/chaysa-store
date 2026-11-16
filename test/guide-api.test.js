@@ -41,6 +41,7 @@ before(async () => {
       TELEGRAM_WEBHOOK_URL: "https://preview.example.com/telegram/webhook",
       CHAYSA_OWNER_CHAT_ID: "111111",
       CHAYSA_BOSTANI_CHAT_ID: "222222",
+      CHAYSA_GUIDE_REVIEW_HOST: "preview.example.com",
       TELEGRAM_MOCK_LOG: mockLog,
       NODE_OPTIONS: "--require " + path.join(__dirname, "mock-telegram-fetch.js")
     },
@@ -124,7 +125,7 @@ test("Telegram approval is owner-initiated, Bostani-only and auditable", async (
   assert.equal(first.deliveryStatus, "sent");
   assert.equal(first.version, "1.0.0");
   assert.equal(first.commit, "abcdef1234567");
-  assert.equal(first.previewUrl, "https://preview.example.com/guide");
+  assert.equal(first.reviewUrl, "https://preview.example.com/guide");
 
   const requestMessage = telegramLog().find(item =>
     item.url.endsWith("/sendMessage") &&
