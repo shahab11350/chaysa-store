@@ -55,18 +55,31 @@ function requireAdmin(req, res, next) {
   next();
 }
 const bostaniSecret = process.env.BOSTANI_ACCESS_PASSWORD || "";
-function signBostani(value) { return crypto.createHmac("sha256", bostaniSecret).update(value).digest("hex"); }
+const bostaniUsername = process.env.BOSTANI_ACCESS_USERNAME || "@bostani26chaysa";
+const bostaniSessionSecret = process.env.BOSTANI_ACCESS_TOKEN || bostaniSecret;
+function safeBostaniEqual(expectedValue, actualValue) {
+  const expected = Buffer.from(String(expectedValue || ""));
+  const actual = Buffer.from(String(actualValue || ""));
+  return expected.length === actual.length && expected.length > 0 && crypto.timingSafeEqual(expected, actual);
+}
+function signBostani(value) { return crypto.createHmac("sha256", bostaniSessionSecret).update(value).digest("hex"); }
+function bostaniSessionCookie() {
+  const exp = String(Date.now() + 8 * 60 * 60 * 1000);
+  return exp + "." + signBostani(exp);
+}
 function isBostani(req) {
-  const access = process.env.BOSTANI_ACCESS_TOKEN || "";
-  if (!access) return false;
+  if (!bostaniSessionSecret) return false;
   const raw = req.headers.cookie || "";
-  const supplied = (raw.match(/(?:^|;\s*)chaysa_bostani=([^;]+)/) || [])[1];
+  const supplied = (raw.match(/(?:^|;\\s*)chaysa_bostani=([^;]+)/) || [])[1];
   if (!supplied) return false;
-  const expected = Buffer.from(access), actual = Buffer.from(decodeURIComponent(supplied));
-  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+  let decoded;
+  try { decoded = decodeURIComponent(supplied); } catch (_) { return false; }
+  const [exp, signature, extra] = decoded.split(".");
+  if (extra !== undefined || !exp || !signature || !/^\\d+$/.test(exp) || Number(exp) < Date.now()) return false;
+  return safeBostaniEqual(signBostani(exp), signature);
 }
 function requireBostani(req,res,next) {
-  if(!isBostani(req)) return json(res,401,{error:"برای ورود به صفحهٔ اختصاصی خانم بستانی، رمز دسترسی را وارد کنید."});
+  if(!isBostani(req)) return json(res,401,{error:"برای ورود به صفحهٔ اختصاصی خانم بستانی، ابتدا وارد شوید."});
   const origin=req.get("origin");
   if(origin && origin!==req.protocol+"://"+req.get("host")) return json(res,403,{error:"درخواست نامعتبر است."});
   next();
@@ -1241,20 +1254,26 @@ app.get("/bostani.html", (req, res, next) => {
   const access = process.env.BOSTANI_ACCESS_TOKEN || "";
   const supplied = typeof req.query.key === "string" ? req.query.key : "";
   if (access && supplied) {
-    const expected = Buffer.from(access), actual = Buffer.from(supplied);
-    if (expected.length === actual.length && crypto.timingSafeEqual(expected, actual)) {
-      res.cookie("chaysa_bostani", access, { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 30 * 24 * 60 * 60 * 1000 });
+    if (safeBostaniEqual(access, supplied)) {
+      res.cookie("chaysa_bostani", bostaniSessionCookie(), { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 8 * 60 * 60 * 1000 });
       return res.redirect(302, "/bostani.html");
     }
     return res.sendStatus(404);
   }
   next();
 });
-app.post("/api/bostani/login",(req,res)=>{
- const key=req.ip||"unknown";if(limited("bostani-login:"+key,6,15*60*1000))return json(res,429,{error:"تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کنید."});
- const supplied=typeof req.body.password==="string"?req.body.password:"";
- if(!bostaniSecret||supplied.length!==bostaniSecret.length||!crypto.timingSafeEqual(Buffer.from(supplied),Buffer.from(bostaniSecret)))return json(res,401,{error:"رمز دسترسی نادرست است."});
- const exp=String(Date.now()+8*60*60*1000);res.cookie("chaysa_bostani",exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true});
+app.post("/api/bostani/login", (req, res) => {
+  const origin = req.get("origin");
+  if (origin && origin !== req.protocol + "://" + req.get("host")) return json(res, 403, { error: "درخواست نامعتبر است." });
+  const key = req.ip || "unknown";
+  if (limited("bostani-login:" + key, 6, 15 * 60 * 1000)) return json(res, 429, { error: "تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کنید." });
+  const username = typeof req.body.username === "string" ? req.body.username.trim() : "";
+  const password = typeof req.body.password === "string" ? req.body.password : "";
+  if (!bostaniSecret || !safeBostaniEqual(bostaniUsername, username) || !safeBostaniEqual(bostaniSecret, password)) {
+    return json(res, 401, { error: "نام کاربری یا رمز عبور نادرست است." });
+  }
+  res.cookie("chaysa_bostani", bostaniSessionCookie(), { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 8 * 60 * 60 * 1000 });
+  return json(res, 200, { ok: true });
 });
 app.post("/api/bostani/logout",(_req,res)=>{res.clearCookie("chaysa_bostani",{httpOnly:true,secure:true,sameSite:"strict",path:"/"});return json(res,200,{ok:true});});
 app.get("/api/bostani/questions",requireBostani,(_req,res)=>{const rows=readQuestions().map(q=>({id:q.id,createdAt:q.createdAt,question:q.question,status:q.status||"در انتظار اتصال مشتری",firstName:q.firstName||"",lastName:q.lastName||"",telegramUsername:q.telegramUsername||"",customerLinked:Boolean(q.customerChatId),customerUsername:q.customerUsername||"",reply:q.reply||"",repliedAt:q.repliedAt||""})).reverse();return json(res,200,rows);});
