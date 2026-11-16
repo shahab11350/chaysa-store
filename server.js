@@ -835,7 +835,8 @@ app.get("/api/admin/letters/meta", requireAdmin, (_req, res) => {
   return json(res, 200, getLetterDraftMeta());
 });
 app.get("/api/admin/letters", requireAdmin, (_req, res) => {
-  return json(res, 200, readLettersArchive().slice(-50).reverse());
+  const rows = readLettersArchive().slice(-50).reverse().map(({ receiptTokenHash, ...row }) => row);
+  return json(res, 200, rows);
 });
 app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
   if (limited("admin-letter-send:" + (req.ip || "unknown"), 5, 60 * 60 * 1000))
