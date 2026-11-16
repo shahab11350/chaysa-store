@@ -125,6 +125,131 @@ app.get("/api/admin/analytics", requireAdmin, (_req, res) => {
   });
 });
 
+
+const GUIDE_BANK_FILE = path.join(ROOT, "guide-bank.json");
+function readGuideBank() {
+  try { return JSON.parse(fs.readFileSync(GUIDE_BANK_FILE, "utf8")); }
+  catch (_) { return { schemaVersion: 1, categories: [], questionBank: [], topicRules: {}, healthPolicy: {} }; }
+}
+function guideNormalize(value) {
+  return String(value || "").toLowerCase()
+    .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
+    .replace(/[يى]/g, "ی").replace(/ك/g, "ک")
+    .replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+    .replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+    .replace(/[\u200c\u200f\u200e]/g, " ")
+    .replace(/[^\p{L}\p{N}\s-]/gu, " ")
+    .replace(/\s+/g, " ").trim();
+}
+function guideSafeMedicine(value) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw || raw.length > 60 || /[@]|https?:|www\.|\+|\b\d{4,}\b/i.test(raw)) return "";
+  if ((raw.match(/\d/g) || []).length >= 7 || /آدرس|نشانی|تلفن|موبایل|شماره تماس|کد ملی|خیابان|کوچه|پلاک/i.test(raw)) return "";
+  if (!/^[\p{L}\p{N}\s-]+$/u.test(raw)) return "";
+  const normalized = guideNormalize(raw);
+  const blockedWords = new Set(["من", "دارم", "بیماری", "علائم", "نشانه", "دچار", "سابقه", "پرونده", "نسخه", "باردار", "حامله", "شیرده", "پزشک", "دوز", "همسرم", "مادرم", "پدرم", "فرزندم", "کودکم"]);
+  if (normalized.split(" ").some(word => blockedWords.has(word))) return "";
+  if (normalized.split(" ").length > 3 || /(?:^|\s)\d+(?:\.\d+)?(?:\s|$)/.test(normalized)) return "";
+  return raw.replace(/\s+/g, " ");
+}
+function guideFindProduct(products, sku, question) {
+  if (sku) {
+    const found = products.find(p => String(p.sku) === String(sku) && p.active !== false);
+    if (found) return found;
+  }
+  const normalized = guideNormalize(question);
+  return products.filter(p => p.active !== false && p.name)
+    .sort((a,b) => String(b.name).length - String(a.name).length)
+    .find(p => normalized.includes(guideNormalize(p.name))) || null;
+}
+function guideContainsAny(text, terms) {
+  return (terms || []).some(term => text.includes(guideNormalize(term)));
+}
+app.get("/api/guide/bootstrap", (_req, res) => {
+  const bank = readGuideBank();
+  const products = readProducts().filter(p => p && p.active !== false).map(p => ({
+    sku: String(p.sku || ""), name: String(p.name || ""), category: String(p.category || "")
+  })).filter(p => p.sku && p.name);
+  return json(res, 200, {
+    schemaVersion: bank.schemaVersion || 1,
+    categories: bank.categories || [],
+    questionBank: bank.questionBank || [],
+    keywords: bank.keywords || [],
+    products,
+    healthNotice: bank.healthPolicy && bank.healthPolicy.notice || "",
+    healthRule: bank.healthPolicy && bank.healthPolicy.rule || ""
+  });
+});
+app.post("/api/guide/resolve", (req, res) => {
+  const key = "guide-resolve:" + (req.ip || "unknown");
+  if (limited(key, 12, 60 * 1000)) return json(res, 429, { ok: false, error: "درخواست‌های زیادی ثبت شده است؛ کمی بعد دوباره تلاش کنید." });
+  const body = req.body || {};
+  const category = typeof body.category === "string" ? body.category : "";
+  const question = typeof body.question === "string" ? body.question.trim() : "";
+  const productSku = typeof body.productSku === "string" ? body.productSku.trim() : "";
+  const medicine = guideSafeMedicine(body.medicine);
+  if (!["products", "safety", "services", "custom"].includes(category))
+    return json(res, 400, { ok: false, error: "دسته راهنما معتبر نیست." });
+  if (!question || question.length > 400)
+    return json(res, 400, { ok: false, error: "متن پرسش را کوتاه و روشن وارد کنید." });
+  const normalized = guideNormalize(question);
+  const bank = readGuideBank();
+  const rules = bank.topicRules || {};
+  if (guideContainsAny(normalized, rules.deniedTerms))
+    return json(res, 200, { ok: false, allowed: false, reason: "outside_scope", message: "این راهنما فقط برای پاسخ‌گویی به پرسش‌های مرتبط با محصولات و خدمات چایسا طراحی شده است." });
+  if (guideContainsAny(normalized, rules.unsafeIntentTerms))
+    return json(res, 200, { ok: false, allowed: false, reason: "unsafe_medical_request", message: "راهنمای چایسا برای تشخیص، درمان یا تغییر دارو طراحی نشده است. برای تصمیم درمانی با پزشک یا داروساز مشورت کنید." });
+  const products = readProducts().filter(p => p && p.active !== false);
+  const product = guideFindProduct(products, productSku, question);
+  const serviceQuestion = guideContainsAny(normalized, rules.serviceTerms);
+  const productQuestion = Boolean(product) || guideContainsAny(normalized, rules.productTopics);
+  if (category === "services" && !serviceQuestion)
+    return json(res, 200, { ok: false, allowed: false, reason: "needs_service_context", message: "لطفاً پرسش را به خرید، سفارش، پرداخت، ارسال یا پیگیری خدمات چایسا مرتبط کنید." });
+  if (category === "products" && (!product || !productQuestion))
+    return json(res, 200, { ok: false, allowed: false, reason: "needs_product", message: "برای ادامه، محصول موردنظر را از فهرست انتخاب کنید و پرسش را درباره همان محصول بنویسید." });
+  if (category === "safety") {
+    if (!product) return json(res, 200, { ok: false, allowed: false, reason: "needs_product", message: "ابتدا محصول چایسا را انتخاب کنید." });
+    const interactionQuestion = guideContainsAny(normalized, ["تداخل", "دارو", "همزمان", "هم زمان"]);
+    let q = "";
+    if (interactionQuestion) {
+      if (!medicine) return json(res, 200, { ok: false, allowed: false, reason: "needs_medicine", message: "برای بررسی تداخل، نام دارو را در فیلد جداگانه وارد کنید؛ اطلاعات شخصی یا شرح پرونده پزشکی را ننویسید." });
+      q = '"' + product.name + '" "' + medicine + '" تداخل مصرف هم‌زمان interaction safety شواهد علمی ';
+    } else {
+      const safetyHits = (rules.safetyTopics || []).filter(t => normalized.includes(guideNormalize(t)));
+      if (!safetyHits.length) return json(res, 200, { ok: false, allowed: false, reason: "needs_safety_context", message: "پرسش را درباره عوارض احتمالی، احتیاط، حساسیت، بارداری، شیردهی یا ایمنی مصرف محصول روشن‌تر کنید." });
+      q = '"' + product.name + '" ' + safetyHits.join(" ") + " ایمنی مصرف safety شواهد علمی ";
+    }
+    q += "(" + (bank.healthPolicy.sourceDomains || []).map(d => "site:" + d).join(" OR ") + ")";
+    const url = "https://www.google.com/search?q=" + encodeURIComponent(q);
+    return json(res, 200, { ok: true, allowed: true, type: "medical_external_search", url,
+      notice: bank.healthPolicy.notice || "", rule: bank.healthPolicy.rule || "" });
+  }
+  if (category === "products") {
+    const topicHits = (rules.productTopics || []).filter(t => normalized.includes(guideNormalize(t)));
+    const topics = topicHits.length ? topicHits.join(" ") : "اطلاعات محصول";
+    const q = '"' + product.name + '" ' + topics + " اطلاعات رسمی";
+    return json(res, 200, { ok: true, allowed: true, type: "product_external_search",
+      url: "https://www.google.com/search?q=" + encodeURIComponent(q),
+      notice: "اطلاعات ترکیبات و ویژگی‌ها باید با برچسب رسمی محصول تطبیق داده شود." });
+  }
+  if (category === "services" || (category === "custom" && serviceQuestion)) {
+    const serviceHits = (rules.serviceTerms || []).filter(t => normalized.includes(guideNormalize(t)));
+    if (!serviceHits.length) return json(res, 200, { ok: false, allowed: false, reason: "outside_scope", message: "این راهنما فقط برای پرسش‌های مرتبط با محصولات و خدمات چایسا طراحی شده است." });
+    const q = "چایسا فروشگاه " + serviceHits.join(" ");
+    return json(res, 200, { ok: true, allowed: true, type: "service_external_search",
+      url: "https://www.google.com/search?q=" + encodeURIComponent(q),
+      notice: "برای اطلاعات قطعی سفارش، فقط اطلاعیه‌ها و پیام‌های رسمی چایسا را ملاک قرار دهید." });
+  }
+  if (category === "custom" && product) {
+    const topics = (rules.productTopics || []).filter(t => normalized.includes(guideNormalize(t)));
+    const q = '"' + product.name + '" ' + (topics.length ? topics.join(" ") : "اطلاعات محصول");
+    return json(res, 200, { ok: true, allowed: true, type: "product_external_search",
+      url: "https://www.google.com/search?q=" + encodeURIComponent(q),
+      notice: "اطلاعات محصول را با برچسب رسمی همان محصول تطبیق دهید." });
+  }
+  return json(res, 200, { ok: false, allowed: false, reason: "outside_scope", message: "این راهنما فقط برای پرسش‌های مرتبط با محصولات و خدمات چایسا طراحی شده است." });
+});
+
 app.get("/api/products", (_req, res) => json(res, 200, readProducts()));
 
 app.post("/api/admin/login", (req, res) => {
@@ -171,14 +296,16 @@ function saveTelegramRecipient(chat) {
   fs.renameSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", TELEGRAM_RECIPIENTS_FILE);
 }
 
-async function sendTelegramText(chatId, text) {
+async function sendTelegramText(chatId, text, replyMarkup) {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   if (!token) return false;
   try {
+    const payload = { chat_id: chatId, text, disable_web_page_preview: true };
+    if (replyMarkup) payload.reply_markup = replyMarkup;
     const response = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text, disable_web_page_preview: true })
+      body: JSON.stringify(payload)
     });
     const result = await response.json();
     return response.ok && result.ok === true;
@@ -259,6 +386,79 @@ function buildBostaniProgressReport() {
   ].join("\n");
 }
 
+const GUIDE_APPROVALS_FILE = path.join(DATA, "guide-approvals.json");
+function readGuideApprovals() {
+  try {
+    const rows = JSON.parse(fs.readFileSync(GUIDE_APPROVALS_FILE, "utf8"));
+    return Array.isArray(rows) ? rows : [];
+  } catch (_) { return []; }
+}
+function saveGuideApprovals(rows) {
+  const tmp = GUIDE_APPROVALS_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), "utf8");
+  fs.renameSync(tmp, GUIDE_APPROVALS_FILE);
+}
+app.get("/api/admin/guide/approvals", requireAdmin, (_req, res) => {
+  return json(res, 200, readGuideApprovals().slice(-100).reverse());
+});
+async function requestGuideApproval(ownerChatId, version, commit, reviewUrl) {
+  const token = process.env.TELEGRAM_BOT_TOKEN || "";
+  const bostaniChatId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
+  if (!token || !/^-?\d+$/.test(bostaniChatId)) {
+    await sendTelegramText(ownerChatId, "درخواست تأیید ارسال نشد؛ اتصال ربات یا شناسه عددی خانم بستانی تنظیم نشده است.");
+    return;
+  }
+  let review;
+  try {
+    review = new URL(reviewUrl);
+    const allowedReviewHost = (process.env.CHAYSA_GUIDE_REVIEW_HOST || "chaysa.up.railway.app").trim().toLowerCase();
+    if (review.protocol !== "https:" || review.hostname.toLowerCase() !== allowedReviewHost ||
+        review.username || review.password || review.href.length > 512) throw new Error("invalid review URL");
+  } catch (_) {
+    await sendTelegramText(ownerChatId, "نشانی نسخه مورد بررسی معتبر نیست. فقط نشانی HTTPS مجازِ راهنمای آزمایشی چایسا پذیرفته می‌شود.");
+    return;
+  }
+  const id = crypto.randomBytes(6).toString("hex").toUpperCase();
+  const record = {
+    id, version, commit: commit.toLowerCase(), reviewUrl: review.href,
+    status: "pending", requestedAt: new Date().toISOString(),
+    requestedByTelegramId: String(ownerChatId), deliveryStatus: "pending"
+  };
+  const rows = readGuideApprovals();
+  rows.push(record);
+  try { saveGuideApprovals(rows); }
+  catch (_) {
+    await sendTelegramText(ownerChatId, "ثبت درخواست تأیید در سابقه پایدار انجام نشد؛ هیچ درخواستی برای خانم بستانی ارسال نشد.");
+    return;
+  }
+  const message = [
+    "درخواست بررسی و تأیید نسخه آزمایشی راهنمای چایسا",
+    "",
+    "نسخه: " + version,
+    "شناسه درخواست: " + id,
+    "Commit: " + commit.toLowerCase(),
+    "لینک نسخه مورد بررسی: " + review.href,
+    "",
+    "لطفاً ابتدا نسخه آزمایشی را بررسی کنید و سپس یکی از دو دکمه زیر را انتخاب کنید.",
+    "این تأیید فقط مربوط به همین نسخه و همین Commit است و به‌معنای مجوز انتشار عمومی نیست."
+  ].join("\n");
+  const keyboard = {
+    keyboard: [[{ text: "تأیید " + id }, { text: "عدم تأیید " + id }]],
+    resize_keyboard: true,
+    one_time_keyboard: true
+  };
+  const sent = await sendTelegramText(bostaniChatId, message, keyboard);
+  const current = readGuideApprovals();
+  const saved = current.find(x => x.id === id);
+  if (saved) {
+    saved.deliveryStatus = sent ? "sent" : "failed";
+    saved.sentAt = sent ? new Date().toISOString() : null;
+    try { saveGuideApprovals(current); } catch (_) {}
+  }
+  await sendTelegramText(ownerChatId, sent
+    ? "درخواست تأیید نسخه " + version + " برای خانم بستانی ارسال شد. شناسه: " + id
+    : "ارسال درخواست به خانم بستانی ناموفق بود. سابقه درخواست با وضعیت ارسال ناموفق نگهداری شد؛ دوباره‌ارسال خودکار انجام نشد.");
+}
 app.post("/telegram/webhook", async (req, res) => {
   const expected = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   const supplied = req.get("x-telegram-bot-api-secret-token") || "";
@@ -267,17 +467,75 @@ app.post("/telegram/webhook", async (req, res) => {
     const update = req.body || {};
     const msg = update.message || update.edited_message;
     if (msg && msg.chat) saveTelegramRecipient(msg.chat);
-    if (msg && msg.chat && msg.chat.type === "private" && typeof msg.text === "string" &&
-        msg.text.trim() === "چایسا فایل") {
+    if (msg && msg.chat && msg.chat.type === "private" && typeof msg.text === "string") {
       const senderId = String(msg.chat.id);
+      const text = msg.text.trim();
       const ownerId = String(process.env.CHAYSA_OWNER_CHAT_ID || "").trim();
       const allowedBostaniId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
-      if (ownerId && senderId === ownerId) {
-        await sendTelegramText(msg.chat.id, buildOwnerProgressReport());
-      } else if (allowedBostaniId && senderId === allowedBostaniId) {
-        await sendTelegramText(msg.chat.id, buildBostaniProgressReport());
+      if (text === "چایسا فایل") {
+        if (ownerId && senderId === ownerId) {
+          await sendTelegramText(msg.chat.id, buildOwnerProgressReport());
+        } else if (allowedBostaniId && senderId === allowedBostaniId) {
+          await sendTelegramText(msg.chat.id, buildBostaniProgressReport());
+        }
+        return res.sendStatus(200);
       }
-      return res.sendStatus(200);
+      if (text.startsWith("/guide_approval")) {
+        if (ownerId && senderId === ownerId) {
+          const match = text.match(/^\/guide_approval(?:@\w+)?\s+([A-Za-z0-9._+-]{1,40})\s+([a-f0-9]{7,40})\s+(https:\/\/\S+)$/i);
+          if (!match) {
+            await sendTelegramText(msg.chat.id, "قالب دستور:\n/guide_approval <version> <commit-sha> <review-url>\nنمونه: /guide_approval 1.0.0 abcdef123456 https://chaysa.up.railway.app");
+          } else {
+            await requestGuideApproval(msg.chat.id, match[1], match[2], match[3]);
+          }
+        }
+        return res.sendStatus(200);
+      }
+      const decision = text.match(/^(عدم\s+تأیید|عدم\s+تایید|تأیید|تایید)\s+([A-F0-9]{12})$/i);
+      if (senderId === allowedBostaniId && decision) {
+        const id = decision[2].toUpperCase();
+        const rows = readGuideApprovals();
+        const record = rows.find(x => x.id === id);
+        if (!record || record.status !== "pending" || record.deliveryStatus !== "sent") {
+          await sendTelegramText(msg.chat.id, "این درخواست تأیید معتبر یا فعال نیست.");
+        } else {
+          const approved = !decision[1].startsWith("عدم");
+          record.status = approved ? "approved" : "rejected";
+          record.reviewedAt = new Date().toISOString();
+          record.reviewerTelegramId = String(msg.from && msg.from.id || msg.chat.id);
+          try {
+            saveGuideApprovals(rows);
+            await sendTelegramText(msg.chat.id,
+              (approved ? "تأیید نسخه ثبت شد." : "عدم تأیید نسخه ثبت شد.") +
+              "\nنسخه: " + record.version +
+              "\nCommit: " + record.commit +
+              "\nشناسه: " + id +
+              (approved ? "" : "\nبرای ثبت اشکالات، دستور /guide_note " + id + " <شرح اشکال> را ارسال کنید."),
+              { remove_keyboard: true });
+          } catch (_) {
+            await sendTelegramText(msg.chat.id, "ثبت نتیجه در سابقه پایدار ناموفق بود؛ لطفاً دوباره تلاش کنید.");
+          }
+        }
+        return res.sendStatus(200);
+      }
+      const note = text.match(/^\/guide_note(?:@\w+)?\s+([A-F0-9]{12})\s+([\s\S]{1,1000})$/i);
+      if (senderId === allowedBostaniId && note) {
+        const rows = readGuideApprovals();
+        const record = rows.find(x => x.id === note[1].toUpperCase() && x.status === "rejected");
+        if (!record) {
+          await sendTelegramText(msg.chat.id, "شناسه نسخه پیدا نشد یا هنوز با عدم تأیید ثبت نشده است.");
+        } else {
+          record.reviewNote = note[2].trim();
+          record.noteAt = new Date().toISOString();
+          try {
+            saveGuideApprovals(rows);
+            await sendTelegramText(msg.chat.id, "توضیحات شما برای نسخه " + record.version + " ثبت شد.");
+          } catch (_) {
+            await sendTelegramText(msg.chat.id, "ثبت توضیحات انجام نشد؛ لطفاً دوباره تلاش کنید.");
+          }
+        }
+        return res.sendStatus(200);
+      }
     }
     const startMatch = msg && msg.chat && msg.chat.type === "private" &&
       typeof msg.text === "string" ? msg.text.trim().match(/^\/start(?:@\w+)?\s+(Q-[A-Za-z0-9-]+)$/i) : null;
@@ -470,7 +728,7 @@ app.post("/api/orders",async(req,res)=>{
 });
 // Do not expose server-side source, package metadata, or deployment configuration.
 app.use((req, res, next) => {
-  const blocked = new Set(["server.js", "package.json", "package-lock.json", "worker.js", "wrangler.toml", "CLOUDFLARE-SETUP.md", "BACKUP-STATUS.md", "DEVELOPMENT-CHECKPOINT.md"]);
+  const blocked = new Set(["server.js", "package.json", "package-lock.json", "worker.js", "wrangler.toml", "CLOUDFLARE-SETUP.md", "guide-bank.json", "BACKUP-STATUS.md", "DEVELOPMENT-CHECKPOINT.md"]);
   const name = decodeURIComponent((req.path || "").split("/").pop() || "");
   if (blocked.has(name) || name.startsWith(".")) return res.sendStatus(404);
   next();
@@ -508,7 +766,7 @@ app.listen(port, "0.0.0.0", () => {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   if (token && webhookSecret) {
-    const webhookUrl = "https://chaysa.up.railway.app/telegram/webhook";
+    const webhookUrl = (process.env.TELEGRAM_WEBHOOK_URL || "https://chaysa.up.railway.app/telegram/webhook").trim();
     fetch("https://api.telegram.org/bot" + token + "/setWebhook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
