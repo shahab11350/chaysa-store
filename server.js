@@ -285,15 +285,62 @@ function readTelegramRecipients() {
     return Array.isArray(rows) ? rows : [];
   } catch (_) { return []; }
 }
+function getChaysaTelegramPair() {
+  const ownerChatId = String(process.env.CHAYSA_OWNER_CHAT_ID || "").trim();
+  const bostaniChatId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
+  const valid = value => /^-?\d+$/.test(value);
+  if (!valid(ownerChatId) || !valid(bostaniChatId) || ownerChatId === bostaniChatId) return null;
+  return [
+    { id: ownerChatId, linkedChatId: bostaniChatId, pairKey: "chaysa-core" },
+    { id: bostaniChatId, linkedChatId: ownerChatId, pairKey: "chaysa-core" }
+  ];
+}
+function syncChaysaTelegramPair() {
+  const pair = getChaysaTelegramPair();
+  if (!pair) return false;
+  const rows = readTelegramRecipients();
+  for (const member of pair) {
+    const index = rows.findIndex(x => String(x.id) === member.id);
+    const current = index >= 0 ? rows[index] : { id: member.id, username: "", first_name: "", type: "private" };
+    const linked = { ...current, linkedChatId: member.linkedChatId, pairKey: member.pairKey, linked: true };
+    if (index >= 0) rows[index] = linked; else rows.push(linked);
+  }
+  const tmp = TELEGRAM_RECIPIENTS_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), { encoding: "utf8", mode: 0o600 });
+  fs.renameSync(tmp, TELEGRAM_RECIPIENTS_FILE);
+  return true;
+}
+async function notifyChaysaTelegramPair(message) {
+  const pair = getChaysaTelegramPair();
+  if (!pair) return { status: "not_configured", recipients: [] };
+  const recipients = await Promise.all(pair.map(async member => ({
+    chatId: member.id,
+    sent: await sendTelegramText(member.id, message)
+  })));
+  return {
+    status: recipients.every(x => x.sent) ? "sent" : recipients.some(x => x.sent) ? "partial" : "failed",
+    recipients
+  };
+}
 function saveTelegramRecipient(chat) {
   if (!chat || chat.type !== "private" || chat.id == null) return;
   const rows = readTelegramRecipients();
   const id = String(chat.id);
   const item = { id, username: chat.username || "", first_name: chat.first_name || "", type: "private" };
   const index = rows.findIndex(x => String(x.id) === id);
-  if (index >= 0) rows[index] = item; else rows.push(item);
-  fs.writeFileSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", JSON.stringify(rows, null, 2), "utf8");
-  fs.renameSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", TELEGRAM_RECIPIENTS_FILE);
+  if (index >= 0) rows[index] = { ...rows[index], ...item }; else rows.push(item);
+  const pair = getChaysaTelegramPair();
+  if (pair) {
+    for (const member of pair) {
+      const existingIndex = rows.findIndex(x => String(x.id) === member.id);
+      const existing = existingIndex >= 0 ? rows[existingIndex] : { id: member.id, username: "", first_name: "", type: "private" };
+      const linked = { ...existing, linkedChatId: member.linkedChatId, pairKey: member.pairKey, linked: true };
+      if (existingIndex >= 0) rows[existingIndex] = linked; else rows.push(linked);
+    }
+  }
+  const tmp = TELEGRAM_RECIPIENTS_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), { encoding: "utf8", mode: 0o600 });
+  fs.renameSync(tmp, TELEGRAM_RECIPIENTS_FILE);
 }
 
 async function sendTelegramText(chatId, text, replyMarkup) {
@@ -574,8 +621,15 @@ app.get("/api/admin/telegram/recipients", requireAdmin, async (_req, res) => {
     const [me, webhook] = await Promise.all([meResponse.json(), webhookResponse.json()]);
     if (!meResponse.ok || me.ok !== true) return json(res, 502, { error: "توکن به یک ربات معتبر تلگرام متصل نیست." });
     if (!webhookResponse.ok || webhook.ok !== true) return json(res, 502, { error: "وضعیت وب‌هوک تلگرام قابل دریافت نیست." });
+    const pair = getChaysaTelegramPair();
+    const recipients = readTelegramRecipients();
     return json(res, 200, {
-      recipients: readTelegramRecipients(),
+      recipients,
+      chaysa_pair: {
+        configured: Boolean(pair),
+        linked: Boolean(pair && pair.every(member => recipients.some(x => x.id === member.id && x.linkedChatId === member.linkedChatId))),
+        participants: pair ? pair.map(x => ({ chat_id: x.id, linked_chat_id: x.linkedChatId })) : []
+      },
       bot_username: me.result.username || "",
       webhook_active: Boolean(webhook.result.url),
       webhook_url_matches: Boolean(webhook.result.url && webhook.result.url.endsWith("/telegram/webhook")),
@@ -602,6 +656,116 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
   fileFilter: (_req, file, cb) => cb(null, /^image\/(jpeg|png|webp|gif|avif)$/i.test(file.mimetype))
 });
+
+const HEALTH_ARCHIVE_DIR = path.join(DATA, "health-archive");
+const HEALTH_ARCHIVE_FILE = path.join(DATA, "health-archive.json");
+fs.mkdirSync(HEALTH_ARCHIVE_DIR, { recursive: true });
+function readHealthArchive() {
+  try {
+    const rows = JSON.parse(fs.readFileSync(HEALTH_ARCHIVE_FILE, "utf8"));
+    return Array.isArray(rows) ? rows : [];
+  } catch (_) { return []; }
+}
+function saveHealthArchive(rows) {
+  const tmp = HEALTH_ARCHIVE_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), { encoding: "utf8", mode: 0o600 });
+  fs.renameSync(tmp, HEALTH_ARCHIVE_FILE);
+}
+const healthArchiveUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, HEALTH_ARCHIVE_DIR),
+    filename: (_req, file, cb) => {
+      const ext = ({ "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp" })[file.mimetype] || "";
+      cb(null, crypto.randomUUID() + ext);
+    }
+  }),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => cb(null, ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype))
+});
+function isSupportedEvidence(file) {
+  const head = fs.readFileSync(file.path).subarray(0, 12);
+  if (file.mimetype === "image/jpeg") return head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff;
+  if (file.mimetype === "image/png") return head.subarray(0, 8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]));
+  if (file.mimetype === "image/webp") return head.toString("ascii",0,4) === "RIFF" && head.toString("ascii",8,12) === "WEBP";
+  return false;
+}
+app.get("/api/admin/health-archive", requireAdmin, (_req, res) => {
+  const rows = readHealthArchive().slice(-200).reverse().map(({ evidenceFile, ...row }) => row);
+  return json(res, 200, rows);
+});
+app.post("/api/admin/health-archive", requireAdmin, healthArchiveUpload.single("evidence"), async (req, res) => {
+  const file = req.file;
+  const reviewerName = typeof req.body.reviewerName === "string" ? req.body.reviewerName.trim().slice(0,120) : "";
+  const decision = typeof req.body.decision === "string" ? req.body.decision.trim() : "";
+  const version = typeof req.body.version === "string" ? req.body.version.trim().slice(0,80) : "";
+  const commit = typeof req.body.commit === "string" ? req.body.commit.trim().toLowerCase() : "";
+  const note = typeof req.body.note === "string" ? req.body.note.trim().slice(0,2000) : "";
+  const allowedDecisions = ["تأیید می‌شود", "تأیید نمی‌شود", "نیاز به اصلاح دارد"];
+  const cleanup = () => { if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path); };
+  if (!file || !reviewerName || !allowedDecisions.includes(decision) || !version ||
+      (commit && !/^[a-f0-9]{7,40}$/.test(commit))) {
+    cleanup();
+    return json(res, 400, { error: "نام تأییدکننده، نسخه، نتیجه معتبر و تصویر مدرک الزامی است." });
+  }
+  if (!isSupportedEvidence(file)) {
+    cleanup();
+    return json(res, 400, { error: "محتوای فایل با فرمت تصویر اعلام‌شده مطابقت ندارد." });
+  }
+  const rows = readHealthArchive();
+  const currentBytes = rows.reduce((sum, row) => sum + Number(row.evidenceSize || 0), 0);
+  if (rows.length >= 200 || currentBytes + file.size > 100 * 1024 * 1024) {
+    cleanup();
+    return json(res, 413, { error: "ظرفیت بایگانی به سقف مجاز رسیده است." });
+  }
+  const record = {
+    id: crypto.randomUUID(),
+    section: "CHAYSA HEALTH",
+    reviewerName,
+    decision,
+    version,
+    commit: commit || null,
+    note,
+    recordedAt: new Date().toISOString(),
+    evidenceFile: path.basename(file.filename),
+    evidenceMime: file.mimetype,
+    evidenceSize: file.size,
+    telegramPair: (getChaysaTelegramPair() || []).map(member => ({
+      chatId: member.id,
+      linkedChatId: member.linkedChatId,
+      pairKey: member.pairKey
+    }))
+  };
+  try {
+    rows.push(record);
+    saveHealthArchive(rows);
+    const notification = await notifyChaysaTelegramPair([
+      "پرونده جدید در بایگانی CHAYSA HEALTH ثبت شد.",
+      "شناسه پرونده: " + record.id,
+      "نتیجه ثبت‌شده: " + record.decision,
+      "بررسی‌کننده اعلام‌شده: " + record.reviewerName,
+      "نسخه: " + record.version,
+      "این اعلان اطلاع‌رسانی است؛ برای مشاهده مدرک وارد پنل مدیریت شوید."
+    ].join("\n"));
+    record.telegramNotification = notification;
+    saveHealthArchive(rows);
+    const { evidenceFile, ...publicRecord } = record;
+    return json(res, 201, { ok: true, record: publicRecord });
+  } catch (_) {
+    cleanup();
+    return json(res, 500, { error: "ذخیره پرونده در بایگانی انجام نشد." });
+  }
+});
+app.get("/api/admin/health-archive/:id/evidence", requireAdmin, (req, res) => {
+  const row = readHealthArchive().find(item => item.id === req.params.id);
+  if (!row || !row.evidenceFile || path.basename(row.evidenceFile) !== row.evidenceFile) return res.sendStatus(404);
+  const filePath = path.join(HEALTH_ARCHIVE_DIR, row.evidenceFile);
+  if (!fs.existsSync(filePath)) return res.sendStatus(404);
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("Cache-Control", "no-store");
+  res.type(row.evidenceMime || "application/octet-stream");
+  return res.sendFile(filePath);
+});
+
 app.post("/api/admin/upload", requireAdmin, upload.single("image"), (req, res) => {
   if (!req.file) return json(res, 400, { error: "فقط فایل تصویری تا ۵ مگابایت مجاز است." });
   return json(res, 200, { url: "/media/" + path.basename(req.file.filename) });
@@ -763,6 +927,12 @@ app.use((err, _req, res, _next) => {
 const port = Number(process.env.PORT || 3000);
 app.listen(port, "0.0.0.0", () => {
   console.log("CHAYSA backup listening on " + port);
+  try {
+    const linked = syncChaysaTelegramPair();
+    console.log("CHAYSA Telegram pair:", linked ? "linked" : "not configured");
+  } catch (_) {
+    console.log("CHAYSA Telegram pair: sync failed");
+  }
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   if (token && webhookSecret) {
