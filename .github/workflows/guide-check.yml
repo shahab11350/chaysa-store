@@ -6,6 +6,7 @@ on:
       - feature/home-guide-layout-2026-11-16
       - feature/health-online-approval-2026-11-16
       - feature/admin-letter-composer-2026-11-16
+      - feature/telegram-inline-letter-receipt-2026-11-16
   pull_request:
     branches:
       - chaysa-backup
