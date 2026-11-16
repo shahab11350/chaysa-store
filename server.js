@@ -285,15 +285,35 @@ function readTelegramRecipients() {
     return Array.isArray(rows) ? rows : [];
   } catch (_) { return []; }
 }
+function getChaysaTelegramPair() {
+  const ownerChatId = String(process.env.CHAYSA_OWNER_CHAT_ID || "").trim();
+  const bostaniChatId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
+  const valid = value => /^-?\\d+$/.test(value);
+  if (!valid(ownerChatId) || !valid(bostaniChatId) || ownerChatId === bostaniChatId) return null;
+  return [
+    { id: ownerChatId, linkedChatId: bostaniChatId, pairKey: "chaysa-core" },
+    { id: bostaniChatId, linkedChatId: ownerChatId, pairKey: "chaysa-core" }
+  ];
+}
 function saveTelegramRecipient(chat) {
   if (!chat || chat.type !== "private" || chat.id == null) return;
   const rows = readTelegramRecipients();
   const id = String(chat.id);
   const item = { id, username: chat.username || "", first_name: chat.first_name || "", type: "private" };
   const index = rows.findIndex(x => String(x.id) === id);
-  if (index >= 0) rows[index] = item; else rows.push(item);
-  fs.writeFileSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", JSON.stringify(rows, null, 2), "utf8");
-  fs.renameSync(TELEGRAM_RECIPIENTS_FILE + ".tmp", TELEGRAM_RECIPIENTS_FILE);
+  if (index >= 0) rows[index] = { ...rows[index], ...item }; else rows.push(item);
+  const pair = getChaysaTelegramPair();
+  if (pair) {
+    for (const member of pair) {
+      const existingIndex = rows.findIndex(x => String(x.id) === member.id);
+      const existing = existingIndex >= 0 ? rows[existingIndex] : { id: member.id, username: "", first_name: "", type: "private" };
+      const linked = { ...existing, linkedChatId: member.linkedChatId, pairKey: member.pairKey, linked: true };
+      if (existingIndex >= 0) rows[existingIndex] = linked; else rows.push(linked);
+    }
+  }
+  const tmp = TELEGRAM_RECIPIENTS_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), { encoding: "utf8", mode: 0o600 });
+  fs.renameSync(tmp, TELEGRAM_RECIPIENTS_FILE);
 }
 
 async function sendTelegramText(chatId, text, replyMarkup) {
@@ -574,8 +594,15 @@ app.get("/api/admin/telegram/recipients", requireAdmin, async (_req, res) => {
     const [me, webhook] = await Promise.all([meResponse.json(), webhookResponse.json()]);
     if (!meResponse.ok || me.ok !== true) return json(res, 502, { error: "توکن به یک ربات معتبر تلگرام متصل نیست." });
     if (!webhookResponse.ok || webhook.ok !== true) return json(res, 502, { error: "وضعیت وب‌هوک تلگرام قابل دریافت نیست." });
+    const pair = getChaysaTelegramPair();
+    const recipients = readTelegramRecipients();
     return json(res, 200, {
-      recipients: readTelegramRecipients(),
+      recipients,
+      chaysa_pair: {
+        configured: Boolean(pair),
+        linked: Boolean(pair && pair.every(member => recipients.some(x => x.id === member.id && x.linkedChatId === member.linkedChatId))),
+        participants: pair ? pair.map(x => ({ chat_id: x.id, linked_chat_id: x.linkedChatId })) : []
+      },
       bot_username: me.result.username || "",
       webhook_active: Boolean(webhook.result.url),
       webhook_url_matches: Boolean(webhook.result.url && webhook.result.url.endsWith("/telegram/webhook")),
@@ -674,7 +701,12 @@ app.post("/api/admin/health-archive", requireAdmin, healthArchiveUpload.single("
     recordedAt: new Date().toISOString(),
     evidenceFile: path.basename(file.filename),
     evidenceMime: file.mimetype,
-    evidenceSize: file.size
+    evidenceSize: file.size,
+    telegramPair: (getChaysaTelegramPair() || []).map(member => ({
+      chatId: member.id,
+      linkedChatId: member.linkedChatId,
+      pairKey: member.pairKey
+    }))
   };
   try {
     rows.push(record);
