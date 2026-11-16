@@ -184,6 +184,46 @@ async function sendTelegramText(chatId, text) {
     return response.ok && result.ok === true;
   } catch (_) { return false; }
 }
+function buildOwnerProgressReport() {
+  const orders = readOrders();
+  const questions = readQuestions();
+  const products = readProducts();
+  const orderCounts = {};
+  for (const order of orders) {
+    const status = String(order.status || "نامشخص");
+    orderCounts[status] = (orderCounts[status] || 0) + 1;
+  }
+  const questionCounts = {};
+  for (const question of questions) {
+    const status = String(question.status || (question.reply ? "پاسخ‌داده‌شده" : "در انتظار پاسخ"));
+    questionCounts[status] = (questionCounts[status] || 0) + 1;
+  }
+  const activeProducts = products.filter(product => product.active !== false).length;
+  const orderLines = Object.entries(orderCounts).map(([status, count]) => "• " + status + ": " + count);
+  const questionLines = Object.entries(questionCounts).map(([status, count]) => "• " + status + ": " + count);
+  return [
+    "گزارش مالک پروژه چایسا",
+    "زمان تهیه: " + new Date().toLocaleString("fa-IR", { timeZone: "Asia/Tehran" }),
+    "",
+    "۱) وضعیت داده‌های فروشگاه",
+    "• کل محصولات: " + products.length,
+    "• محصولات فعال: " + activeProducts,
+    "• کل سفارش‌های ثبت‌شده: " + orders.length,
+    ...(orderLines.length ? orderLines : ["• هنوز سفارشی ثبت نشده است."]),
+    "",
+    "۲) پرسش و پاسخ",
+    "• کل پرسش‌ها: " + questions.length,
+    ...(questionLines.length ? questionLines : ["• هنوز پرسشی ثبت نشده است."]),
+    "",
+    "۳) وضعیت فنی",
+    "• این پیام از مسیر وب‌هوک ربات تولید شده است.",
+    "• وضعیت زنده انتشار سایت، ساخت و انتشار اندروید، آزمون‌های دستگاه و سلامت زیرساخت از داده‌های فروشگاه قابل استنتاج نیست و باید جداگانه ممیزی شود.",
+    "",
+    "۴) امنیت و حریم خصوصی",
+    "• این گزارش فقط آمار تجمیعی را نشان می‌دهد؛ اطلاعات هویتی مشتریان، نشانی، تماس، متن پرسش‌ها، جزئیات پرداخت، رمزها و توکن‌ها ارسال نمی‌شود."
+  ].join("\n");
+}
+
 function buildBostaniProgressReport() {
   const orders = readOrders();
   const questions = readQuestions();
@@ -229,8 +269,12 @@ app.post("/telegram/webhook", async (req, res) => {
     if (msg && msg.chat) saveTelegramRecipient(msg.chat);
     if (msg && msg.chat && msg.chat.type === "private" && typeof msg.text === "string" &&
         msg.text.trim() === "چایسا فایل") {
+      const senderId = String(msg.chat.id);
+      const ownerId = String(process.env.CHAYSA_OWNER_CHAT_ID || "").trim();
       const allowedBostaniId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
-      if (allowedBostaniId && String(msg.chat.id) === allowedBostaniId) {
+      if (ownerId && senderId === ownerId) {
+        await sendTelegramText(msg.chat.id, buildOwnerProgressReport());
+      } else if (allowedBostaniId && senderId === allowedBostaniId) {
         await sendTelegramText(msg.chat.id, buildBostaniProgressReport());
       }
       return res.sendStatus(200);
