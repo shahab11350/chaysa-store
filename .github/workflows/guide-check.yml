@@ -4,11 +4,16 @@ on:
   push:
     branches:
       - feature/home-guide-layout-2026-11-16
+      - feature/health-online-approval-2026-11-16
   pull_request:
     branches:
       - chaysa-backup
     paths:
       - "server.js"
+      - "admin.html"
+      - "health-approval.html"
+      - "docs/CHAYSA_PROJECT_MASTER.md"
+      - "docs/CHAYSA_SYSTEM_SPEC.md"
       - "guide.js"
       - "guide-bank.json"
       - "test/**"
