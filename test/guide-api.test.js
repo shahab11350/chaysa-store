@@ -282,3 +282,92 @@ test("store service questions are allowed", async () => {
   assert.equal(result.body.allowed, true);
   assert.equal(result.body.type, "service_external_search");
 });
+
+
+test("CHAYSA HEALTH approval link is delivered privately, one-time and archived automatically", async () => {
+  const unauthorized = await fetch(baseUrl + "/api/admin/health-approval/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: "{}"
+  });
+  assert.equal(unauthorized.status, 401);
+
+  const login = await fetch(baseUrl + "/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: "guide-test-only-password" })
+  });
+  assert.equal(login.status, 200);
+  const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
+  assert.match(cookie, /^chaysa_admin=/);
+
+  const send = await fetch(baseUrl + "/api/admin/health-approval/send", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: "{}"
+  });
+  assert.equal(send.status, 201);
+  const sent = await send.json();
+  assert.equal(sent.deliveryStatus, "sent");
+
+  const messages = telegramLog().filter(item => item.url.endsWith("/sendMessage"));
+  const letterMessage = messages.map(item => JSON.parse(item.body)).find(body =>
+    String(body.chat_id) === "222222" &&
+    body.text.includes("/health-approval.html#")
+  );
+  assert.ok(letterMessage, "the private approval link must be sent to Bostani's configured chat");
+  const link = letterMessage.text.match(/https:\/\/chaysa\.up\.railway\.app\/health-approval\.html#([A-Za-z0-9_-]+)/);
+  assert.ok(link);
+  const token = link[1];
+  assert.equal(token.length, 43);
+
+  const page = await fetch(baseUrl + "/health-approval.html");
+  assert.equal(page.status, 200);
+  assert.match(await page.text(), /تأیید می‌شود/);
+
+  const view = await fetch(baseUrl + "/api/health-approval/view", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token })
+  });
+  assert.equal(view.status, 200);
+  const letter = await view.json();
+  assert.match(letter.letter, /بانک اطلاعاتی جامع و پویا/);
+  assert.match(letter.letter, /تداخلات احتمالی/);
+
+  const decision = await fetch(baseUrl + "/api/health-approval/decision", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, decision: "نیاز به اصلاح دارد", note: "لطفاً هشدارهای ایمنی تکمیل شود." })
+  });
+  assert.equal(decision.status, 200);
+  const result = await decision.json();
+  assert.ok(result.archiveRecordId);
+
+  const archiveResponse = await fetch(baseUrl + "/api/admin/health-archive", {
+    headers: { Cookie: cookie }
+  });
+  assert.equal(archiveResponse.status, 200);
+  const archive = await archiveResponse.json();
+  const record = archive.find(item => item.id === result.archiveRecordId);
+  assert.ok(record);
+  assert.equal(record.decision, "نیاز به اصلاح دارد");
+  assert.equal(record.evidenceType, "online_decision");
+  assert.equal(record.evidenceFile, undefined);
+  assert.match(record.reviewerIdentityNote, /احراز هویت حقوقی/);
+
+  const notifications = telegramLog().filter(item => {
+    if (!item.url.endsWith("/sendMessage")) return false;
+    const body = JSON.parse(item.body);
+    return body.text.includes("نتیجه بررسی بخش CHAYSA HEALTH در بایگانی ثبت شد");
+  }).map(item => String(JSON.parse(item.body).chat_id));
+  assert.ok(notifications.includes("111111"));
+  assert.ok(notifications.includes("222222"));
+
+  const replay = await fetch(baseUrl + "/api/health-approval/decision", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, decision: "تأیید می‌شود" })
+  });
+  assert.equal(replay.status, 409);
+});
