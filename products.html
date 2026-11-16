@@ -90,7 +90,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .checkout-preview h4{margin:0 0 8px;color:#173b2b}
 .checkout-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .checkout-actions button{flex:1;min-width:130px;border:0;border-radius:9px;padding:12px;font-family:inherit;cursor:pointer}
-.checkout-status{margin:14px 0 0;padding:14px;border-radius:10px;font-size:16px;line-height:2;font-weight:bold;text-align:center}.checkout-status.success{background:#edf6ee;border:1px solid #8ab493;color:#245b32}.checkout-status.error{background:#fff0ee;border:1px solid #d99a91;color:#9b3025}.checkout-send:disabled{opacity:.7;cursor:wait}
+.checkout-status{margin:14px 0 0;padding:14px;border-radius:10px;font-size:16px;line-height:2;font-weight:bold;text-align:center}.checkout-status.success{background:#edf6ee;border:1px solid #8ab493;color:#245b32}.checkout-status.warning{background:#fff8e7;border:1px solid #d9b65d;color:#765414}.checkout-status.error{background:#fff0ee;border:1px solid #d99a91;color:#9b3025}.checkout-send:disabled{opacity:.7;cursor:wait}
 .checkout-send{background:#244b37;color:white;font-weight:bold}
 .checkout-back{background:#f1eee5;color:#665a43}
 .payment-tracking-note{margin:12px 0 0;padding:12px;background:#f8f6ef;border-radius:10px;color:#665a43;font-size:12px;line-height:2}
@@ -592,8 +592,17 @@ document.addEventListener("DOMContentLoaded", async function () {
       const response=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,items,termsAccepted:true,termsAcceptedAt:new Date().toISOString()})});
       let result={};try{result=await response.json()}catch(_){}
       if(!response.ok||!result.ok)throw new Error(result.error||"ثبت سفارش انجام نشد.");
-      status.textContent="سفارش با شناسه "+result.orderId+" ثبت شد. فاکتور را کپی و تا زمان تحویل نگهداری کن.";
-      status.classList.add("success");status.hidden=false;
+      status.classList.remove("success","warning","error");
+      if(result.notificationStatus==="sent"&&result.notificationStatusSaved){
+        status.textContent="سفارش با شناسه "+result.orderId+" ثبت شد و پیش‌فاکتور به هر دو گیرنده ارسال شد. فاکتور را تا زمان تحویل نگهداری کن.";
+        status.classList.add("success");
+      }else{
+        const delivery=result.recipientCount>0?"ارسال موفق به "+result.delivered+" از "+result.recipientCount+" گیرنده":"گیرندگان اعلان سفارش در سامانه تنظیم نشده‌اند";
+        const persistence=result.notificationStatusSaved?"":"؛ ذخیره وضعیت ارسال نیز تأیید نشد";
+        status.textContent="سفارش با شناسه "+result.orderId+" در سامانه ثبت شد، اما دریافت پیش‌فاکتور توسط مدیران تأیید نشده است ("+delivery+persistence+"). سفارش را دوباره ثبت نکنید؛ شناسه و فاکتور را نگه دارید.";
+        status.classList.add("warning");
+      }
+      status.hidden=false;
       checkout.querySelector(".issued-invoice-text").textContent=result.invoice;
       checkout.querySelector(".issued-invoice").hidden=false;
       button.textContent="سفارش ثبت شد";button.disabled=true;
