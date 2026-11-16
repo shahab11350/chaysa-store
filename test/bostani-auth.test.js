@@ -1,5 +1,6 @@
 const { test, before, after } = require("node:test");
 const assert = require("node:assert/strict");
+const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
 const { mkdtempSync, rmSync } = require("node:fs");
 const os = require("node:os");
@@ -90,4 +91,25 @@ test("legacy key is converted to an eight-hour signed session", async () => {
   const cookie = setCookie.split(";")[0];
   assert.doesNotMatch(cookie, /test-only-session-secret/);
   assert.equal((await fetch(baseUrl + "/api/bostani/questions", { headers: { Cookie: cookie } })).status, 200);
+});
+
+test("expired and tampered session cookies are rejected", async () => {
+  const expired = String(Date.now() - 1000);
+  const expiredSignature = crypto.createHmac("sha256", "test-only-session-secret").update(expired).digest("hex");
+  const expiredCookie = "chaysa_bostani=" + expired + "." + expiredSignature;
+  assert.equal((await fetch(baseUrl + "/api/bostani/questions", { headers: { Cookie: expiredCookie } })).status, 401);
+  const future = String(Date.now() + 60 * 60 * 1000);
+  const tamperedCookie = "chaysa_bostani=" + future + "." + "0".repeat(64);
+  assert.equal((await fetch(baseUrl + "/api/bostani/questions", { headers: { Cookie: tamperedCookie } })).status, 401);
+});
+test("login rejects a mismatched Origin and enforces the attempt limit", async () => {
+  const badOrigin = await fetch(baseUrl + "/api/bostani/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Origin: "https://attacker.example" },
+    body: JSON.stringify({ username: "@bostani26chaysa", password: "test-only-bostani-password" })
+  });
+  assert.equal(badOrigin.status, 403);
+  const results = [];
+  for (let i = 0; i < 5; i++) results.push((await login("@wrong", "wrong")).status);
+  assert.equal(results.at(-1), 429);
 });
