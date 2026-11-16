@@ -125,6 +125,117 @@ app.get("/api/admin/analytics", requireAdmin, (_req, res) => {
   });
 });
 
+
+const GUIDE_BANK_FILE = path.join(ROOT, "guide-bank.json");
+function readGuideBank() {
+  try { return JSON.parse(fs.readFileSync(GUIDE_BANK_FILE, "utf8")); }
+  catch (_) { return { schemaVersion: 1, categories: [], questionBank: [], topicRules: {}, healthPolicy: {} }; }
+}
+function guideNormalize(value) {
+  return String(value || "").toLowerCase()
+    .replace(/[\\u064B-\\u065F\\u0670\\u0640]/g, "")
+    .replace(/[يى]/g, "ی").replace(/ك/g, "ک")
+    .replace(/[۰-۹]/g, d => String("۰۱۲۳۴۵۶۷۸۹".indexOf(d)))
+    .replace(/[٠-٩]/g, d => String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))
+    .replace(/[\\u200c\\u200f\\u200e]/g, " ")
+    .replace(/[^\\p{L}\\p{N}\\s-]/gu, " ")
+    .replace(/\\s+/g, " ").trim();
+}
+function guideSafeMedicine(value) {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw || raw.length > 80 || /[@\\d]|https?:|www\\.|\\+|\\b\\d{4,}\\b/i.test(raw)) return "";
+  if (!/^[\\p{L}\\s-]+$/u.test(raw)) return "";
+  return raw.replace(/\\s+/g, " ");
+}
+function guideFindProduct(products, sku, question) {
+  if (sku) {
+    const found = products.find(p => String(p.sku) === String(sku) && p.active !== false);
+    if (found) return found;
+  }
+  const normalized = guideNormalize(question);
+  return products.filter(p => p.active !== false && p.name)
+    .sort((a,b) => String(b.name).length - String(a.name).length)
+    .find(p => normalized.includes(guideNormalize(p.name))) || null;
+}
+function guideContainsAny(text, terms) {
+  return (terms || []).some(term => text.includes(guideNormalize(term)));
+}
+app.get("/api/guide/bootstrap", (_req, res) => {
+  const bank = readGuideBank();
+  const products = readProducts().filter(p => p && p.active !== false).map(p => ({
+    sku: String(p.sku || ""), name: String(p.name || ""), category: String(p.category || "")
+  })).filter(p => p.sku && p.name);
+  return json(res, 200, {
+    schemaVersion: bank.schemaVersion || 1,
+    categories: bank.categories || [],
+    questionBank: bank.questionBank || [],
+    products,
+    healthNotice: bank.healthPolicy && bank.healthPolicy.notice || "",
+    healthRule: bank.healthPolicy && bank.healthPolicy.rule || ""
+  });
+});
+app.post("/api/guide/resolve", (req, res) => {
+  const key = "guide-resolve:" + (req.ip || "unknown");
+  if (limited(key, 12, 60 * 1000)) return json(res, 429, { ok: false, error: "درخواست‌های زیادی ثبت شده است؛ کمی بعد دوباره تلاش کنید." });
+  const body = req.body || {};
+  const category = typeof body.category === "string" ? body.category : "";
+  const question = typeof body.question === "string" ? body.question.trim() : "";
+  const productSku = typeof body.productSku === "string" ? body.productSku.trim() : "";
+  const medicine = guideSafeMedicine(body.medicine);
+  if (!["products", "safety", "services", "custom"].includes(category))
+    return json(res, 400, { ok: false, error: "دسته راهنما معتبر نیست." });
+  if (!question || question.length > 400)
+    return json(res, 400, { ok: false, error: "متن پرسش را کوتاه و روشن وارد کنید." });
+  const normalized = guideNormalize(question);
+  const bank = readGuideBank();
+  const rules = bank.topicRules || {};
+  if (guideContainsAny(normalized, rules.deniedTerms))
+    return json(res, 200, { ok: false, allowed: false, reason: "outside_scope", message: "این راهنما فقط برای پاسخ‌گویی به پرسش‌های مرتبط با محصولات و خدمات چایسا طراحی شده است." });
+  if (guideContainsAny(normalized, rules.unsafeIntentTerms))
+    return json(res, 200, { ok: false, allowed: false, reason: "unsafe_medical_request", message: "راهنمای چایسا برای تشخیص، درمان یا تغییر دارو طراحی نشده است. برای تصمیم درمانی با پزشک یا داروساز مشورت کنید." });
+  const products = readProducts().filter(p => p && p.active !== false);
+  const product = guideFindProduct(products, productSku, question);
+  const serviceQuestion = guideContainsAny(normalized, rules.serviceTerms);
+  const productQuestion = Boolean(product) || guideContainsAny(normalized, rules.productTopics);
+  if (category === "services" && !serviceQuestion)
+    return json(res, 200, { ok: false, allowed: false, reason: "needs_service_context", message: "لطفاً پرسش را به خرید، سفارش، پرداخت، ارسال یا پیگیری خدمات چایسا مرتبط کنید." });
+  if (category === "products" && (!product || !productQuestion))
+    return json(res, 200, { ok: false, allowed: false, reason: "needs_product", message: "برای ادامه، محصول موردنظر را از فهرست انتخاب کنید و پرسش را درباره همان محصول بنویسید." });
+  if (category === "safety") {
+    if (!product) return json(res, 200, { ok: false, allowed: false, reason: "needs_product", message: "ابتدا محصول چایسا را انتخاب کنید." });
+    if (!medicine) return json(res, 200, { ok: false, allowed: false, reason: "needs_medicine", message: "نام دارو را در فیلد جداگانه وارد کنید؛ اطلاعات شخصی یا مشخصات پزشکی خود را ننویسید." });
+    const q = '"' + product.name + '" "' + medicine + '" تداخل مصرف هم‌زمان ایمنی شواهد ' +
+      (bank.healthPolicy.sourceDomains || []).map(d => "site:" + d).join(" OR ");
+    const url = "https://www.google.com/search?q=" + encodeURIComponent(q);
+    return json(res, 200, { ok: true, allowed: true, type: "medical_external_search", url,
+      notice: bank.healthPolicy.notice || "", rule: bank.healthPolicy.rule || "" });
+  }
+  if (category === "products") {
+    const topicHits = (rules.productTopics || []).filter(t => normalized.includes(guideNormalize(t)));
+    const topics = topicHits.length ? topicHits.join(" ") : "اطلاعات محصول";
+    const q = '"' + product.name + '" ' + topics + " اطلاعات رسمی";
+    return json(res, 200, { ok: true, allowed: true, type: "product_external_search",
+      url: "https://www.google.com/search?q=" + encodeURIComponent(q),
+      notice: "اطلاعات ترکیبات و ویژگی‌ها باید با برچسب رسمی محصول تطبیق داده شود." });
+  }
+  if (category === "services" || (category === "custom" && serviceQuestion)) {
+    const serviceHits = (rules.serviceTerms || []).filter(t => normalized.includes(guideNormalize(t)));
+    if (!serviceHits.length) return json(res, 200, { ok: false, allowed: false, reason: "outside_scope", message: "این راهنما فقط برای پرسش‌های مرتبط با محصولات و خدمات چایسا طراحی شده است." });
+    const q = "چایسا فروشگاه " + serviceHits.join(" ");
+    return json(res, 200, { ok: true, allowed: true, type: "service_external_search",
+      url: "https://www.google.com/search?q=" + encodeURIComponent(q),
+      notice: "برای اطلاعات قطعی سفارش، فقط اطلاعیه‌ها و پیام‌های رسمی چایسا را ملاک قرار دهید." });
+  }
+  if (category === "custom" && product) {
+    const topics = (rules.productTopics || []).filter(t => normalized.includes(guideNormalize(t)));
+    const q = '"' + product.name + '" ' + (topics.length ? topics.join(" ") : "اطلاعات محصول");
+    return json(res, 200, { ok: true, allowed: true, type: "product_external_search",
+      url: "https://www.google.com/search?q=" + encodeURIComponent(q),
+      notice: "اطلاعات محصول را با برچسب رسمی همان محصول تطبیق دهید." });
+  }
+  return json(res, 200, { ok: false, allowed: false, reason: "outside_scope", message: "این راهنما فقط برای پرسش‌های مرتبط با محصولات و خدمات چایسا طراحی شده است." });
+});
+
 app.get("/api/products", (_req, res) => json(res, 200, readProducts()));
 
 app.post("/api/admin/login", (req, res) => {
@@ -470,7 +581,7 @@ app.post("/api/orders",async(req,res)=>{
 });
 // Do not expose server-side source, package metadata, or deployment configuration.
 app.use((req, res, next) => {
-  const blocked = new Set(["server.js", "package.json", "package-lock.json", "worker.js", "wrangler.toml", "CLOUDFLARE-SETUP.md", "BACKUP-STATUS.md", "DEVELOPMENT-CHECKPOINT.md"]);
+  const blocked = new Set(["server.js", "package.json", "package-lock.json", "worker.js", "wrangler.toml", "CLOUDFLARE-SETUP.md", "guide-bank.json", "BACKUP-STATUS.md", "DEVELOPMENT-CHECKPOINT.md"]);
   const name = decodeURIComponent((req.path || "").split("/").pop() || "");
   if (blocked.has(name) || name.startsWith(".")) return res.sendStatus(404);
   next();
