@@ -275,5 +275,81 @@
       "category": "services",
       "suggestion": "چطور سفارش خودم را پیگیری کنم؟"
     }
-  ]
+  ],
+  "interactionRecords": [],
+  "knowledgeSchema": {
+    "product": [
+      "sku",
+      "name",
+      "category",
+      "ingredients",
+      "caffeine",
+      "flavor",
+      "aroma",
+      "brewing",
+      "storage",
+      "officialLabelSource",
+      "lastReviewedAt"
+    ],
+    "medication": [
+      "genericName",
+      "brandNames",
+      "activeIngredient",
+      "drugClass",
+      "source",
+      "lastReviewedAt"
+    ],
+    "interaction": [
+      "productSku",
+      "botanicalIngredient",
+      "medicationGenericName",
+      "interactionType",
+      "severity",
+      "evidenceLevel",
+      "summary",
+      "precautions",
+      "sourceIds",
+      "reviewedAt",
+      "reviewDueAt"
+    ],
+    "specialCondition": [
+      "condition",
+      "productSku",
+      "ingredient",
+      "riskSummary",
+      "evidenceLevel",
+      "sourceIds",
+      "reviewedAt"
+    ],
+    "adverseEffect": [
+      "productSku",
+      "ingredient",
+      "effect",
+      "frequencyIfKnown",
+      "severity",
+      "sourceIds",
+      "reviewedAt"
+    ],
+    "source": [
+      "id",
+      "title",
+      "publisher",
+      "url",
+      "sourceType",
+      "publicationDate",
+      "accessedAt",
+      "reliability",
+      "notes"
+    ],
+    "faq": [
+      "id",
+      "category",
+      "question",
+      "synonyms",
+      "answer",
+      "sourceIds",
+      "status",
+      "reviewedAt"
+    ]
+  }
 }
