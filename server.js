@@ -508,7 +508,7 @@ app.listen(port, "0.0.0.0", () => {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   if (token && webhookSecret) {
-    const webhookUrl = "https://chaysa-backup-store-production.up.railway.app/telegram/webhook";
+    const webhookUrl = "https://chaysa.up.railway.app/telegram/webhook";
     fetch("https://api.telegram.org/bot" + token + "/setWebhook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
