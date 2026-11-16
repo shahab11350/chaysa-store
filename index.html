@@ -196,25 +196,22 @@ if(document.readyState==="loading"){
 <div class="chaysa-home-tools">
 <section id="chaysaGuide" class="about chaysa-guide" aria-labelledby="chaysaGuideTitle">
   <h2 id="chaysaGuideTitle">راهنمای چایسا</h2>
-  <p>پاسخ به پرسش‌های مرتبط با محصولات و خدمات چایسا</p>
-  <div class="chaysa-guide-options">
-    <details class="chaysa-guide-option">
-      <summary class="chaysa-guide-button">راهنمای محصولات</summary>
-      <p>اطلاعات معرفی، ترکیبات، طعم، روش مصرف و نگهداری محصولات چایسا.</p>
-    </details>
-    <details class="chaysa-guide-option">
-      <summary class="chaysa-guide-button">سلامت و ایمنی مصرف</summary>
-      <p>اطلاعات احتیاطی، عوارض احتمالی و بررسی تداخل چای و دمنوش با داروها.</p>
-    </details>
-    <details class="chaysa-guide-option">
-      <summary class="chaysa-guide-button">راهنمای خرید و خدمات</summary>
-      <p>راهنمای سفارش، پرداخت، ارسال و پیگیری خدمات چایسا.</p>
-    </details>
-    <details class="chaysa-guide-option">
-      <summary class="chaysa-guide-button">پرسش اختصاصی</summary>
-      <p>برای ارسال پرسش به همکاران چایسا از فرم پرسش‌وپاسخ کنار این بخش استفاده کنید.</p>
-    </details>
-  </div>
+  <p>راهنمای انتخاب محصول و پرسش‌های مرتبط با محصولات و خدمات چایسا</p>
+  <div id="chaysaGuideCategories" class="chaysa-guide-options" aria-label="دسته‌بندی راهنما"></div>
+  <div id="chaysaGuidePrompts" class="chaysa-guide-prompts" aria-live="polite"></div>
+  <form id="chaysaGuideForm" class="chaysa-guide-form">
+    <label for="chaysaGuideProduct">محصول چایسا</label>
+    <select id="chaysaGuideProduct"><option value="">انتخاب محصول</option></select>
+    <label for="chaysaGuideMedicine" id="chaysaGuideMedicineLabel" hidden>نام دارو</label>
+    <input id="chaysaGuideMedicine" type="text" maxlength="80" autocomplete="off" placeholder="نام ژنریک یا تجاری دارو" hidden>
+    <label for="chaysaGuideQuestion">پرسش شما</label>
+    <textarea id="chaysaGuideQuestion" rows="3" maxlength="400" required placeholder="پرسش مرتبط با محصولات یا خدمات چایسا را بنویسید..."></textarea>
+    <button id="chaysaGuidePrepare" type="submit">بررسی و آماده‌سازی پرسش</button>
+    <p id="chaysaGuideStatus" role="status" aria-live="polite"></p>
+    <a id="chaysaGuideAnswer" class="chaysa-guide-answer" hidden target="_blank" rel="noopener noreferrer">دریافت پاسخ</a>
+  </form>
+  <p class="chaysa-guide-privacy">پرسش شما در چایسا ذخیره نمی‌شود. اطلاعات شخصی، شماره تماس، نشانی یا جزئیات پرونده پزشکی را وارد نکنید.</p>
+  <p id="chaysaGuideHealthNotice" class="chaysa-guide-health" hidden></p>
 </section>
 
 <section id="questions" class="about" style="max-width:none">
@@ -330,7 +327,25 @@ header{position:relative;min-height:176px;padding:48px 110px 22px}
 #chaysaMusicPlayer .cm-controls span{display:inline-block!important;visibility:visible!important;opacity:1!important;font:bold 11px Tahoma;color:#244b37;white-space:nowrap}
 #chaysaMusicPlayer .cm-heading{font:bold 12px Tahoma;color:#244b37;text-align:center;margin:0 0 4px}
 #chaysaSuno{display:block!important;pointer-events:auto!important;width:100%;height:84px;border:0;border-radius:8px;background:#fff}
-@media(max-width:420px){header{min-height:170px;padding:50px 108px 18px}.logo{font-size:27px}header h1{font-size:22px;margin:5px 0}header p{font-size:11px;margin-top:3px}#chaysaCalendar,#chaysaClock{top:8px!important;width:96px;height:96px;padding:7px;border-width:1px}#chaysaCalendar{right:6px!important}#chaysaClock{left:6px!important}#chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:10px;margin-bottom:3px}#chaysaClock .cc-time{font-size:16px}#chaysaCalendar .cc-date{font-size:10px}#chaysaClock .cc-zone{font-size:7px}#chaysaMusicPlayer{left:auto!important;bottom:auto!important;width:calc(100% - 20px);margin:10px auto 16px}#chaysaSuno{height:82px}}</style>
+@media(max-width:420px){header{min-height:170px;padding:50px 108px 18px}.logo{font-size:27px}header h1{font-size:22px;margin:5px 0}header p{font-size:11px;margin-top:3px}#chaysaCalendar,#chaysaClock{top:8px!important;width:96px;height:96px;padding:7px;border-width:1px}#chaysaCalendar{right:6px!important}#chaysaClock{left:6px!important}#chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:10px;margin-bottom:3px}#chaysaClock .cc-time{font-size:16px}#chaysaCalendar .cc-date{font-size:10px}#chaysaClock .cc-zone{font-size:7px}#chaysaMusicPlayer{left:auto!important;bottom:auto!important;width:calc(100% - 20px);margin:10px auto 16px}#chaysaSuno{height:82px}}
+.chaysa-guide-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:16px 0}
+.chaysa-guide-category{border:0;border-radius:9px;background:#b99b55;color:#fff;padding:11px 8px;font:bold 13px Tahoma;line-height:1.8;cursor:pointer}
+.chaysa-guide-category[aria-pressed="true"]{background:#244b37;outline:2px solid #b99b55;outline-offset:2px}
+.chaysa-guide-prompts{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.chaysa-guide-prompt{border:1px solid #d9c99f;background:#fff;color:#244b37;border-radius:18px;padding:8px 11px;font:12px Tahoma;cursor:pointer}
+.chaysa-guide-form{display:grid;gap:8px;background:#fff;border:1px solid #e6d9b8;border-radius:13px;padding:14px;text-align:right}
+.chaysa-guide-form label{font-weight:bold;font-size:13px;color:#244b37}
+.chaysa-guide-form select,.chaysa-guide-form input,.chaysa-guide-form textarea{width:100%;min-width:0;border:1px solid #d8d0bd;border-radius:9px;padding:11px;font:13px/1.9 Tahoma;background:#fff;color:#26372b}
+.chaysa-guide-form button,.chaysa-guide-answer{display:block;width:100%;border:0;border-radius:9px;background:#244b37;color:#fff;padding:12px;text-align:center;text-decoration:none;font:bold 13px Tahoma;cursor:pointer}
+.chaysa-guide-form button:disabled{opacity:.6;cursor:wait}
+.chaysa-guide-answer{background:#b99b55;margin-top:4px}
+#chaysaGuideStatus{font-size:12px;line-height:1.9;margin:2px 0;color:#a33}
+.chaysa-guide-privacy,.chaysa-guide-health{font-size:11px;line-height:1.9;color:#777;margin:9px 0}
+.chaysa-guide-health{padding:10px;background:#fff8e8;border-right:3px solid #b99b55;border-radius:7px;color:#654f22}
+@media(max-width:700px){.chaysa-home-tools{grid-template-columns:minmax(0,1fr)}.chaysa-guide-options{grid-template-columns:1fr 1fr}}
+@media(max-width:380px){.chaysa-guide-options{grid-template-columns:1fr}}
+
+</style>
 
 <script>
 (function(){
@@ -429,5 +444,6 @@ document.addEventListener("click", function(event) {
   }
 });
 </script>
+<script src="/guide.js" defer></script>
 </body>
 </html>
