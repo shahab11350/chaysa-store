@@ -794,6 +794,116 @@ app.post("/api/admin/health-approval/send", requireAdmin, async (req, res) => {
   if (!sent) return json(res, 502, { error: "ارسال پیام تلگرام ناموفق بود؛ درخواست در سوابق با وضعیت ناموفق نگهداری شد.", requestId: request.id });
   return json(res, 201, { ok: true, requestId: request.id, deliveryStatus: "sent", expiresAt: request.expiresAt });
 });
+
+const LETTERS_ARCHIVE_FILE = path.join(DATA, "letters-archive.json");
+function readLettersArchive() {
+  try {
+    const rows = JSON.parse(fs.readFileSync(LETTERS_ARCHIVE_FILE, "utf8"));
+    return Array.isArray(rows) ? rows : [];
+  } catch (_) { return []; }
+}
+function saveLettersArchive(rows) {
+  const tmp = LETTERS_ARCHIVE_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), { encoding: "utf8", mode: 0o600 });
+  fs.renameSync(tmp, LETTERS_ARCHIVE_FILE);
+}
+function getLetterDraftMeta(rows = readLettersArchive(), now = new Date()) {
+  const dayKey = tehranDay(now);
+  const count = rows.filter(row => row.dayKey === dayKey).length + 1;
+  const letterNumber = "CHY-" + dayKey.replace(/-/g, "") + "-" + String(count).padStart(3, "0");
+  const dateTime = now.toLocaleString("fa-IR", {
+    timeZone: "Asia/Tehran", year: "numeric", month: "long", day: "numeric",
+    hour: "2-digit", minute: "2-digit", hour12: false
+  });
+  return { dayKey, letterNumber, dateTime };
+}
+function formatGeneralChaysaLetter(meta, body) {
+  return [
+    "CHAYSA | فروشگاه اینترنتی چایسا",
+    "نامه رسمی",
+    "شماره نامه: " + meta.letterNumber,
+    "تاریخ و ساعت: " + meta.dateTime,
+    "--------------------------------",
+    body,
+    "",
+    "--------------------------------",
+    "محمدرضا نظام",
+    "ناظر کیفی و ایده‌پرداز فروشگاه اینترنتی چایسا (CHAYSA)"
+  ].join("\n");
+}
+app.get("/api/admin/letters/meta", requireAdmin, (_req, res) => {
+  return json(res, 200, getLetterDraftMeta());
+});
+app.get("/api/admin/letters", requireAdmin, (_req, res) => {
+  return json(res, 200, readLettersArchive().slice(-50).reverse());
+});
+app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
+  if (limited("admin-letter-send:" + (req.ip || "unknown"), 5, 60 * 60 * 1000))
+    return json(res, 429, { error: "تعداد ارسال نامه بیش از حد مجاز است؛ یک ساعت بعد دوباره تلاش کنید." });
+  const body = typeof (req.body && req.body.text) === "string" ? req.body.text.trim() : "";
+  if (!body || body.length > 3400)
+    return json(res, 400, { error: "متن نامه الزامی است و نباید بیشتر از ۳۴۰۰ نویسه باشد." });
+  if (!process.env.TELEGRAM_BOT_TOKEN || !getChaysaTelegramPair())
+    return json(res, 503, { error: "اتصال امن ربات یا پیوند دوطرفه حساب‌های تلگرام آماده نیست." });
+  const rows = readLettersArchive();
+  const now = new Date();
+  const meta = getLetterDraftMeta(rows, now);
+  const message = formatGeneralChaysaLetter(meta, body);
+  if (message.length > 4096)
+    return json(res, 400, { error: "متن نهایی نامه از محدودیت پیام تلگرام بیشتر است." });
+  const record = {
+    id: crypto.randomUUID(),
+    letterNumber: meta.letterNumber,
+    dayKey: meta.dayKey,
+    createdAt: now.toISOString(),
+    dateTime: meta.dateTime,
+    body,
+    formattedMessage: message,
+    signatureName: "محمدرضا نظام",
+    signatureRole: "ناظر کیفی و ایده‌پرداز فروشگاه اینترنتی چایسا (CHAYSA)",
+    deliveryStatus: "pending",
+    deliveredCount: 0,
+    recipientCount: 2
+  };
+  rows.push(record);
+  try { saveLettersArchive(rows.slice(-500)); }
+  catch (_) { return json(res, 500, { error: "ذخیره اولیه نامه در بایگانی انجام نشد؛ هیچ پیامی ارسال نشد." }); }
+  const delivery = await notifyChaysaTelegramPair(message);
+  record.deliveryStatus = delivery.status;
+  record.deliveredCount = delivery.recipients.filter(item => item.sent).length;
+  record.sentAt = record.deliveredCount ? new Date().toISOString() : null;
+  try {
+    const current = readLettersArchive();
+    const saved = current.find(item => item.id === record.id);
+    if (saved) {
+      Object.assign(saved, {
+        deliveryStatus: record.deliveryStatus,
+        deliveredCount: record.deliveredCount,
+        sentAt: record.sentAt
+      });
+      saveLettersArchive(current);
+    }
+  } catch (_) {
+    return json(res, 500, { error: "وضعیت ارسال در بایگانی به‌روزرسانی نشد؛ پیش از ارسال مجدد، بایگانی را بررسی کنید.", letterNumber: record.letterNumber });
+  }
+  if (delivery.status !== "sent")
+    return json(res, 502, {
+      error: delivery.status === "partial"
+        ? "نامه فقط به یکی از دو حساب تلگرام رسید؛ از ارسال مجدد خودکار جلوگیری شد."
+        : "ارسال نامه به تلگرام ناموفق بود؛ وضعیت آن در بایگانی ثبت شد.",
+      letterNumber: record.letterNumber,
+      deliveredCount: record.deliveredCount,
+      deliveryStatus: delivery.status
+    });
+  return json(res, 201, {
+    ok: true,
+    letterNumber: record.letterNumber,
+    dateTime: record.dateTime,
+    deliveredCount: record.deliveredCount,
+    deliveryStatus: record.deliveryStatus
+  });
+});
+
 app.post("/api/health-approval/view", (req, res) => {
   if (!healthApprovalOriginAllowed(req)) return json(res, 403, { error: "مبدأ درخواست معتبر نیست." });
   if (limited("health-approval-view:" + (req.ip || "unknown"), 30, 10 * 60 * 1000))
