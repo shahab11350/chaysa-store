@@ -59,6 +59,18 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 @media(max-width:360px){.product-cards{grid-template-columns:1fr}}
 
 @media(min-width:650px){.grid{grid-template-columns:repeat(4,1fr)}}
+
+.chaysa-home-tools{max-width:1100px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px;direction:rtl;align-items:start}
+.chaysa-home-tools>section{width:100%;max-width:none;min-width:0;margin:0}
+.chaysa-guide-options{display:grid;grid-template-columns:1fr;gap:10px;margin-top:18px}
+.chaysa-guide-option{background:#fff;border:1px solid #eee8d8;border-radius:12px;padding:10px;box-shadow:0 3px 12px #0000000b;text-align:center}
+.chaysa-guide-option summary{list-style:none;cursor:pointer}
+.chaysa-guide-option summary::-webkit-details-marker{display:none}
+.chaysa-guide-button{display:block;width:100%;box-sizing:border-box;background:#b99b55;color:#fff;border-radius:8px;padding:12px 14px;font:bold 14px Tahoma,sans-serif;line-height:1.8}
+.chaysa-guide-button:focus-visible{outline:3px solid #173b2b;outline-offset:3px}
+.chaysa-guide-option p{font-size:12px;line-height:2;color:#666;margin:12px 4px 4px}
+@media(max-width:700px){.chaysa-home-tools{grid-template-columns:minmax(0,1fr);gap:4px;padding:0 10px}.chaysa-home-tools>section{padding-left:6px;padding-right:6px}}
+
 </style>
 
 <meta name="chaysa-release" content="2026-11-14-invite-card-v1">
@@ -181,7 +193,31 @@ if(document.readyState==="loading"){
 
 
 
-<section id="questions" class="about" style="max-width:760px">
+<div class="chaysa-home-tools">
+<section id="chaysaGuide" class="about chaysa-guide" aria-labelledby="chaysaGuideTitle">
+  <h2 id="chaysaGuideTitle">راهنمای چایسا</h2>
+  <p>پاسخ به پرسش‌های مرتبط با محصولات و خدمات چایسا</p>
+  <div class="chaysa-guide-options">
+    <details class="chaysa-guide-option">
+      <summary class="chaysa-guide-button">راهنمای محصولات</summary>
+      <p>اطلاعات معرفی، ترکیبات، طعم، روش مصرف و نگهداری محصولات چایسا.</p>
+    </details>
+    <details class="chaysa-guide-option">
+      <summary class="chaysa-guide-button">سلامت و ایمنی مصرف</summary>
+      <p>اطلاعات احتیاطی، عوارض احتمالی و بررسی تداخل چای و دمنوش با داروها.</p>
+    </details>
+    <details class="chaysa-guide-option">
+      <summary class="chaysa-guide-button">راهنمای خرید و خدمات</summary>
+      <p>راهنمای سفارش، پرداخت، ارسال و پیگیری خدمات چایسا.</p>
+    </details>
+    <details class="chaysa-guide-option">
+      <summary class="chaysa-guide-button">پرسش اختصاصی</summary>
+      <p>برای ارسال پرسش به همکاران چایسا از فرم پرسش‌وپاسخ کنار این بخش استفاده کنید.</p>
+    </details>
+  </div>
+</section>
+
+<section id="questions" class="about" style="max-width:none">
   <h2>پرسش از شما، پاسخ از ما</h2>
   <p>سؤال، ابهام یا پیشنهادت رو برامون بنویس. بعد از ثبت پرسش، برای دریافت پاسخ از همکارمون، اتصال تلگرام رو کامل کن.</p>
   <form id="chaysaQuestionForm" style="background:#fff;border:1px solid #e6d9b8;border-radius:16px;padding:20px;text-align:right;box-shadow:0 4px 16px #0000000a">
@@ -201,6 +237,7 @@ if(document.readyState==="loading"){
     <p id="chaysaQuestionStatus" role="status" aria-live="polite" style="margin:12px 0 0;font-size:13px;text-align:center"></p>
   </form>
 </section>
+</div>
 
 <footer id="contact">
 <strong>CHAYSA | چایسا</strong>
