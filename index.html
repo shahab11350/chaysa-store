@@ -74,6 +74,20 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .chaysa-guide-option p{font-size:12px;line-height:2;color:#666;margin:12px 4px 4px}
 @media(max-width:700px){.chaysa-home-tools{grid-template-columns:minmax(0,1fr);gap:4px;padding:0 10px}.chaysa-home-tools>section{padding-left:6px;padding-right:6px}}
 
+
+/* Independent CHAYSA HEALTH entry card on homepage */
+.chaysa-health-home-section{max-width:1100px;margin:18px auto 28px;padding:0 16px}
+.chaysa-health-home-card{position:relative;display:flex;align-items:center;justify-content:space-between;gap:24px;overflow:hidden;padding:26px 30px;border:1px solid #c9b477;border-radius:20px;background:linear-gradient(120deg,#e8eee3 0%,#f8f7ef 58%,#f3ecd9 100%);box-shadow:0 8px 26px #183b2b12;text-align:right}
+.chaysa-health-home-card:before{content:"";position:absolute;top:0;right:0;bottom:0;width:6px;background:linear-gradient(180deg,#b99b55,#244b37)}
+.chaysa-health-home-copy{min-width:0}
+.chaysa-health-home-kicker{margin:0 0 5px;color:#6f874d;font:bold 12px/1.6 Tahoma,sans-serif;letter-spacing:2px;direction:ltr;text-align:right}
+.chaysa-health-home-copy h2{margin:0 0 8px;color:#173b2b;font-size:21px;text-align:right}
+.chaysa-health-home-copy>p:not(.chaysa-health-home-kicker){margin:0;color:#536454;font-size:13px;line-height:2}
+.chaysa-health-home-status{display:inline-block!important;margin-top:10px!important;padding:3px 12px;border:1px solid #c5ad6c;border-radius:20px;background:#fffaf0;color:#806728!important;font-size:11px!important}
+.chaysa-health-home-link{flex:0 0 auto;display:inline-block;padding:12px 20px;border:1px solid #b99b55;border-radius:10px;background:#244b37;color:#fff;text-decoration:none;font:bold 13px Tahoma,sans-serif;white-space:nowrap;transition:background .2s ease}
+.chaysa-health-home-link:hover{background:#173b2b}
+.chaysa-health-home-link:focus-visible{outline:3px solid #b99b55;outline-offset:3px}
+@media(max-width:650px){.chaysa-health-home-section{margin:12px auto 20px;padding:0 12px}.chaysa-health-home-card{align-items:stretch;flex-direction:column;gap:14px;padding:22px 20px}.chaysa-health-home-copy h2{font-size:18px}.chaysa-health-home-link{width:100%;box-sizing:border-box;text-align:center}}
 </style>
 
 <meta name="chaysa-release" content="2026-11-14-invite-card-v1">
@@ -194,7 +208,17 @@ if(document.readyState==="loading"){
 <p>چایسا، فروشگاهی برای انتخاب‌های متنوع امروز و فردا؛ با نگاهی به فرصت‌های تازه در آینده.</p>
 </section>
 
-
+<section class="chaysa-health-home-section" aria-labelledby="chaysaHealthHomeTitle">
+  <div class="chaysa-health-home-card">
+    <div class="chaysa-health-home-copy">
+      <p class="chaysa-health-home-kicker">CHAYSA HEALTH</p>
+      <h2 id="chaysaHealthHomeTitle">مشاور سلامت چایسا</h2>
+      <p>فضایی مستقل برای شناخت علمی محصولات گیاهی، نکات ایمنی مصرف و بررسی تداخل‌های احتمالی چای و دمنوش با داروها.</p>
+      <p class="chaysa-health-home-status">در حال تکمیل</p>
+    </div>
+    <a class="chaysa-health-home-link" href="health-advisor.html">ورود به مشاور سلامت</a>
+  </div>
+</section>
 
 <div class="chaysa-home-tools">
 <section id="chaysaGuide" class="about chaysa-guide" aria-labelledby="chaysaGuideTitle">
@@ -206,13 +230,6 @@ if(document.readyState==="loading"){
     <p><strong>تأیید فنی:</strong> آقای نظام، مالک پروژه چایسا؛ پس از بررسی صحت عملکرد، امنیت و پایداری سامانه.</p>
     <p>تا دریافت و ثبت هر دو تأیید، این بخش در وضعیت آزمایشی باقی می‌ماند.</p>
   </aside>
-  <aside class="chaysa-guide-trial-notice" role="note" aria-label="وضعیت مشاور سلامت چایسا">
-    <strong>مشاور سلامت چایسا — در حال تکمیل</strong>
-    <p>بانک علمی بررسی تداخل چای و دمنوش با داروها و منابع تخصصی آن در دست تکمیل و بازبینی است.</p>
-    <p>تا زمان تکمیل بانک و تأیید تخصصی، این بخش پاسخ پزشکی تأییدشده ارائه نمی‌کند. نتایج جست‌وجوی بیرونی نیز به معنی تأیید پزشکی از سوی چایسا نیست.</p>
-    <p>برای تصمیم درباره مصرف هم‌زمان محصولات گیاهی و داروها، به‌ویژه در شرایط پرخطر، با پزشک یا داروساز مشورت کنید و داروی تجویزشده را خودسرانه تغییر ندهید.</p>
-  </aside>
-  <p><a class="chaysa-health-entry" href="health-advisor.html">CHAYSA HEALTH <span>مشاور سلامت چایسا</span></a></p>
   <p>راهنمای انتخاب محصول و پرسش‌های مرتبط با محصولات و خدمات چایسا</p>
   <div id="chaysaGuideCategories" class="chaysa-guide-options" aria-label="دسته‌بندی راهنما"></div>
   <div id="chaysaGuidePrompts" class="chaysa-guide-prompts" aria-live="polite"></div>
