@@ -14,6 +14,7 @@
 <button type="button" data-view="ordersView">سفارش‌ها</button>
 <button type="button" data-view="questionsView">پرسش و پاسخ</button>
 <button type="button" data-view="analyticsView">آمار سایت و اپ</button>
+<button type="button" data-view="healthArchiveView">بایگانی تأییدیه‌ها</button>
 <button type="button" data-view="telegramView">اتصال تلگرام</button>
 </nav>
 </section>
@@ -32,6 +33,27 @@
 <section id="analyticsView" class="admin-view hidden">
 <div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><div class="row" style="margin-top:16px"><h2>آمار سایت و اپلیکیشن</h2><button id="refreshAnalytics" class="secondary">به‌روزرسانی آمار</button></div><div id="analytics" class="muted">در حال دریافت آمار…</div><p class="muted">آمار سایت از زمان انتشار این نسخه ثبت می‌شود. نصب APK پس از اتصال نسخهٔ اندروید به سرویس آمار، با اولین اجرا ثبت خواهد شد.</p></div>
 </section>
+
+<section id="healthArchiveView" class="admin-view hidden">
+<div class="panel">
+<button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button>
+<h2 style="margin-top:16px">بایگانی تأییدیه‌های CHAYSA HEALTH</h2>
+<p class="muted">پرونده فقط پس از دریافت نتیجه بررسی و تصویر تأیید/اعلام نظر ثبت می‌شود. تصویر مدارک در فضای خصوصی سرور نگهداری می‌شود و فقط مدیر واردشده به آن دسترسی دارد.</p>
+<div style="border:1px solid #e8dfca;border-radius:12px;padding:14px;margin:14px 0">
+<h3>ثبت پرونده جدید</h3>
+<label for="healthReviewer">نام و نام خانوادگی بررسی‌کننده</label><input id="healthReviewer" maxlength="120" placeholder="سرکار خانم بستانی">
+<label for="healthDecision">نتیجه بررسی</label><select id="healthDecision"><option value="تأیید می‌شود">تأیید می‌شود</option><option value="تأیید نمی‌شود">تأیید نمی‌شود</option><option value="نیاز به اصلاح دارد">نیاز به اصلاح دارد</option></select>
+<label for="healthVersion">نسخه بررسی‌شده</label><input id="healthVersion" maxlength="80" placeholder="مثلاً CHAYSA HEALTH – نسخه اول">
+<label for="healthCommit">شناسه Commit (اختیاری)</label><input id="healthCommit" maxlength="40" placeholder="شناسه نسخه در صورت وجود">
+<label for="healthNote">توضیحات</label><textarea id="healthNote" rows="3" maxlength="2000" style="width:100%;padding:11px;border:1px solid #d9d2c2;border-radius:9px;font:14px/2 Tahoma"></textarea>
+<label for="healthEvidence">تصویر اسکرین‌شات نتیجه</label><input id="healthEvidence" type="file" accept="image/jpeg,image/png,image/webp">
+<p class="muted">فرمت‌های JPG، PNG و WebP؛ حداکثر ۵ مگابایت. سقف بایگانی ۲۰۰ پرونده یا ۱۰۰ مگابایت است.</p>
+<button id="saveHealthArchive">ثبت و بایگانی پرونده</button><div id="healthArchiveStatus" class="muted" aria-live="polite"></div>
+</div>
+<h3>سوابق ثبت‌شده</h3><button id="refreshHealthArchive" class="secondary">به‌روزرسانی بایگانی</button><div id="healthArchiveRows" class="muted">در حال بارگذاری…</div>
+</div>
+</section>
+
 <section id="telegramView" class="admin-view hidden">
 <div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">اتصال تلگرام</h2><p class="muted">برای شناسایی گیرنده‌ها، پیام‌های شروع ربات خوانده می‌شوند؛ فقط شناسه و نام کاربری نمایش داده می‌شود.</p><button id="telegramLookup" class="secondary">شناسایی گیرنده‌های فاکتور</button><div id="telegramResult" class="muted"></div></div>
 </section>
@@ -43,6 +65,37 @@ function showDashboard(){ showAdminView('adminHome'); }
 async function api(path,opts={}){const r=await fetch('/api/admin/'+path,{credentials:'same-origin',...opts});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'خطا در ارتباط با سرور');return d}
 function render(){ $('items').innerHTML='';products.forEach((p,i)=>{const el=document.createElement('div');el.className='product';const img=document.createElement('img');img.src=p.image||'';img.alt='';const info=document.createElement('div');const title=document.createElement('b');title.textContent=p.name;const meta=document.createElement('small');meta.textContent=(p.category||'')+' · '+(p.price||0).toLocaleString('fa-IR')+' تومان · '+(p.sku||'بدون شناسه')+' · '+(p.active===false?'غیرفعال':'فعال');info.append(title,meta);const actions=document.createElement('div');actions.className='actions';const edit=document.createElement('button');edit.textContent='ویرایش';edit.onclick=()=>fill(i);const del=document.createElement('button');del.textContent='حذف';del.className='danger';del.onclick=async()=>{if(confirm('این محصول حذف شود؟')){products.splice(i,1);await saveAll()}};const toggle=document.createElement('button');toggle.textContent=p.active===false?'فعال‌سازی':'غیرفعال‌سازی';toggle.className='secondary';toggle.onclick=async()=>{products[i].active=products[i].active===false;await saveAll()};actions.append(edit,toggle,del);el.append(img,info,actions);$('items').append(el)})}
 async function load(){products=await api('products');render();status('تعداد محصولات: '+products.length)}
+
+async function loadHealthArchive(){
+ const host=$('healthArchiveRows');host.textContent='در حال دریافت سوابق…';
+ try{
+  const rows=await api('health-archive');host.replaceChildren();
+  if(!rows.length){host.textContent='هنوز پرونده‌ای در این بایگانی ثبت نشده است.';return}
+  rows.forEach(row=>{
+   const box=document.createElement('div');box.style.cssText='border:1px solid #e8dfca;border-radius:10px;padding:12px;margin:10px 0;line-height:2';
+   const title=document.createElement('b');title.textContent=row.section+' · '+row.decision;
+   const meta=document.createElement('div');meta.className='muted';meta.textContent='بررسی‌کننده: '+row.reviewerName+' · نسخه: '+row.version+' · ثبت: '+new Date(row.recordedAt).toLocaleString('fa-IR');
+   const note=document.createElement('p');note.style.whiteSpace='pre-wrap';note.textContent=row.note||'بدون توضیحات';
+   const evidence=document.createElement('button');evidence.className='secondary';evidence.textContent='نمایش تصویر مدرک';evidence.onclick=()=>window.open('/api/admin/health-archive/'+encodeURIComponent(row.id)+'/evidence','_blank','noopener');
+   box.append(title,meta,note,evidence);host.append(box);
+  });
+ }catch(e){host.textContent=e.message}
+}
+async function saveHealthArchive(){
+ const statusBox=$('healthArchiveStatus'),file=$('healthEvidence').files[0];
+ if(!file){statusBox.textContent='تصویر اسکرین‌شات را انتخاب کنید.';return}
+ const form=new FormData();form.append('reviewerName',$('healthReviewer').value.trim());form.append('decision',$('healthDecision').value);
+ form.append('version',$('healthVersion').value.trim());form.append('commit',$('healthCommit').value.trim());form.append('note',$('healthNote').value.trim());form.append('evidence',file);
+ const button=$('saveHealthArchive');button.disabled=true;statusBox.textContent='در حال ثبت پرونده…';
+ try{
+  await api('health-archive',{method:'POST',body:form});
+  statusBox.textContent='پرونده با موفقیت در بایگانی ثبت شد.';
+  $('healthReviewer').value='';$('healthVersion').value='';$('healthCommit').value='';$('healthNote').value='';$('healthEvidence').value='';
+  await loadHealthArchive();
+ }catch(e){statusBox.textContent=e.message}
+ finally{button.disabled=false}
+}
+
 async function loadAnalytics(){
  const host=$('analytics');host.textContent='در حال دریافت آمار…';
  try{
@@ -123,9 +176,11 @@ function goBackAdminView(){
  const previousView=adminViewHistory.pop()||'adminHome';
  showAdminView(previousView,{remember:false});
 }
-document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.view==='addProductView')$('clear').click();showAdminView(button.dataset.view)}));
+document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.view==='addProductView')$('clear').click();showAdminView(button.dataset.view);if(button.dataset.view==='healthArchiveView')loadHealthArchive()}));
 document.querySelectorAll('[data-back]').forEach(button=>button.addEventListener('click',goBackAdminView));
 $('refreshOrders').onclick=loadOrders;
+$('refreshHealthArchive').onclick=loadHealthArchive;
+$('saveHealthArchive').onclick=saveHealthArchive;
 $('refreshAnalytics').onclick=loadAnalytics;
 $('refreshQuestions').onclick=loadQuestions;
 $('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reload()};
