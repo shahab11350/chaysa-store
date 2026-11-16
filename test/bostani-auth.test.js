@@ -74,7 +74,7 @@ test("valid credentials create secure signed session; logout revokes it", async 
   assert.match(setCookie, /SameSite=Strict/i);
   assert.match(setCookie, /Max-Age=28800/i);
   const cookie = setCookie.split(";")[0];
-  assert.match(cookie, /^chaysa_bostani=\\d+\\./);
+  assert.match(cookie, /^chaysa_bostani=\d+\./);
   assert.equal((await fetch(baseUrl + "/api/bostani/questions", { headers: { Cookie: cookie } })).status, 200);
   assert.equal((await fetch(baseUrl + "/api/bostani/logout", { method: "POST", headers: { Cookie: cookie } })).status, 200);
   assert.equal((await fetch(baseUrl + "/api/bostani/questions", { headers: { Cookie: cookie } })).status, 401);
