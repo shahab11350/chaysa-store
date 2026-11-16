@@ -169,6 +169,7 @@ app.get("/api/guide/bootstrap", (_req, res) => {
     schemaVersion: bank.schemaVersion || 1,
     categories: bank.categories || [],
     questionBank: bank.questionBank || [],
+    keywords: bank.keywords || [],
     products,
     healthNotice: bank.healthPolicy && bank.healthPolicy.notice || "",
     healthRule: bank.healthPolicy && bank.healthPolicy.rule || ""
