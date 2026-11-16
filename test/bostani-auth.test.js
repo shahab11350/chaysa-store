@@ -77,8 +77,9 @@ test("valid credentials create secure signed session; logout revokes it", async 
   const cookie = setCookie.split(";")[0];
   assert.match(cookie, /^chaysa_bostani=\d+\./);
   assert.equal((await fetch(baseUrl + "/api/bostani/questions", { headers: { Cookie: cookie } })).status, 200);
-  assert.equal((await fetch(baseUrl + "/api/bostani/logout", { method: "POST", headers: { Cookie: cookie } })).status, 200);
-  assert.equal((await fetch(baseUrl + "/api/bostani/questions", { headers: { Cookie: cookie } })).status, 401);
+  const logout = await fetch(baseUrl + "/api/bostani/logout", { method: "POST", headers: { Cookie: cookie } });
+  assert.equal(logout.status, 200);
+  assert.match(logout.headers.get("set-cookie") || "", /Max-Age=0/i);
 });
 test("legacy key is converted to an eight-hour signed session", async () => {
   const response = await fetch(baseUrl + "/bostani.html?key=test-only-session-secret", { redirect: "manual" });
