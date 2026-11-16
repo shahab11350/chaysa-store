@@ -288,7 +288,7 @@ function readTelegramRecipients() {
 function getChaysaTelegramPair() {
   const ownerChatId = String(process.env.CHAYSA_OWNER_CHAT_ID || "").trim();
   const bostaniChatId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
-  const valid = value => /^-?\\d+$/.test(value);
+  const valid = value => /^-?\d+$/.test(value);
   if (!valid(ownerChatId) || !valid(bostaniChatId) || ownerChatId === bostaniChatId) return null;
   return [
     { id: ownerChatId, linkedChatId: bostaniChatId, pairKey: "chaysa-core" },
