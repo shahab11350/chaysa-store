@@ -113,13 +113,13 @@ footer{text-align:center;color:var(--muted);font-size:11px;margin-top:22px}
       if (reviewerName) reviewerName.focus();
       return;
     }
-    if (!window.confirm("نام ثبت‌شونده: " + name + "\\nنتیجه «" + decision + "» ثبت شود؟ پس از ثبت، لینک قابل استفاده مجدد نخواهد بود.")) return;
+    if (!window.confirm("نام ثبت‌شونده: " + name + "\nنتیجه «" + decision + "» ثبت شود؟ پس از ثبت، لینک قابل استفاده مجدد نخواهد بود.")) return;
     buttons.forEach(item => item.disabled = true);
     status.textContent = "در حال ثبت نظر و بایگانی…";
     try {
       const result = await post("/api/health-approval/decision", { token, decision, reviewerName: name, note: note.value });
       area.classList.add("hidden");
-      status.textContent = "نظر شما با موفقیت ثبت شد.\nنتیجه: " + result.decision + "\nشناسه پرونده بایگانی: " + result.archiveRecordId + "\nاین لینک اکنون مصرف شده است.";
+      status.textContent = "نظر شما با موفقیت ثبت شد.\nنام ثبت‌شده: " + result.reviewerName + "\nنتیجه: " + result.decision + "\nزمان ثبت: " + new Date(result.recordedAt).toLocaleString("fa-IR", { timeZone: "Asia/Tehran" }) + "\nشناسه پرونده بایگانی: " + result.archiveRecordId + "\nاین لینک اکنون مصرف شده است.";
       history.replaceState(null, "", window.location.pathname);
     } catch (error) {
       status.textContent = error.message;
