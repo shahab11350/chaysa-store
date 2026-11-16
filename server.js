@@ -400,7 +400,7 @@ app.get("/api/admin/guide/approvals", requireAdmin, (_req, res) => {
 async function requestGuideApproval(ownerChatId, version, commit, previewUrl) {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   const bostaniChatId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
-  if (!token || !/^-?\\d+$/.test(bostaniChatId)) {
+  if (!token || !/^-?\d+$/.test(bostaniChatId)) {
     await sendTelegramText(ownerChatId, "درخواست تأیید ارسال نشد؛ اتصال ربات یا شناسه عددی خانم بستانی تنظیم نشده است.");
     return;
   }
@@ -436,7 +436,7 @@ async function requestGuideApproval(ownerChatId, version, commit, previewUrl) {
     "",
     "لطفاً ابتدا نسخه آزمایشی را بررسی کنید و سپس یکی از دو دکمه زیر را انتخاب کنید.",
     "این تأیید فقط مربوط به همین نسخه و همین Commit است و به‌معنای مجوز انتشار عمومی نیست."
-  ].join("\\n");
+  ].join("\n");
   const keyboard = {
     keyboard: [[{ text: "تأیید " + id }, { text: "عدم تأیید " + id }]],
     resize_keyboard: true,
@@ -478,16 +478,16 @@ app.post("/telegram/webhook", async (req, res) => {
       }
       if (text.startsWith("/guide_approval")) {
         if (ownerId && senderId === ownerId) {
-          const match = text.match(/^\\/guide_approval(?:@\\w+)?\\s+([A-Za-z0-9._+-]{1,40})\\s+([a-f0-9]{7,40})\\s+(https:\\/\\/\\S+)$/i);
+          const match = text.match(/^\/guide_approval(?:@\w+)?\s+([A-Za-z0-9._+-]{1,40})\s+([a-f0-9]{7,40})\s+(https:\/\/\S+)$/i);
           if (!match) {
-            await sendTelegramText(msg.chat.id, "قالب دستور:\\n/guide_approval <version> <commit-sha> <preview-url>\\nنمونه: /guide_approval 1.0.0 abcdef123456 https://chaysa-guide-preview.up.railway.app");
+            await sendTelegramText(msg.chat.id, "قالب دستور:\n/guide_approval <version> <commit-sha> <preview-url>\nنمونه: /guide_approval 1.0.0 abcdef123456 https://chaysa-guide-preview.up.railway.app");
           } else {
             await requestGuideApproval(msg.chat.id, match[1], match[2], match[3]);
           }
         }
         return res.sendStatus(200);
       }
-      const decision = text.match(/^(عدم\\s+تأیید|عدم\\s+تایید|تأیید|تایید)\\s+([A-F0-9]{12})$/i);
+      const decision = text.match(/^(عدم\s+تأیید|عدم\s+تایید|تأیید|تایید)\s+([A-F0-9]{12})$/i);
       if (senderId === allowedBostaniId && decision) {
         const id = decision[2].toUpperCase();
         const rows = readGuideApprovals();
@@ -503,10 +503,10 @@ app.post("/telegram/webhook", async (req, res) => {
             saveGuideApprovals(rows);
             await sendTelegramText(msg.chat.id,
               (approved ? "تأیید نسخه ثبت شد." : "عدم تأیید نسخه ثبت شد.") +
-              "\\nنسخه: " + record.version +
-              "\\nCommit: " + record.commit +
-              "\\nشناسه: " + id +
-              (approved ? "" : "\\nبرای ثبت اشکالات، دستور /guide_note " + id + " <شرح اشکال> را ارسال کنید."),
+              "\nنسخه: " + record.version +
+              "\nCommit: " + record.commit +
+              "\nشناسه: " + id +
+              (approved ? "" : "\nبرای ثبت اشکالات، دستور /guide_note " + id + " <شرح اشکال> را ارسال کنید."),
               { remove_keyboard: true });
           } catch (_) {
             await sendTelegramText(msg.chat.id, "ثبت نتیجه در سابقه پایدار ناموفق بود؛ لطفاً دوباره تلاش کنید.");
@@ -514,7 +514,7 @@ app.post("/telegram/webhook", async (req, res) => {
         }
         return res.sendStatus(200);
       }
-      const note = text.match(/^\\/guide_note(?:@\\w+)?\\s+([A-F0-9]{12})\\s+([\\s\\S]{1,1000})$/i);
+      const note = text.match(/^\/guide_note(?:@\w+)?\s+([A-F0-9]{12})\s+([\s\S]{1,1000})$/i);
       if (senderId === allowedBostaniId && note) {
         const rows = readGuideApprovals();
         const record = rows.find(x => x.id === note[1].toUpperCase() && x.status === "rejected");
@@ -534,7 +534,7 @@ app.post("/telegram/webhook", async (req, res) => {
       }
     }
     const startMatch = msg && msg.chat && msg.chat.type === "private" &&
-      typeof msg.text === "string" ? msg.text.trim().match(/^\\/start(?:@\\w+)?\\s+(Q-[A-Za-z0-9-]+)$/i) : null;
+      typeof msg.text === "string" ? msg.text.trim().match(/^\/start(?:@\w+)?\s+(Q-[A-Za-z0-9-]+)$/i) : null;
     if (startMatch) {
       const rows = readQuestions();
       const question = rows.find(x => x.id === startMatch[1]);
