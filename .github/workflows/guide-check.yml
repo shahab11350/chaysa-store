@@ -13,6 +13,7 @@ on:
     paths:
       - "server.js"
       - "admin.html"
+      - "bostani.html"
       - "health-approval.html"
       - "letter-receipt.html"
       - "docs/CHAYSA_PROJECT_MASTER.md"
@@ -37,6 +38,8 @@ jobs:
         run: npm install --ignore-scripts
       - name: Check server JavaScript syntax
         run: node --check server.js
+      - name: Run Bostani authentication tests
+        run: npm run test:bostani-auth
       - name: Check admin inline JavaScript syntax
         run: |
           python - <<'PY'
