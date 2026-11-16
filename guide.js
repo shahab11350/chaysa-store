@@ -27,6 +27,7 @@
     status.style.color = "#a33";
   }
   function selectCategory(id) {
+    if (category !== id) medicine.value = "";
     category = id;
     clearResult();
     categoryBox.querySelectorAll("button").forEach(function (button) {
@@ -71,6 +72,7 @@
       button.className = "chaysa-guide-prompt";
       button.textContent = item.label;
       button.addEventListener("click", function () {
+        medicine.value = "";
         question.value = item.prompt;
         clearResult();
         question.focus();
@@ -123,8 +125,14 @@
     });
 
   [question, medicine, product].forEach(function (field) {
-    field.addEventListener("input", function () { clearResult(); if (field === question) renderSuggestions(); });
-    field.addEventListener("change", clearResult);
+    field.addEventListener("input", function () {
+      clearResult();
+      if (field === question) { medicine.value = ""; renderSuggestions(); }
+    });
+    field.addEventListener("change", function () {
+      if (field === product) medicine.value = "";
+      clearResult();
+    });
   });
 
   form.addEventListener("submit", async function (event) {
