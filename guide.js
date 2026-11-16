@@ -138,11 +138,6 @@
       status.textContent = "ابتدا محصول موردنظر را انتخاب کنید.";
       return;
     }
-    if (category === "safety" && !medicine.value.trim()) {
-      status.textContent = "نام دارو را در فیلد جداگانه وارد کنید.";
-      medicine.focus();
-      return;
-    }
     const requestSnapshot = {
       category: category,
       question: question.value.trim(),
