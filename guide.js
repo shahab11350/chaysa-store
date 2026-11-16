@@ -3,6 +3,7 @@
   if (!root) return;
   const categoryBox = document.getElementById("chaysaGuideCategories");
   const promptBox = document.getElementById("chaysaGuidePrompts");
+  const suggestionBox = document.getElementById("chaysaGuideSuggestions");
   const form = document.getElementById("chaysaGuideForm");
   const product = document.getElementById("chaysaGuideProduct");
   const medicine = document.getElementById("chaysaGuideMedicine");
@@ -15,6 +16,9 @@
   let data = null;
   let category = "products";
 
+  function normalize(value) {
+    return String(value || "").toLowerCase().replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\u200e]/g, " ").replace(/\\s+/g, " ").trim();
+  }
   function clearResult() {
     answer.hidden = true;
     answer.removeAttribute("href");
@@ -34,6 +38,28 @@
     medicine.hidden = !safety;
     medicineLabel.hidden = !safety;
     renderPrompts();
+    renderSuggestions();
+  }
+  function renderSuggestions() {
+    suggestionBox.replaceChildren();
+    if (!data || !question.value.trim()) return;
+    const text = normalize(question.value);
+    const matches = (data.keywords || []).filter(function (item) {
+      return (item.match || []).some(function (term) { return text.includes(normalize(term)); });
+    }).slice(0, 4);
+    matches.forEach(function (item) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "chaysa-guide-prompt";
+      button.textContent = "پیشنهاد: " + item.suggestion;
+      button.addEventListener("click", function () {
+        selectCategory(item.category);
+        question.value = item.suggestion;
+        clearResult();
+        question.focus();
+      });
+      suggestionBox.appendChild(button);
+    });
   }
   function renderPrompts() {
     promptBox.replaceChildren();
@@ -96,7 +122,7 @@
     });
 
   [question, medicine, product].forEach(function (field) {
-    field.addEventListener("input", clearResult);
+    field.addEventListener("input", function () { clearResult(); if (field === question) renderSuggestions(); });
     field.addEventListener("change", clearResult);
   });
 
