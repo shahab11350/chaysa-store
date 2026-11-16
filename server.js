@@ -756,7 +756,7 @@ app.post("/api/admin/health-approval/send", requireAdmin, async (req, res) => {
   if (!/^-?\d+$/.test(bostaniChatId) || !process.env.TELEGRAM_BOT_TOKEN)
     return json(res, 503, { error: "تنظیمات امن ارسال تلگرام خانم بستانی کامل نیست." });
   const rows = readHealthApprovalRequests();
-  const active = rows.find(item => item.status === "pending" && item.expiresAt && Date.parse(item.expiresAt) > Date.now());
+  const active = rows.find(item => item.status === "pending" && item.deliveryStatus === "sent" && item.expiresAt && Date.parse(item.expiresAt) > Date.now());
   if (active) return json(res, 409, { error: "یک درخواست بررسی فعال وجود دارد؛ برای جلوگیری از ایجاد لینک‌های موازی، ابتدا همان درخواست را پیگیری کنید.", requestId: active.id, expiresAt: active.expiresAt });
   const token = crypto.randomBytes(32).toString("base64url");
   const now = new Date();
