@@ -81,9 +81,9 @@ async function loadHealthArchive(){
    const title=document.createElement('b');title.textContent=row.section+' · '+row.decision;
    const meta=document.createElement('div');meta.className='muted';meta.textContent='بررسی‌کننده: '+row.reviewerName+' · نسخه: '+row.version+' · ثبت: '+new Date(row.recordedAt).toLocaleString('fa-IR');
    const note=document.createElement('p');note.style.whiteSpace='pre-wrap';note.textContent=row.note||'بدون توضیحات';
-   const evidence=document.createElement('div');evidence.className='muted';evidence.textContent=row.evidenceType==='online_decision'?'مدرک: ثبت مستقیم نتیجه از طریق لینک اختصاصی (بدون تصویر اسکرین‌شات)':row.evidenceFile?'مدرک تصویری در بایگانی خصوصی ثبت شده است.':'مدرک تصویری ثبت نشده است.';
+   const evidence=document.createElement('div');evidence.className='muted';evidence.textContent=row.evidenceType==='online_decision'?'مدرک: ثبت مستقیم نتیجه از طریق لینک اختصاصی (بدون تصویر اسکرین‌شات)':row.hasEvidence?'مدرک تصویری در بایگانی خصوصی ثبت شده است.':'مدرک تصویری ثبت نشده است.';
    box.append(title,meta,note,evidence);
-   if(row.evidenceFile){const view=document.createElement('button');view.className='secondary';view.textContent='نمایش تصویر مدرک';view.onclick=()=>window.open('/api/admin/health-archive/'+encodeURIComponent(row.id)+'/evidence','_blank','noopener');box.append(view)}
+   if(row.hasEvidence){const view=document.createElement('button');view.className='secondary';view.textContent='نمایش تصویر مدرک';view.onclick=()=>window.open('/api/admin/health-archive/'+encodeURIComponent(row.id)+'/evidence','_blank','noopener');box.append(view)}
    if(row.telegramNotification){const delivery=document.createElement('div');delivery.className='muted';delivery.textContent='وضعیت اعلان تلگرام: '+row.telegramNotification.status;box.append(delivery)}
    host.append(box);
   });
