@@ -41,6 +41,8 @@ before(async () => {
       TELEGRAM_WEBHOOK_URL: "https://preview.example.com/telegram/webhook",
       CHAYSA_OWNER_CHAT_ID: "111111",
       CHAYSA_BOSTANI_CHAT_ID: "222222",
+      ORDER_CHAT_IDS: "111111,222222",
+      TELEGRAM_MOCK_FAIL_ORDER_CHAT_IDS: "222222",
       CHAYSA_GUIDE_REVIEW_HOST: "preview.example.com",
       TELEGRAM_MOCK_LOG: mockLog,
       NODE_OPTIONS: "--require " + path.join(__dirname, "mock-telegram-fetch.js")
@@ -459,4 +461,58 @@ test("general letters use a direct Telegram inline receipt button", async () => 
   await postLetterReceiptCallback(callbackData, "333333", "letter-callback-unauthorized");
   archive = JSON.parse(readFileSync(archivePath, "utf8"));
   assert.equal(archive[0].receivedByTelegramId, "222222");
+});
+
+
+test("Order is stored and Telegram delivery status is explicit when one recipient rejects the invoice", async () => {
+  const payload = {
+    customer: {
+      name: "آزمون", family: "خریدار", contact: "09120000000",
+      messengerId: "@test_customer", province: "تهران", city: "تهران",
+      address: "نشانی آزمایشی", postal: "1234567890", notes: "ندارد"
+    },
+    items: [{ sku: "1401008", qty: 2 }],
+    termsAccepted: true,
+    termsAcceptedAt: new Date().toISOString()
+  };
+  const response = await fetch(baseUrl + "/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const result = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(result.ok, true);
+  assert.ok(result.orderId);
+  assert.equal(result.notificationStatus, "partial");
+  assert.equal(result.delivered, 1);
+  assert.equal(result.recipientCount, 2);
+  assert.equal(result.notificationStatusSaved, true);
+  assert.match(result.invoice, /جمع کل:/);
+
+  const saved = JSON.parse(readFileSync(path.join(dataDir, "orders.json"), "utf8"));
+  const order = saved.find(item => item.id === result.orderId);
+  assert.ok(order);
+  assert.equal(order.total, 958000);
+  assert.equal(order.notification.status, "partial");
+  assert.equal(order.notification.delivered, 1);
+  assert.equal(order.notification.recipientCount, 2);
+  assert.ok(order.notification.attemptedAt);
+
+  const unauthenticated = await fetch(baseUrl + "/api/admin/orders");
+  assert.equal(unauthenticated.status, 401);
+  const login = await fetch(baseUrl + "/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: "guide-test-only-password" })
+  });
+  assert.equal(login.status, 200);
+  const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
+  const adminOrders = await fetch(baseUrl + "/api/admin/orders", {
+    headers: { Cookie: cookie }
+  });
+  assert.equal(adminOrders.status, 200);
+  const rows = await adminOrders.json();
+  const visible = rows.find(item => item.id === result.orderId);
+  assert.equal(visible.notification.status, "partial");
 });
