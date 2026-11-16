@@ -17,7 +17,7 @@
   let category = "products";
 
   function normalize(value) {
-    return String(value || "").toLowerCase().replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\u200e]/g, " ").replace(/\\s+/g, " ").trim();
+    return String(value || "").toLowerCase().replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\u200e]/g, " ").replace(/\s+/g, " ").trim();
   }
   function clearResult() {
     answer.hidden = true;
