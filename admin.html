@@ -39,10 +39,7 @@
 <script>
 let products=[];
 const $=id=>document.getElementById(id), status=m=>$('status').textContent=m;
-function showDashboard(){ $('dashboard').classList.remove('hidden');document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden')); }
-function openView(id){ $('dashboard').classList.add('hidden');document.querySelectorAll('.view').forEach(v=>v.classList.add('hidden'));$(id).classList.remove('hidden'); }
-document.querySelectorAll('[data-open-view]').forEach(b=>b.addEventListener('click',()=>openView(b.dataset.openView)));
-document.querySelectorAll('[data-home]').forEach(b=>b.addEventListener('click',showDashboard));
+function showDashboard(){ showAdminView('adminHome'); }
 async function api(path,opts={}){const r=await fetch('/api/admin/'+path,{credentials:'same-origin',...opts});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'خطا در ارتباط با سرور');return d}
 function render(){ $('items').innerHTML='';products.forEach((p,i)=>{const el=document.createElement('div');el.className='product';const img=document.createElement('img');img.src=p.image||'';img.alt='';const info=document.createElement('div');const title=document.createElement('b');title.textContent=p.name;const meta=document.createElement('small');meta.textContent=(p.category||'')+' · '+(p.price||0).toLocaleString('fa-IR')+' تومان · '+(p.sku||'بدون شناسه')+' · '+(p.active===false?'غیرفعال':'فعال');info.append(title,meta);const actions=document.createElement('div');actions.className='actions';const edit=document.createElement('button');edit.textContent='ویرایش';edit.onclick=()=>fill(i);const del=document.createElement('button');del.textContent='حذف';del.className='danger';del.onclick=async()=>{if(confirm('این محصول حذف شود؟')){products.splice(i,1);await saveAll()}};const toggle=document.createElement('button');toggle.textContent=p.active===false?'فعال‌سازی':'غیرفعال‌سازی';toggle.className='secondary';toggle.onclick=async()=>{products[i].active=products[i].active===false;await saveAll()};actions.append(edit,toggle,del);el.append(img,info,actions);$('items').append(el)})}
 async function load(){products=await api('products');render();status('تعداد محصولات: '+products.length)}
