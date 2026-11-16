@@ -59,5 +59,16 @@ jobs:
           Path('/tmp/chaysa-letter-receipt.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
           PY
           node --check /tmp/chaysa-letter-receipt.js
+      - name: Check health approval page inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('health-approval.html').read_text(encoding='utf-8')
+          scripts = source.split('<script>')
+          if len(scripts) < 2:
+              raise SystemExit('health approval inline script not found')
+          Path('/tmp/chaysa-health-approval.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
+          PY
+          node --check /tmp/chaysa-health-approval.js
       - name: Run guide API tests
         run: npm run test:guide
