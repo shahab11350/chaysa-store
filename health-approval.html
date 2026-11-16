@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#f7f6ef">
+<meta name="referrer" content="no-referrer">
+<title>درخواست بررسی CHAYSA HEALTH | چایسا</title>
+<style>
+:root{color-scheme:light;--ink:#263b2d;--green:#315b42;--soft:#eaf0e8;--gold:#b99b55;--cream:#f7f6ef;--line:#e2dfd2;--muted:#69766c}
+*{box-sizing:border-box}
+body{margin:0;background:var(--cream);color:var(--ink);font-family:Tahoma,Arial,sans-serif;line-height:2}
+main{width:min(100% - 24px,820px);margin:28px auto 54px}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:10px 4px 18px;border-bottom:1px solid var(--line)}
+.brand{direction:ltr;text-align:left;color:var(--green);font:700 17px Arial,sans-serif;letter-spacing:2px}
+.brand small{display:block;direction:rtl;font:12px Tahoma;letter-spacing:0;color:var(--muted);margin-top:5px}
+.tag{font-size:11px;color:#796536;border:1px solid #d8c99f;border-radius:20px;padding:4px 10px}
+.card{margin-top:22px;padding:clamp(18px,4vw,34px);background:#fff;border:1px solid var(--line);border-radius:17px;box-shadow:0 10px 35px #243a2b0b}
+.eyebrow{text-align:center;color:var(--gold);font:700 11px Arial,sans-serif;letter-spacing:2px;direction:ltr}
+h1{text-align:center;color:var(--green);font-size:clamp(21px,4vw,29px);line-height:1.7;margin:8px 0 2px}
+.sub{text-align:center;color:var(--muted);font-size:12px;margin:0 0 22px}
+#letter{white-space:pre-line;font-size:14px;line-height:2.25;color:#34483a}
+.version{margin:20px 0;padding:10px 13px;background:#f7f5ed;border-right:3px solid var(--gold);font-size:12px;color:#625b47}
+.note-label{display:block;margin:18px 0 7px;font-size:13px;font-weight:bold}
+textarea{display:block;width:100%;min-height:95px;padding:11px;border:1px solid #d9d2c2;border-radius:10px;font:13px/2 Tahoma;resize:vertical}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:17px}
+button{min-height:52px;border:0;border-radius:10px;padding:10px 8px;background:var(--green);color:white;font:700 13px Tahoma;cursor:pointer}
+button:nth-child(2){background:#8b4c42}
+button:nth-child(3){background:#8a7541}
+button:disabled{opacity:.55;cursor:wait}
+#status{margin-top:17px;padding:12px;border-radius:10px;background:var(--soft);font-size:13px;color:var(--green);white-space:pre-line}
+.warning{margin-top:20px;padding:13px 15px;border:1px solid #e5d9b9;border-radius:11px;background:#fffdf7;color:#6e603e;font-size:11px;line-height:2}
+footer{text-align:center;color:var(--muted);font-size:11px;margin-top:22px}
+.hidden{display:none!important}
+@media(max-width:560px){main{margin-top:12px}.actions{grid-template-columns:1fr}.actions button{min-height:46px}header{align-items:flex-start}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="brand">CHAYSA HEALTH<small>فروشگاه اینترنتی چایسا</small></div><span class="tag">نامه رسمی · بررسی نهایی</span></header>
+<section class="card">
+<div class="eyebrow">REVIEW & CONFIRMATION</div>
+<h1>درخواست بررسی بخش مشاور سلامت چایسا</h1>
+<p class="sub">لطفاً متن نامه را مطالعه و نظر خود را ثبت فرمایید.</p>
+<div id="letter" aria-live="polite">در حال بررسی اعتبار لینک اختصاصی…</div>
+<div id="version" class="version hidden"></div>
+<div id="decisionArea" class="hidden">
+<label class="note-label" for="reviewNote">توضیحات یا موارد نیازمند اصلاح (اختیاری)</label>
+<textarea id="reviewNote" maxlength="2000" placeholder="در صورت نیاز، توضیحات خود را بنویسید…"></textarea>
+<div class="actions">
+<button type="button" data-decision="تأیید می‌شود">تأیید می‌شود</button>
+<button type="button" data-decision="تأیید نمی‌شود">تأیید نمی‌شود</button>
+<button type="button" data-decision="نیاز به اصلاح دارد">نیاز به اصلاح دارد</button>
+</div>
+</div>
+<div id="status" role="status" aria-live="polite">لطفاً منتظر بمانید…</div>
+<div class="warning">این لینک اختصاصی و یک‌بارمصرف است؛ آن را در اختیار دیگران قرار ندهید. با ثبت نظر، نتیجه در بایگانی داخلی CHAYSA HEALTH ثبت می‌شود. این فرایند سابقه قابل پیگیری داخلی ایجاد می‌کند، اما امضای الکترونیکی واجد شرایط قانونی نیست و به‌تنهایی مجوز انتشار عمومی محسوب نمی‌شود.</div>
+</section>
+<footer>تیم طراحی و توسعه فروشگاه اینترنتی چایسا (CHAYSA)<br>ناظر فنی و ایده‌پرداز: آقای نظام</footer>
+</main>
+<script>
+(() => {
+  const token = window.location.hash.slice(1);
+  const letter = document.getElementById("letter");
+  const status = document.getElementById("status");
+  const area = document.getElementById("decisionArea");
+  const version = document.getElementById("version");
+  const note = document.getElementById("reviewNote");
+  const buttons = Array.from(document.querySelectorAll("[data-decision]"));
+  const post = async (path, body) => {
+    const response = await fetch(path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-store",
+      credentials: "omit",
+      referrerPolicy: "no-referrer",
+      body: JSON.stringify(body)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "درخواست انجام نشد.");
+    return data;
+  };
+  if (!/^[A-Za-z0-9_-]{40,60}$/.test(token)) {
+    letter.textContent = "لینک بررسی وجود ندارد یا معتبر نیست. لطفاً از فرستنده درخواست لینک تازه کنید.";
+    status.textContent = "امکان نمایش نامه وجود ندارد.";
+    return;
+  }
+  post("/api/health-approval/view", { token }).then(data => {
+    letter.textContent = data.letter;
+    version.textContent = "نسخه مورد بررسی: " + data.version + " · اعتبار تا: " + new Date(data.expiresAt).toLocaleString("fa-IR");
+    version.classList.remove("hidden");
+    area.classList.remove("hidden");
+    status.textContent = "نامه آماده بررسی است. پس از مطالعه، یکی از سه نتیجه را انتخاب کنید.";
+  }).catch(error => {
+    letter.textContent = "متن نامه در دسترس نیست.";
+    status.textContent = error.message;
+  });
+  buttons.forEach(button => button.addEventListener("click", async () => {
+    const decision = button.dataset.decision;
+    if (!window.confirm("نتیجه «" + decision + "» ثبت شود؟ پس از ثبت، لینک قابل استفاده مجدد نخواهد بود.")) return;
+    buttons.forEach(item => item.disabled = true);
+    status.textContent = "در حال ثبت نظر و بایگانی…";
+    try {
+      const result = await post("/api/health-approval/decision", { token, decision, note: note.value });
+      area.classList.add("hidden");
+      status.textContent = "نظر شما با موفقیت ثبت شد.\nنتیجه: " + result.decision + "\nشناسه پرونده بایگانی: " + result.archiveRecordId + "\nاین لینک اکنون مصرف شده است.";
+      history.replaceState(null, "", window.location.pathname);
+    } catch (error) {
+      status.textContent = error.message;
+      if (!/قبلاً ثبت|تعیین تکلیف|مهلت/.test(error.message)) buttons.forEach(item => item.disabled = false);
+    }
+  }));
+})();
+</script>
+</body>
+</html>
