@@ -335,14 +335,30 @@ test("CHAYSA HEALTH approval link is delivered privately, one-time and archived 
   assert.match(letter.letter, /بانک اطلاعاتی جامع و پویا/);
   assert.match(letter.letter, /تداخلات احتمالی/);
 
-  const decision = await fetch(baseUrl + "/api/health-approval/decision", {
+  const missingName = await fetch(baseUrl + "/api/health-approval/decision", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ token, decision: "نیاز به اصلاح دارد", note: "لطفاً هشدارهای ایمنی تکمیل شود." })
   });
+  assert.equal(missingName.status, 400);
+
+  const invalidName = await fetch(baseUrl + "/api/health-approval/decision", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, reviewerName: "خانم بستانی 123", decision: "نیاز به اصلاح دارد" })
+  });
+  assert.equal(invalidName.status, 400);
+
+  const decision = await fetch(baseUrl + "/api/health-approval/decision", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, reviewerName: "خانم بستانی", decision: "نیاز به اصلاح دارد", note: "لطفاً هشدارهای ایمنی تکمیل شود." })
+  });
   assert.equal(decision.status, 200);
   const result = await decision.json();
   assert.ok(result.archiveRecordId);
+  assert.equal(result.reviewerName, "خانم بستانی");
+  assert.ok(result.recordedAt);
 
   const archiveResponse = await fetch(baseUrl + "/api/admin/health-archive", {
     headers: { Cookie: cookie }
@@ -352,6 +368,7 @@ test("CHAYSA HEALTH approval link is delivered privately, one-time and archived 
   const record = archive.find(item => item.id === result.archiveRecordId);
   assert.ok(record);
   assert.equal(record.decision, "نیاز به اصلاح دارد");
+  assert.equal(record.reviewerName, "خانم بستانی");
   assert.equal(record.evidenceType, "online_decision");
   assert.equal(record.evidenceFile, undefined);
   assert.match(record.reviewerIdentityNote, /احراز هویت حقوقی/);
@@ -367,7 +384,7 @@ test("CHAYSA HEALTH approval link is delivered privately, one-time and archived 
   const replay = await fetch(baseUrl + "/api/health-approval/decision", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ token, decision: "تأیید می‌شود" })
+    body: JSON.stringify({ token, reviewerName: "خانم بستانی", decision: "تأیید می‌شود" })
   });
   assert.equal(replay.status, 409);
 });
