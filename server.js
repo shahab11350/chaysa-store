@@ -295,6 +295,33 @@ function getChaysaTelegramPair() {
     { id: bostaniChatId, linkedChatId: ownerChatId, pairKey: "chaysa-core" }
   ];
 }
+function syncChaysaTelegramPair() {
+  const pair = getChaysaTelegramPair();
+  if (!pair) return false;
+  const rows = readTelegramRecipients();
+  for (const member of pair) {
+    const index = rows.findIndex(x => String(x.id) === member.id);
+    const current = index >= 0 ? rows[index] : { id: member.id, username: "", first_name: "", type: "private" };
+    const linked = { ...current, linkedChatId: member.linkedChatId, pairKey: member.pairKey, linked: true };
+    if (index >= 0) rows[index] = linked; else rows.push(linked);
+  }
+  const tmp = TELEGRAM_RECIPIENTS_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), { encoding: "utf8", mode: 0o600 });
+  fs.renameSync(tmp, TELEGRAM_RECIPIENTS_FILE);
+  return true;
+}
+async function notifyChaysaTelegramPair(message) {
+  const pair = getChaysaTelegramPair();
+  if (!pair) return { status: "not_configured", recipients: [] };
+  const recipients = await Promise.all(pair.map(async member => ({
+    chatId: member.id,
+    sent: await sendTelegramText(member.id, message)
+  })));
+  return {
+    status: recipients.every(x => x.sent) ? "sent" : recipients.some(x => x.sent) ? "partial" : "failed",
+    recipients
+  };
+}
 function saveTelegramRecipient(chat) {
   if (!chat || chat.type !== "private" || chat.id == null) return;
   const rows = readTelegramRecipients();
@@ -711,6 +738,16 @@ app.post("/api/admin/health-archive", requireAdmin, healthArchiveUpload.single("
   try {
     rows.push(record);
     saveHealthArchive(rows);
+    const notification = await notifyChaysaTelegramPair([
+      "پرونده جدید در بایگانی CHAYSA HEALTH ثبت شد.",
+      "شناسه پرونده: " + record.id,
+      "نتیجه ثبت‌شده: " + record.decision,
+      "بررسی‌کننده اعلام‌شده: " + record.reviewerName,
+      "نسخه: " + record.version,
+      "این اعلان اطلاع‌رسانی است؛ برای مشاهده مدرک وارد پنل مدیریت شوید."
+    ].join("\n"));
+    record.telegramNotification = notification;
+    saveHealthArchive(rows);
     const { evidenceFile, ...publicRecord } = record;
     return json(res, 201, { ok: true, record: publicRecord });
   } catch (_) {
@@ -890,6 +927,12 @@ app.use((err, _req, res, _next) => {
 const port = Number(process.env.PORT || 3000);
 app.listen(port, "0.0.0.0", () => {
   console.log("CHAYSA backup listening on " + port);
+  try {
+    const linked = syncChaysaTelegramPair();
+    console.log("CHAYSA Telegram pair:", linked ? "linked" : "not configured");
+  } catch (_) {
+    console.log("CHAYSA Telegram pair: sync failed");
+  }
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   if (token && webhookSecret) {
