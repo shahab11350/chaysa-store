@@ -70,12 +70,12 @@ function bostaniSessionCookie() {
 function isBostani(req) {
   if (!bostaniSessionSecret) return false;
   const raw = req.headers.cookie || "";
-  const supplied = (raw.match(/(?:^|;\\s*)chaysa_bostani=([^;]+)/) || [])[1];
+  const supplied = (raw.match(/(?:^|;\s*)chaysa_bostani=([^;]+)/) || [])[1];
   if (!supplied) return false;
   let decoded;
   try { decoded = decodeURIComponent(supplied); } catch (_) { return false; }
   const [exp, signature, extra] = decoded.split(".");
-  if (extra !== undefined || !exp || !signature || !/^\\d+$/.test(exp) || Number(exp) < Date.now()) return false;
+  if (extra !== undefined || !exp || !signature || !/^\d+$/.test(exp) || Number(exp) < Date.now()) return false;
   return safeBostaniEqual(signBostani(exp), signature);
 }
 function requireBostani(req,res,next) {
@@ -1349,9 +1349,9 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  const page = req.method === "GET" && (req.path === "/" || req.path === "/index.html" || /\\.html$/i.test(req.path));
+  const page = req.method === "GET" && (req.path === "/" || req.path === "/index.html" || /\.html$/i.test(req.path));
   if (!page || req.path === "/admin.html" || req.path === "/bostani.html") return next();
-  let visitor = (req.headers.cookie || "").match(/(?:^|;\\s*)chaysa_visitor=([A-Za-z0-9_-]+)/);
+  let visitor = (req.headers.cookie || "").match(/(?:^|;\s*)chaysa_visitor=([A-Za-z0-9_-]+)/);
   let visitorId = visitor && visitor[1];
   if (!visitorId) {
     visitorId = crypto.randomBytes(18).toString("hex");
