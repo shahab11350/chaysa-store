@@ -144,6 +144,7 @@ function guideNormalize(value) {
 function guideSafeMedicine(value) {
   const raw = typeof value === "string" ? value.trim() : "";
   if (!raw || raw.length > 80 || /[@]|https?:|www\.|\+|\b\d{4,}\b/i.test(raw)) return "";
+  if ((raw.match(/\d/g) || []).length >= 7 || /آدرس|نشانی|تلفن|موبایل|شماره تماس|کد ملی|خیابان|کوچه|پلاک/i.test(raw)) return "";
   if (!/^[\p{L}\p{N}\s-]+$/u.test(raw)) return "";
   return raw.replace(/\s+/g, " ");
 }
