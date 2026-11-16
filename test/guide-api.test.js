@@ -154,7 +154,7 @@ test("Telegram approval is owner-initiated, Bostani-only and auditable", async (
   assert.equal(rows[1].status, "pending");
 
   await postWebhook("222222", "عدم تأیید " + second.id);
-  await postWebhook("222222", "/guide_note " + second.id + "لطفاً بخش احتیاط‌های مصرف بازبینی شود.");
+  await postWebhook("222222", "/guide_note " + second.id + " لطفاً بخش احتیاط‌های مصرف بازبینی شود.");
   rows = approvalRows();
   assert.equal(rows[1].status, "rejected");
   assert.equal(rows[1].reviewNote, "لطفاً بخش احتیاط‌های مصرف بازبینی شود.");
