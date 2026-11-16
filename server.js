@@ -602,6 +602,101 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
   fileFilter: (_req, file, cb) => cb(null, /^image\/(jpeg|png|webp|gif|avif)$/i.test(file.mimetype))
 });
+
+const HEALTH_ARCHIVE_DIR = path.join(DATA, "health-archive");
+const HEALTH_ARCHIVE_FILE = path.join(DATA, "health-archive.json");
+fs.mkdirSync(HEALTH_ARCHIVE_DIR, { recursive: true });
+function readHealthArchive() {
+  try {
+    const rows = JSON.parse(fs.readFileSync(HEALTH_ARCHIVE_FILE, "utf8"));
+    return Array.isArray(rows) ? rows : [];
+  } catch (_) { return []; }
+}
+function saveHealthArchive(rows) {
+  const tmp = HEALTH_ARCHIVE_FILE + ".tmp";
+  fs.writeFileSync(tmp, JSON.stringify(rows, null, 2), { encoding: "utf8", mode: 0o600 });
+  fs.renameSync(tmp, HEALTH_ARCHIVE_FILE);
+}
+const healthArchiveUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, HEALTH_ARCHIVE_DIR),
+    filename: (_req, file, cb) => {
+      const ext = ({ "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp" })[file.mimetype] || "";
+      cb(null, crypto.randomUUID() + ext);
+    }
+  }),
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => cb(null, ["image/jpeg", "image/png", "image/webp"].includes(file.mimetype))
+});
+function isSupportedEvidence(file) {
+  const head = fs.readFileSync(file.path).subarray(0, 12);
+  if (file.mimetype === "image/jpeg") return head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff;
+  if (file.mimetype === "image/png") return head.subarray(0, 8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]));
+  if (file.mimetype === "image/webp") return head.toString("ascii",0,4) === "RIFF" && head.toString("ascii",8,12) === "WEBP";
+  return false;
+}
+app.get("/api/admin/health-archive", requireAdmin, (_req, res) => {
+  const rows = readHealthArchive().slice(-200).reverse().map(({ evidenceFile, ...row }) => row);
+  return json(res, 200, rows);
+});
+app.post("/api/admin/health-archive", requireAdmin, healthArchiveUpload.single("evidence"), (req, res) => {
+  const file = req.file;
+  const reviewerName = typeof req.body.reviewerName === "string" ? req.body.reviewerName.trim().slice(0,120) : "";
+  const decision = typeof req.body.decision === "string" ? req.body.decision.trim() : "";
+  const version = typeof req.body.version === "string" ? req.body.version.trim().slice(0,80) : "";
+  const commit = typeof req.body.commit === "string" ? req.body.commit.trim().toLowerCase() : "";
+  const note = typeof req.body.note === "string" ? req.body.note.trim().slice(0,2000) : "";
+  const allowedDecisions = ["تأیید می‌شود", "تأیید نمی‌شود", "نیاز به اصلاح دارد"];
+  const cleanup = () => { if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path); };
+  if (!file || !reviewerName || !allowedDecisions.includes(decision) || !version ||
+      (commit && !/^[a-f0-9]{7,40}$/.test(commit))) {
+    cleanup();
+    return json(res, 400, { error: "نام تأییدکننده، نسخه، نتیجه معتبر و تصویر مدرک الزامی است." });
+  }
+  if (!isSupportedEvidence(file)) {
+    cleanup();
+    return json(res, 400, { error: "محتوای فایل با فرمت تصویر اعلام‌شده مطابقت ندارد." });
+  }
+  const rows = readHealthArchive();
+  const currentBytes = rows.reduce((sum, row) => sum + Number(row.evidenceSize || 0), 0);
+  if (rows.length >= 200 || currentBytes + file.size > 100 * 1024 * 1024) {
+    cleanup();
+    return json(res, 413, { error: "ظرفیت بایگانی به سقف مجاز رسیده است." });
+  }
+  const record = {
+    id: crypto.randomUUID(),
+    section: "CHAYSA HEALTH",
+    reviewerName,
+    decision,
+    version,
+    commit: commit || null,
+    note,
+    recordedAt: new Date().toISOString(),
+    evidenceFile: path.basename(file.filename),
+    evidenceMime: file.mimetype,
+    evidenceSize: file.size
+  };
+  try {
+    rows.push(record);
+    saveHealthArchive(rows);
+    const { evidenceFile, ...publicRecord } = record;
+    return json(res, 201, { ok: true, record: publicRecord });
+  } catch (_) {
+    cleanup();
+    return json(res, 500, { error: "ذخیره پرونده در بایگانی انجام نشد." });
+  }
+});
+app.get("/api/admin/health-archive/:id/evidence", requireAdmin, (req, res) => {
+  const row = readHealthArchive().find(item => item.id === req.params.id);
+  if (!row || !row.evidenceFile || path.basename(row.evidenceFile) !== row.evidenceFile) return res.sendStatus(404);
+  const filePath = path.join(HEALTH_ARCHIVE_DIR, row.evidenceFile);
+  if (!fs.existsSync(filePath)) return res.sendStatus(404);
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("Cache-Control", "no-store");
+  res.type(row.evidenceMime || "application/octet-stream");
+  return res.sendFile(filePath);
+});
+
 app.post("/api/admin/upload", requireAdmin, upload.single("image"), (req, res) => {
   if (!req.file) return json(res, 400, { error: "فقط فایل تصویری تا ۵ مگابایت مجاز است." });
   return json(res, 200, { url: "/media/" + path.basename(req.file.filename) });
