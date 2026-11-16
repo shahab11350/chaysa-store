@@ -24,6 +24,7 @@
     answer.removeAttribute("href");
     healthNotice.hidden = true;
     status.textContent = "";
+    status.style.color = "#a33";
   }
   function selectCategory(id) {
     category = id;
@@ -142,6 +143,12 @@
       medicine.focus();
       return;
     }
+    const requestSnapshot = {
+      category: category,
+      question: question.value.trim(),
+      productSku: product.value,
+      medicine: medicine.value.trim()
+    };
     prepare.disabled = true;
     prepare.textContent = "در حال بررسی...";
     status.textContent = "";
@@ -152,14 +159,19 @@
         headers: { "Content-Type": "application/json" },
         cache: "no-store",
         body: JSON.stringify({
-          category: category,
-          question: question.value.trim(),
-          productSku: product.value,
-          medicine: medicine.value.trim()
+          category: requestSnapshot.category,
+          question: requestSnapshot.question,
+          productSku: requestSnapshot.productSku,
+          medicine: requestSnapshot.medicine
         })
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "بررسی پرسش انجام نشد.");
+      if (category !== requestSnapshot.category || question.value.trim() !== requestSnapshot.question ||
+          product.value !== requestSnapshot.productSku || medicine.value.trim() !== requestSnapshot.medicine) {
+        status.textContent = "پرسش هنگام بررسی تغییر کرد؛ دوباره آن را بررسی کنید.";
+        return;
+      }
       if (!result.allowed || !result.ok) {
         status.textContent = result.message || "این پرسش در محدوده راهنمای چایسا نیست.";
         return;
