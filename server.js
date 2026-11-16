@@ -60,7 +60,7 @@ function isBostani(req) {
   const access = process.env.BOSTANI_ACCESS_TOKEN || "";
   if (!access) return false;
   const raw = req.headers.cookie || "";
-  const supplied = (raw.match(/(?:^|;\\s*)chaysa_bostani=([^;]+)/) || [])[1];
+  const supplied = (raw.match(/(?:^|;\s*)chaysa_bostani=([^;]+)/) || [])[1];
   if (!supplied) return false;
   const expected = Buffer.from(access), actual = Buffer.from(decodeURIComponent(supplied));
   return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
