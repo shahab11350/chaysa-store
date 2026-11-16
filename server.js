@@ -1349,9 +1349,9 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res, next) => {
-  const page = req.method === "GET" && (req.path === "/" || req.path === "/index.html" || /\.html$/i.test(req.path));
+  const page = req.method === "GET" && (req.path === "/" || req.path === "/index.html" || /\\.html$/i.test(req.path));
   if (!page || req.path === "/admin.html" || req.path === "/bostani.html") return next();
-  let visitor = (req.headers.cookie || "").match(/(?:^|;\s*)chaysa_visitor=([A-Za-z0-9_-]+)/);
+  let visitor = (req.headers.cookie || "").match(/(?:^|;\\s*)chaysa_visitor=([A-Za-z0-9_-]+)/);
   let visitorId = visitor && visitor[1];
   if (!visitorId) {
     visitorId = crypto.randomBytes(18).toString("hex");
