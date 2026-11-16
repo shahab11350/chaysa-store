@@ -57,14 +57,13 @@ function requireAdmin(req, res, next) {
 const bostaniSecret = process.env.BOSTANI_ACCESS_PASSWORD || "";
 function signBostani(value) { return crypto.createHmac("sha256", bostaniSecret).update(value).digest("hex"); }
 function isBostani(req) {
-  if (!bostaniSecret) return false;
+  const access = process.env.BOSTANI_ACCESS_TOKEN || "";
+  if (!access) return false;
   const raw = req.headers.cookie || "";
-  const token = (raw.match(new RegExp("(?:^|;\\s*)chaysa_bostani=([^;]+)")) || [])[1];
-  if (!token) return false;
-  const parts=token.split("."), exp=parts[0], sig=parts[1];
-  if (!exp || !sig || !/^\d+$/.test(exp) || Number(exp)<Date.now()) return false;
-  const expected=Buffer.from(signBostani(exp)), actual=Buffer.from(sig);
-  return expected.length===actual.length && crypto.timingSafeEqual(expected,actual);
+  const supplied = (raw.match(/(?:^|;\\s*)chaysa_bostani=([^;]+)/) || [])[1];
+  if (!supplied) return false;
+  const expected = Buffer.from(access), actual = Buffer.from(decodeURIComponent(supplied));
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
 }
 function requireBostani(req,res,next) {
   if(!isBostani(req)) return json(res,401,{error:"برای ورود به صفحهٔ اختصاصی خانم بستانی، رمز دسترسی را وارد کنید."});
@@ -283,6 +282,19 @@ app.post("/api/admin/questions/:id/reply",requireAdmin,async(req,res)=>{
   }catch(_){return json(res,502,{ok:false,error:"ارتباط با تلگرام برقرار نشد؛ پاسخ ارسال نشد."})}
   q.reply=reply;q.repliedAt=new Date().toISOString();q.status="پاسخ ارسال‌شده";saveQuestions(rows);
   return json(res,200,{ok:true,status:q.status,repliedAt:q.repliedAt});
+});
+app.get("/bostani.html", (req, res, next) => {
+  const access = process.env.BOSTANI_ACCESS_TOKEN || "";
+  const supplied = typeof req.query.key === "string" ? req.query.key : "";
+  if (access && supplied) {
+    const expected = Buffer.from(access), actual = Buffer.from(supplied);
+    if (expected.length === actual.length && crypto.timingSafeEqual(expected, actual)) {
+      res.cookie("chaysa_bostani", access, { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 30 * 24 * 60 * 60 * 1000 });
+      return res.redirect(302, "/bostani.html");
+    }
+    return res.sendStatus(404);
+  }
+  next();
 });
 app.post("/api/bostani/login",(req,res)=>{
  const key=req.ip||"unknown";if(limited("bostani-login:"+key,6,15*60*1000))return json(res,429,{error:"تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کنید."});
