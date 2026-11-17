@@ -118,8 +118,10 @@ footer#contact{margin-top:28px;border-top:3px solid #c5a45b;background:linear-gr
  #chaysaClock .cc-time{font-size:11px}
  #chaysaCalendar .cc-date{font-size:8px;line-height:1.4}
  #chaysaClock .cc-zone{font-size:6px}
- nav{justify-content:center;gap:7px;padding:9px 8px;overflow-x:visible;overflow-y:visible;flex-wrap:wrap;scrollbar-width:auto}
- nav a{flex:0 1 auto;max-width:100%;padding:8px 10px;font-size:12px;white-space:normal;text-align:center;line-height:1.7}
+ nav{position:sticky;top:0;z-index:1000;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;justify-content:stretch;gap:7px;padding:9px 10px;overflow:visible;flex-wrap:initial;scrollbar-width:auto}
+ nav a{display:flex;align-items:center;justify-content:center;min-width:0;max-width:100%;min-height:42px;box-sizing:border-box;padding:8px 7px;margin:0;font-size:12px;white-space:normal;overflow-wrap:anywhere;text-align:center;line-height:1.6;border-radius:9px}
+ nav a.chaysa-health-nav-link{margin:0;min-height:42px}
+ nav a[href="#questions"]{grid-column:1 / -1}
  .hero{margin:16px 10px;padding:37px 18px;border-radius:18px}
  .hero h2{font-size:25px}
  .hero p{font-size:13px}
