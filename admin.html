@@ -301,6 +301,7 @@ function goBackAdminView(){
  showAdminView(previousView,{remember:false});
 }
 document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.view==='addProductView')$('clear').click();showAdminView(button.dataset.view);if(button.dataset.view==='healthArchiveView')loadHealthArchive();if(button.dataset.view==='letterComposerView')loadLetterComposer()}));
+$('openMediaLibrary').addEventListener('click',()=>{window.location.href='/media-library.html'});
 document.querySelectorAll('[data-back]').forEach(button=>button.addEventListener('click',goBackAdminView));
 $('refreshOrders').onclick=loadOrders;
 $('refreshHealthArchive').onclick=loadHealthArchive;
