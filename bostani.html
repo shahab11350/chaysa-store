@@ -1,10 +1,63 @@
-<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>پاسخ‌گویی چایسا</title>
-<style>*{box-sizing:border-box}body{margin:0;background:#f7f5ef;color:#26372b;font:15px Tahoma,sans-serif}header{background:#173b2b;color:#fff;padding:24px 16px;text-align:center}header b{color:#e6cc85;font-size:25px}.wrap{max-width:760px;margin:22px auto;padding:0 14px}.panel,.question{background:#fff;border:1px solid #e8dfca;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 4px 14px #0000000a}h2{font-size:18px;margin:0 0 14px}label{display:block;font-weight:bold;margin:12px 0 7px}input,textarea{width:100%;padding:13px;border:1px solid #d9d2c2;border-radius:9px;font:inherit;background:white}textarea{min-height:110px;line-height:2;resize:vertical}button{border:0;border-radius:9px;padding:12px 16px;background:#244b37;color:white;font:inherit;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.muted{color:#777;font-size:12px;line-height:2}.hidden{display:none!important}.status{background:#f7f5ef;padding:10px;border-radius:8px;margin:12px 0;line-height:2}.question{line-height:2}.question p{white-space:pre-wrap}.previous{background:#f7f5ef;padding:10px;border-radius:8px;white-space:pre-wrap}.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}</style>
-<header><b>CHAYSA</b><div>صفحهٔ اختصاصی پاسخ‌گویی به پرسش‌های مشتریان</div></header><main class="wrap">
-<section id="app"><div class="panel"><div class="actions"><h2 style="flex:1">پرسش‌های مشتریان</h2><button id="refresh">به‌روزرسانی</button><button id="logout" style="background:#eee9dc;color:#443b2a">خروج امن</button></div><div id="status" class="status">در حال دریافت پرسش‌ها…</div><div id="questions"></div></div></section></main>
+<!doctype html><html lang="fa" dir="rtl"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>پنل اختصاصی چایسا</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f5ef;color:#26372b;font:15px Tahoma,sans-serif}header{background:#173b2b;color:#fff;padding:24px 16px;text-align:center}header b{color:#e6cc85;font-size:25px}.wrap{max-width:900px;margin:22px auto;padding:0 14px}.panel,.question,.order{background:#fff;border:1px solid #e8dfca;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 4px 14px #0000000a}h2{font-size:18px;margin:0 0 14px}label{display:block;font-weight:bold;margin:12px 0 7px}input,textarea,select{width:100%;padding:13px;border:1px solid #d9d2c2;border-radius:9px;font:inherit;background:white}textarea{min-height:110px;line-height:2;resize:vertical}button{border:0;border-radius:9px;padding:12px 16px;background:#244b37;color:white;font:inherit;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.muted{color:#777;font-size:12px;line-height:2}.hidden{display:none!important}.status{background:#f7f5ef;padding:10px;border-radius:8px;margin:12px 0;line-height:2}.question,.order{line-height:2}.question p{white-space:pre-wrap}.previous{background:#f7f5ef;padding:10px;border-radius:8px;white-space:pre-wrap}.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}.tabs button[aria-selected="true"]{background:#b99b55;color:#173b2b}.order-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.order-grid>div{background:#faf9f5;padding:9px;border-radius:8px;overflow-wrap:anywhere}.order ul{padding-right:22px}.order select{max-width:320px}@media(max-width:560px){.order-grid{grid-template-columns:1fr}}
+</style>
+<header><b>CHAYSA</b><div>پنل اختصاصی خانم بستانی</div></header><main class="wrap">
+<section id="app">
+<div class="panel"><div class="actions"><h2 style="flex:1">پنل پیگیری چایسا</h2><button id="refresh">به‌روزرسانی بخش جاری</button><button id="logout" style="background:#eee9dc;color:#443b2a">خروج امن</button></div>
+<nav class="tabs" aria-label="بخش‌های مجاز"><button type="button" data-tab="orders" aria-selected="true">سفارش‌ها</button><button type="button" data-tab="questions" aria-selected="false">پرسش و پاسخ</button></nav>
+<div id="status" class="status" aria-live="polite">در حال دریافت سفارش‌ها…</div></div>
+<section id="ordersSection"><div id="orders"></div></section>
+<section id="questionsSection" class="hidden"><div class="panel"><h2>پرسش‌های مشتریان</h2><div id="questions"></div></div></section>
+</section></main>
 <script>
 const $=id=>document.getElementById(id);
+let activeTab="orders";
 async function api(path,opts={}){const r=await fetch('/api/bostani/'+path,{credentials:'same-origin',...opts});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'خطا در ارتباط با سرور');return d}
-async function load(){const host=$('questions'),status=$('status');status.textContent='در حال دریافت پرسش‌ها…';host.replaceChildren();try{const rows=await api('questions');if(!rows.length){status.textContent='هنوز پرسشی ثبت نشده است.';return}status.textContent='تعداد پرسش‌ها: '+rows.length;rows.forEach(q=>{const box=document.createElement('article');box.className='question';const title=document.createElement('b');title.textContent=q.id+' · '+q.status;const meta=document.createElement('div');meta.className='muted';meta.textContent='زمان ثبت: '+new Date(q.createdAt).toLocaleString('fa-IR')+' · '+(q.customerLinked?'اتصال تلگرام مشتری برقرار است':'مشتری هنوز اتصال تلگرام را کامل نکرده');const question=document.createElement('p');question.textContent=q.question;box.append(title,meta,question);if(q.reply){const old=document.createElement('div');old.className='previous';old.textContent='پاسخ قبلی: '+q.reply;box.append(old)}const area=document.createElement('textarea');area.maxLength=4000;area.placeholder='پاسخ مشتری را اینجا بنویسید…';const send=document.createElement('button');send.textContent='ارسال پاسخ به مشتری';send.disabled=!q.customerLinked;send.title=q.customerLinked?'':'مشتری باید ابتدا از لینک اختصاصی پرسش وارد ربات چایسا شود و Start را بزند';send.onclick=async()=>{const reply=area.value.trim();if(!reply){alert('لطفاً متن پاسخ را بنویسید.');return}if(!confirm('پاسخ برای مشتری در تلگرام ارسال شود؟'))return;send.disabled=true;send.textContent='در حال ارسال…';try{await api('questions/'+encodeURIComponent(q.id)+'/reply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reply})});await load()}catch(e){alert(e.message);send.disabled=false;send.textContent='ارسال پاسخ به مشتری'}};box.append(area,send);host.append(box)})}catch(e){status.textContent=e.message}}
-$('refresh').onclick=load;$('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reload()};load();
+function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el}
+function money(value){return Number(value||0).toLocaleString('fa-IR')+' تومان'}
+async function loadOrders(){
+ const host=$('orders'),status=$('status');host.replaceChildren();status.textContent='در حال دریافت سفارش‌ها…';
+ try{
+  const rows=await api('orders');
+  if(!rows.length){status.textContent='هنوز سفارشی ثبت نشده است.';return}
+  status.textContent='تعداد سفارش‌ها: '+rows.length;
+  rows.forEach(o=>{
+   const box=node('article',undefined,'order');
+   box.append(node('b',o.id+' · '+o.status));
+   box.append(node('div','زمان ثبت: '+new Date(o.createdAt).toLocaleString('fa-IR'),'muted'));
+   const c=o.customer||{},grid=node('div',undefined,'order-grid');
+   const fields=[['نام مشتری',(c.name||'')+' '+(c.family||'')],['راه تماس',c.contact],['پیام‌رسان',c.messengerPlatform==='rubika'?'روبیکا':'تلگرام'],['شناسه پیام‌رسان',c.messengerId],['استان و شهر',(c.province||'')+' / '+(c.city||'')],['کد پستی',c.postal],['نشانی',c.address],['توضیحات',c.notes]];
+   fields.forEach(([label,value])=>{const cell=node('div');cell.append(node('b',label),node('div',value||'—'));grid.append(cell)});
+   box.append(grid,node('h3','اقلام سفارش'));
+   const list=node('ul');(o.items||[]).forEach(item=>list.append(node('li',item.name+' · '+item.qty+' × '+money(item.unitPrice)+' = '+money(item.lineTotal))));box.append(list,node('b','جمع کل: '+money(o.total)));
+   const label=node('label','وضعیت سفارش');const select=node('select');['در انتظار بررسی','در حال آماده‌سازی','ارسال‌شده','تحویل‌شده','لغوشده'].forEach(v=>{const option=node('option',v);option.value=v;option.selected=v===o.status;select.append(option)});label.append(select);
+   const save=node('button','ثبت وضعیت');save.type='button';save.onclick=async()=>{save.disabled=true;try{await api('orders/'+encodeURIComponent(o.id)+'/status',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:select.value})});await loadOrders()}catch(e){alert(e.message);save.disabled=false}};
+   box.append(label,save);host.append(box);
+  });
+ }catch(e){status.textContent=e.message}
+}
+async function loadQuestions(){
+ const host=$('questions'),status=$('status');host.replaceChildren();status.textContent='در حال دریافت پرسش‌ها…';
+ try{
+  const rows=await api('questions');
+  if(!rows.length){status.textContent='هنوز پرسشی ثبت نشده است.';return}
+  status.textContent='تعداد پرسش‌ها: '+rows.length;
+  rows.forEach(q=>{
+   const box=node('article',undefined,'question');box.append(node('b',q.id+' · '+q.status));
+   box.append(node('div','زمان ثبت: '+new Date(q.createdAt).toLocaleString('fa-IR')+' · '+(q.customerLinked?'اتصال تلگرام مشتری برقرار است':'مشتری هنوز اتصال تلگرام را کامل نکرده'),'muted'));
+   box.append(node('p',q.question));
+   if(q.reply)box.append(node('div','پاسخ قبلی: '+q.reply,'previous'));
+   const area=node('textarea');area.maxLength=4000;area.placeholder='پاسخ مشتری را اینجا بنویسید…';
+   const send=node('button','ارسال پاسخ به مشتری');send.disabled=!q.customerLinked;send.title=q.customerLinked?'':'مشتری باید ابتدا از لینک اختصاصی پرسش وارد ربات چایسا شود و Start را بزند';
+   send.onclick=async()=>{const reply=area.value.trim();if(!reply){alert('لطفاً متن پاسخ را بنویسید.');return}if(!confirm('پاسخ برای مشتری در تلگرام ارسال شود؟'))return;send.disabled=true;try{await api('questions/'+encodeURIComponent(q.id)+'/reply',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({reply})});await loadQuestions()}catch(e){alert(e.message);send.disabled=false}};
+   box.append(area,send);host.append(box);
+  });
+ }catch(e){status.textContent=e.message}
+}
+async function load(){if(activeTab==='orders')await loadOrders();else await loadQuestions()}
+document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>{activeTab=button.dataset.tab;$('ordersSection').classList.toggle('hidden',activeTab!=='orders');$('questionsSection').classList.toggle('hidden',activeTab!=='questions');document.querySelectorAll('[data-tab]').forEach(b=>b.setAttribute('aria-selected',String(b===button)));load()}));
+$('refresh').onclick=load;
+$('logout').onclick=async()=>{try{await api('logout',{method:'POST'})}finally{location.reload()}};
+load();
 </script></html>
