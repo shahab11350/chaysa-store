@@ -543,3 +543,24 @@ test("Order accepts Rubika as the selected customer messaging channel and stores
   assert.equal(order.customer.messengerPlatform, "rubika");
   assert.equal(order.customer.messengerId, "rubika-test-chat-id");
 });
+
+
+test("Order rejects an unsupported customer messaging channel", async () => {
+  const payload = {
+    customer: {
+      name: "آزمون", family: "خریدار", contact: "09120000002",
+      messengerPlatform: "unsupported", messengerId: "test-chat",
+      province: "تهران", city: "تهران", address: "نشانی آزمایشی",
+      postal: "1234567890", notes: "ندارد"
+    },
+    items: [{ sku: "1401008", qty: 1 }],
+    termsAccepted: true,
+    termsAcceptedAt: new Date().toISOString()
+  };
+  const response = await fetch(baseUrl + "/api/orders", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  assert.equal(response.status, 400);
+  assert.match((await response.json()).error, /تلگرام یا روبیکا/);
+});
