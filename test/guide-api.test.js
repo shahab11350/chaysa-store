@@ -40,7 +40,7 @@ before(async () => {
       DATA_DIR: dataDir,
       ADMIN_PASSWORD: "guide-test-only-password",
       TELEGRAM_BOT_TOKEN: "test-bot-token",
-      RUBIKA_BOT_TOKEN: "test-rubika-token",
+      RUBIKA_BOT_TOKEN: "test-rubika-token",\n      RUBIKA_WEBHOOK_URL: "https://preview.example.com/rubika/webhook/test",
       RUBIKA_MOCK_LOG: rubikaMockLog,
       TELEGRAM_WEBHOOK_SECRET: "test-webhook-secret",
       TELEGRAM_WEBHOOK_URL: "https://preview.example.com/telegram/webhook",
