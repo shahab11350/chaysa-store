@@ -710,6 +710,17 @@ app.post("/telegram/webhook", async (req, res) => {
       const text = msg.text.trim();
       const ownerId = String(process.env.CHAYSA_OWNER_CHAT_ID || "").trim();
       const allowedBostaniId = String(process.env.CHAYSA_BOSTANI_CHAT_ID || "").trim();
+      const customerStart = text.match(/^\/start(?:@\w+)?(?:\s+([A-Za-z0-9_-]{1,64}))?$/i);
+      if (customerStart && (!customerStart[1] || customerStart[1] === "order")) {
+        await sendTelegramText(msg.chat.id, [
+          "به ربات چایسا خوش آمدید.",
+          "شناسه عددی گفت‌وگوی شما برای ثبت سفارش:",
+          senderId,
+          "این عدد را کپی کنید و در فرم خرید، پس از انتخاب تلگرام، در کادر شناسه گفت‌وگو وارد کنید.",
+          "آیدی عمومی با @ برای ارسال فاکتور و وضعیت سفارش کافی نیست."
+        ].join("\n"));
+        return res.sendStatus(200);
+      }
       if (text === "چایسا فایل") {
         if (ownerId && senderId === ownerId) {
           await sendTelegramText(msg.chat.id, buildOwnerProgressReport());
@@ -1515,6 +1526,21 @@ app.post("/api/questions",async(req,res)=>{
   try{const current=readQuestions();const saved=current.find(x=>x.id===item.id);if(saved){saved.delivered=item.delivered;saved.delivery=item.delivery;saved.rubikaNotification=item.rubikaNotification;saved.updatedAt=item.updatedAt;saveQuestions(current)}}catch(_){}
   if(item.delivered!==2)return json(res,502,{ok:false,error:"ارسال پرسش به هر دو گیرنده تلگرام کامل نشد. وضعیت ارسال روبیکا جداگانه ثبت شده است.",delivered:item.delivered,rubikaNotificationStatus:rubikaNotice.status,requestId:item.id});
   return json(res,200,{ok:true,delivered:2,rubikaNotificationStatus:rubikaNotice.status,requestId:item.id});
+});
+app.get("/api/telegram/customer-bot",async(req,res)=>{
+ const key="telegram-customer-bot:"+(req.ip||"unknown");
+ if(limited(key,30,10*60*1000))return json(res,429,{error:"درخواست‌های زیاد؛ کمی بعد دوباره تلاش کنید."});
+ const token=process.env.TELEGRAM_BOT_TOKEN||"";
+ if(!token)return json(res,503,{error:"اتصال ربات تلگرام در حال حاضر آماده نیست."});
+ try{
+  const response=await fetch("https://api.telegram.org/bot"+token+"/getMe");
+  const result=await response.json();
+  const username=String(result&&result.result&&result.result.username||"");
+  if(!response.ok||result.ok!==true||!/^[A-Za-z0-9_]{5,32}$/.test(username))
+   return json(res,503,{error:"نشانی ربات تلگرام قابل دریافت نیست."});
+  res.set("Cache-Control","public, max-age=300");
+  return json(res,200,{username,url:"https://t.me/"+username+"?start=order"});
+ }catch(_){return json(res,503,{error:"ارتباط با تلگرام برقرار نشد."});}
 });
 app.post("/api/orders",async(req,res)=>{
  const key="order:"+(req.ip||"unknown");if(limited(key,5,10*60*1000))return json(res,429,{error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کن."});
