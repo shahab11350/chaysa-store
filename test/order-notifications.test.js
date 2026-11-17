@@ -157,3 +157,40 @@ test("owner and Bostani status changes notify the selected customer channel, sup
   });
   assert.ok(rubikaCustomerMessage);
 });
+
+test("Telegram checkout connection link resolves the bot and /start returns the customer numeric chat ID", async () => {
+  const botInfo = await request("/api/telegram/customer-bot");
+  const botBody = await botInfo.json();
+  assert.equal(botInfo.status, 200);
+  assert.equal(botBody.username, "ChaysaBotTest");
+  assert.equal(botBody.url, "https://t.me/ChaysaBotTest?start=order");
+
+  const started = await request("/telegram/webhook", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-telegram-bot-api-secret-token": "test-webhook-secret" },
+    body: JSON.stringify({
+      message: { chat: { id: 444444, type: "private", username: "customer_test", first_name: "مشتری" }, text: "/start order" }
+    })
+  });
+  assert.equal(started.status, 200);
+  const welcome = lines(telegramLog).map(entry => JSON.parse(entry.body || "{}")).find(payload =>
+    payload.chat_id === 444444 && String(payload.text || "").includes("شناسه عددی گفت‌وگوی شما برای ثبت سفارش")
+  );
+  assert.ok(welcome);
+  assert.match(welcome.text, /444444/);
+  assert.match(welcome.text, /آیدی عمومی با @/);
+});
+
+test("Telegram generic /start still returns a chat ID without a deep-link payload", async () => {
+  const started = await request("/telegram/webhook", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "x-telegram-bot-api-secret-token": "test-webhook-secret" },
+    body: JSON.stringify({ message: { chat: { id: 555555, type: "private" }, text: "/start" } })
+  });
+  assert.equal(started.status, 200);
+  const welcome = lines(telegramLog).map(entry => JSON.parse(entry.body || "{}")).find(payload =>
+    payload.chat_id === 555555 && String(payload.text || "").includes("شناسه عددی گفت‌وگوی شما برای ثبت سفارش")
+  );
+  assert.ok(welcome);
+  assert.match(welcome.text, /555555/);
+});
