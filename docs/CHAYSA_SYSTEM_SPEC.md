@@ -535,7 +535,7 @@ Volume فعلی Railway در مسیر `/data` برای ذخیره پایدار �
 
 - مسیر مدیریتی POST /api/admin/letters/archive با middleware احراز هویت مدیر محافظت می‌شود.
 - ورودی: title الزامی (۱ تا ۱۶۰ نویسه) و text اختیاری (حداکثر ۳۴۰۰ نویسه). عنوان از کنترل‌کاراکترها پاک‌سازی می‌شود.
-- رکورد با recordType: archive_only، deliveryStatus: not_sent، archivedOnly: true و sentAt: null در همان فایل پایدار /data/letters-archive.json ثبت می‌شود.
+- رکورد با recordType: archive_only، deliveryStatus: not_sent، archivedOnly: true، registeredBy: محمدرضا نظام و sentAt: null در همان فایل پایدار /data/letters-archive.json ثبت می‌شود.
 - این endpoint هیچ تابع تلگرام را فراخوانی نمی‌کند؛ پاسخ موفق به معنی ثبت در بایگانی است، نه ارسال یا تحویل.
 - UI دو اقدام مستقل دارد: «ثبت در بایگانی بدون ارسال» و «ارسال نامه به تلگرام». دکمه دوم و مسیر قبلی ارسال جداگانه باقی می‌مانند.
 - ظرفیت بایگانی ۵۰۰ رکورد و محدودیت درخواست برای مسیر ثبت مستقل اعمال می‌شود.
