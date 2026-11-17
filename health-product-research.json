@@ -1614,10 +1614,12 @@
     "iranianSourceCount": 11,
     "usagePolicy": "منابع ایرانی بر اساس نقش تفکیک شده‌اند: مؤسسه/شبکه برای شناسایی مراکز؛ پایگاه نمایه برای بازیابی؛ نشریه برای یافتن مقاله؛ مقاله داوری‌شده برای ارزیابی ادعای مشخص. مطالب سنتی و آموزشی بدون شواهد مستقل، شاهد اثربخشی یا ایمنی محسوب نمی‌شوند.",
     "bookBibliographyAddedAt": "2026-11-17",
-    "bookCount": 21,
+    "bookCount": 28,
     "note": "کتاب‌ها به‌عنوان منابع کتاب‌شناختی معرفی شده‌اند؛ این ثبت به معنی تأیید محتوای آن‌ها نیست. اطلاعات چاپ/ISBN در صورت نبود یا اختلاف باید از نسخه واقعی کنترل شود.",
     "bookBibliographyUpdatedAt": "2026-11-17",
-    "bookExpansionNote": "فهرست با کتاب‌های مرجع WHO، کتاب‌های تخصصی چای و گیاهان، فارماکوگنوزی، کیفیت و ایمنی توسعه یافت. آثار تاریخی/قدیمی با محدودیت مشخص شده‌اند. اطلاعات چاپ/ISBN نامطمئن به‌عنوان قطعی درج نشده است."
+    "bookExpansionNote": "فهرست با کتاب‌های مرجع WHO، کتاب‌های تخصصی چای و گیاهان، فارماکوگنوزی، کیفیت و ایمنی توسعه یافت. آثار تاریخی/قدیمی با محدودیت مشخص شده‌اند. اطلاعات چاپ/ISBN نامطمئن به‌عنوان قطعی درج نشده است.",
+    "lastExpansionAdded": 7,
+    "lastExpansionNote": "افزوده‌های تازه بر اساس رکورد ناشر یا فهرست کتاب‌شناختی/کتابخانه‌ای بررسی شدند؛ اطلاعات ناقص یا نیازمند تطبیق نسخه صریحاً مشخص شده‌اند."
   },
   "bookBibliography": [
     {
@@ -1940,6 +1942,120 @@
       ],
       "limitations": "منبع تاریخی طب سنتی است؛ مطالب آن شاهد اثربخشی یا ایمنی پزشکی مدرن محسوب نمی‌شود.",
       "recordType": "historical_traditional_reference"
+    },
+    {
+      "id": "B-TEA-CHEM-HEALTH-2026",
+      "title": "Tea Chemistry and Health Benefits: Flavour and Processing Dynamics",
+      "author": "Xiaoting Zhai (editor)",
+      "publisher": "Springer Nature Switzerland",
+      "publicationDetails": "1st edition, 2026; 216 pages",
+      "isbn": "978-3-032-11828-8 (eBook); 978-3-032-11827-1 (hardcover)",
+      "language": "English",
+      "scope": [
+        "شیمی چای، رنگ، عطر و طعم",
+        "اثر فرآوری بر ترکیبات چای",
+        "ترکیبات زیست‌فعال و موضوعات سلامت"
+      ],
+      "limitations": "کتاب تازه‌منتشرشده؛ معرفی مباحث سلامت در کتاب به‌تنهایی اثبات اثر درمانی نیست.",
+      "catalogueUrl": "https://link.springer.com/book/10.1007/978-3-032-11828-8",
+      "recordType": "publisher_catalog_verified"
+    },
+    {
+      "id": "B-STEEPED-2024",
+      "title": "Steeped: The Chemistry of Tea",
+      "author": "Michelle Francl",
+      "publisher": "Royal Society of Chemistry",
+      "publicationDetails": "2024; 240 pages",
+      "isbn": "978-1-83916-591-7 (hardback); 978-1-83707-103-6 (paperback)",
+      "language": "English",
+      "scope": [
+        "شیمی مولکولی چای",
+        "کافئین و ترکیبات مؤثر بر طعم و عطر",
+        "انواع چای و روش دم‌آوری"
+      ],
+      "limitations": "کتاب علمی-عمومی است، نه راهنمای بالینی یا مرجع تجویز درمان.",
+      "catalogueUrl": "https://books.rsc.org/books/monograph/2162/SteepedThe-Chemistry-of-Tea",
+      "recordType": "publisher_catalog_verified"
+    },
+    {
+      "id": "B-IR-MARJAE-GIAHAN",
+      "title": "مرجع گیاهان دارویی (دو جلد)",
+      "author": "احمد امامی، شیرین فصیحی، ایرج مهرگان؛ با همکاری گروهی از پژوهشگران",
+      "publisher": "انتشارات اندیشه‌آور",
+      "publicationDetails": "جلد اول ۱۳۸۹؛ جلد دوم ۱۳۹۲",
+      "isbn": "در رکورد بررسی‌شده مشخص نشده؛ از نسخه چاپی کنترل شود",
+      "language": "فارسی",
+      "scope": [
+        "مرجع گیاهان دارویی",
+        "موارد مصرف رایج و دیدگاه‌های مکاتب سنتی مختلف"
+      ],
+      "limitations": "گزارش معرفی کتاب، دامنه گسترده‌ای از مکاتب را ذکر می‌کند؛ ادعاهای هر مکتب باید جداگانه و با شواهد مستقل سنجیده شود.",
+      "catalogueUrl": "https://tabaye.ir/maarja-giahan-darooei/",
+      "recordType": "iranian_reference_book"
+    },
+    {
+      "id": "B-IR-FAARMACODYNAMICS",
+      "title": "اساس فارماکودینامی گیاهان دارویی",
+      "author": "منوچهر عبادی؛ ترجمه عذرا غلامی، زهره ابوالحسن‌زاده و عبدالعلی محقق‌زاده",
+      "publisher": "انتشارات چوگان",
+      "publicationDetails": "چاپ سوم، ۱۳۹۸؛ ۱۰۲۶ صفحه",
+      "isbn": "978-964-2542-41-3",
+      "language": "فارسی",
+      "scope": [
+        "فارماکودینامی گیاهان دارویی",
+        "سازوکارهای اثر و مبانی داروشناسی"
+      ],
+      "limitations": "اطلاعات کتاب‌شناختی از فهرست کتاب‌فروشی/کتابخانه تجاری به دست آمده؛ مشخصات نهایی با شناسنامه نسخه کنترل شود.",
+      "catalogueUrl": "https://mahdroo.ir/shop/product/book-1282167-l5xi0p",
+      "recordType": "iranian_reference_book"
+    },
+    {
+      "id": "B-IR-ARDABIL-FLORA",
+      "title": "گیاهان دارویی: بررسی اکولوژیکی و گیاه‌شناسی گیاهان دارویی استان اردبیل",
+      "author": "شهرام مهری و شهامت هدایت",
+      "publisher": "واحد پارس‌آباد مغان، دانشگاه آزاد اسلامی",
+      "publicationDetails": "چاپ اول، ۱۳۹۷؛ ۵۱۲ صفحه",
+      "isbn": "978-964-10-5092-6",
+      "language": "فارسی",
+      "scope": [
+        "گیاه‌شناسی و اکولوژی گیاهان دارویی منطقه اردبیل",
+        "شناسایی و پراکنش گیاهان بومی"
+      ],
+      "limitations": "دامنه جغرافیایی کتاب منطقه‌ای است و اطلاعات آن را نباید به همه مناطق ایران تعمیم داد.",
+      "catalogueUrl": "https://mahdroo.ir/shop/product/book-482174-kqgw3b",
+      "recordType": "iranian_reference_book"
+    },
+    {
+      "id": "B-IR-MEDICINAL-PLANTS-IRAN-WORLD",
+      "title": "گیاهان دارویی: بررسی گیاهان دارویی ایران و جهان",
+      "author": "مجتبی اخوان‌ارمکی و علی جهانی",
+      "publisher": "انتشارات اتکا",
+      "publicationDetails": "چاپ اول، ۱۳۹۵؛ ۳۸۶ صفحه",
+      "isbn": "978-600-8204-43-5",
+      "language": "فارسی",
+      "scope": [
+        "معرفی گیاهان دارویی ایران و جهان",
+        "مرجع مقدماتی شناسایی و مطالعه گیاهان"
+      ],
+      "limitations": "پیش از استفاده تخصصی، فهرست مطالب و منابع هر فصل و مشخصات نسخه چاپی بررسی شود.",
+      "catalogueUrl": "https://mahdroo.ir/shop/product/book-893621-efa6hn",
+      "recordType": "iranian_reference_book"
+    },
+    {
+      "id": "B-IR-HERBAL-MEDICINES-IRAN",
+      "title": "گیاهان دارویی ایران: جنبه‌های گیاه‌شناختی و اثرات درمانی؛ نسخه‌های ترکیبی",
+      "author": "هرمزدیار کیان‌مهر",
+      "publisher": "انتشارات آییژ",
+      "publicationDetails": "چاپ اول، ۱۳۹۳؛ ۳۱۴ صفحه",
+      "isbn": "978-964-970-404-3",
+      "language": "فارسی",
+      "scope": [
+        "گیاهان دارویی ایران",
+        "جنبه‌های گیاه‌شناختی و نسخه‌های ترکیبی گزارش‌شده"
+      ],
+      "limitations": "وجود عنوان «اثرات درمانی» در نام کتاب به معنی اثبات بالینی ادعاها نیست؛ نسخه‌های ترکیبی باید جداگانه از نظر ایمنی و شواهد ارزیابی شوند.",
+      "catalogueUrl": "https://mahdroo.ir/shop/product/book-1555911-844tb1",
+      "recordType": "iranian_reference_book"
     }
   ],
   "bookBibliographyDisclaimer": "معرفی کتاب‌ها صرفاً جهت اطلاع‌رسانی است و به‌منزله تأیید یا تضمین صحت محتوای آن‌ها از سوی CHAYSA نیست.",
