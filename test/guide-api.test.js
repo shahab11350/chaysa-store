@@ -475,29 +475,35 @@ test("general letters use a direct Telegram inline receipt button", async () => 
   const callbackData = messages[0].reply_markup.inline_keyboard[0][0].callback_data;
   const archivePath = path.join(dataDir, "letters-archive.json");
   let archive = JSON.parse(readFileSync(archivePath, "utf8"));
-  assert.equal(archive[0].receiptStatus, "pending");
+  let sentRecord = archive.find(item => item.body === "متن آزمایشی نامه برای آزمون دکمه تلگرام");
+  assert.ok(sentRecord);
+  assert.equal(sentRecord.receiptStatus, "pending");
 
   const callback = await postLetterReceiptCallback(callbackData);
   assert.equal(callback.status, 200);
   archive = JSON.parse(readFileSync(archivePath, "utf8"));
-  assert.equal(archive[0].receiptStatus, "received");
-  assert.equal(archive[0].receiptMethod, "telegram_inline_button");
-  assert.equal(archive[0].receivedByTelegramId, "222222");
-  assert.ok(archive[0].receivedAt);
+  sentRecord = archive.find(item => item.body === "متن آزمایشی نامه برای آزمون دکمه تلگرام");
+  assert.ok(sentRecord);
+  assert.equal(sentRecord.receiptStatus, "received");
+  assert.equal(sentRecord.receiptMethod, "telegram_inline_button");
+  assert.equal(sentRecord.receivedByTelegramId, "222222");
+  assert.ok(sentRecord.receivedAt);
 
   const callbackCalls = telegramLog().filter(item =>
     item.url.endsWith("/answerCallbackQuery") || item.url.endsWith("/editMessageReplyMarkup")
   );
   assert.ok(callbackCalls.some(item => item.url.endsWith("/answerCallbackQuery")));
   assert.ok(callbackCalls.some(item => item.url.endsWith("/editMessageReplyMarkup")));
-  const receivedAt = archive[0].receivedAt;
+  const receivedAt = sentRecord.receivedAt;
   await postLetterReceiptCallback(callbackData, "222222", "letter-callback-replay");
   archive = JSON.parse(readFileSync(archivePath, "utf8"));
-  assert.equal(archive[0].receivedAt, receivedAt);
+  sentRecord = archive.find(item => item.body === "متن آزمایشی نامه برای آزمون دکمه تلگرام");
+  assert.equal(sentRecord.receivedAt, receivedAt);
 
   await postLetterReceiptCallback(callbackData, "333333", "letter-callback-unauthorized");
   archive = JSON.parse(readFileSync(archivePath, "utf8"));
-  assert.equal(archive[0].receivedByTelegramId, "222222");
+  sentRecord = archive.find(item => item.body === "متن آزمایشی نامه برای آزمون دکمه تلگرام");
+  assert.equal(sentRecord.receivedByTelegramId, "222222");
 });
 
 
