@@ -570,7 +570,44 @@ test("Rubika webhook reveals the real chat ID on /start", async () => {
   assert.match(JSON.parse(welcome.body).text, new RegExp(chatId));
 });
 
-test("Order rejects an unsupported customer messaging channel", async () => {
+
+test("Rubika webhook handles StartedBot and nested update envelopes", async () => {
+  const crypto = require("node:crypto");
+  const key = crypto.createHash("sha256").update("CHAYSA-RUBIKA-WEBHOOK-V1:test-rubika-token").digest("hex").slice(0, 40);
+  const chatId = "u0QFtn01dd26d72abc5c77b8e116cd79";
+  const before = readFileSync(rubikaMockLog, "utf8").split("\\n").filter(Boolean).length;
+
+  const started = await fetch(baseUrl + "/rubika/webhook/" + key, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ update: { type: "StartedBot", chat_id: chatId } })
+  });
+  assert.equal(started.status, 200);
+
+  const nestedMessage = await fetch(baseUrl + "/rubika/webhook/" + key, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ data: { update: {
+      type: "NewMessage", chat_id: chatId,
+      new_message: { sender_type: "User", sender_id: chatId, text: "/start" }
+    } } })
+  });
+  assert.equal(nestedMessage.status, 200);
+
+  const calls = readFileSync(rubikaMockLog, "utf8").split("\\n").filter(Boolean).map(line => JSON.parse(line));
+  const welcomeCalls = calls.slice(before).filter(item =>
+    item.url.endsWith("/sendMessage") && JSON.parse(item.body).text.includes("شناسه گفت‌وگوی شما")
+  );
+  assert.equal(welcomeCalls.length, 2);
+  for (const item of welcomeCalls) assert.match(JSON.parse(item.body).text, new RegExp(chatId));
+});
+
+test("Rubika webhook registration uses ReceiveUpdate and accepts the documented Done result", async () => {
+  const calls = readFileSync(rubikaMockLog, "utf8").split("\\n").filter(Boolean).map(line => JSON.parse(line));
+  const registration = calls.find(item => item.url.endsWith("/updateBotEndpoints"));
+  assert.ok(registration);
+  assert.deepEqual(JSON.parse(registration.body).type, "ReceiveUpdate");
+  assert.match(JSON.parse(registration.body).url, /^https:\\/\\/preview\\.example\\.com\\//);
+});
+\ntest("Order rejects an unsupported customer messaging channel", async () => {
   const payload = {
     customer: {
       name: "آزمون", family: "خریدار", contact: "09120000002",
