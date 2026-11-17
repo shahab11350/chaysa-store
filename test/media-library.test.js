@@ -6,6 +6,7 @@ const path = require("node:path");
 const net = require("node:net");
 const { spawn, execFile } = require("node:child_process");
 const { promisify } = require("node:util");
+const { readFileSync } = require("node:fs");
 const sharp = require("sharp");
 const ffmpeg = require("ffmpeg-static");
 const run = promisify(execFile);
@@ -30,6 +31,18 @@ test("media library authenticates, compresses image/audio/video, lists and delet
     stdio: ["ignore", "pipe", "pipe"]
   });
   let logs = "";
+  let peakRssKb = 0, peakCpuPercent = 0;
+  const resourceSampler = setInterval(async () => {
+    try {
+      const { stdout } = await run("ps", ["-eo", "pid=,ppid=,rss=,pcpu="]);
+      let rss = 0, cpu = 0;
+      for (const line of stdout.trim().split("\\n")) {
+        const values = line.trim().split(/\\s+/).map(Number);
+        if (values.length === 4 && (values[0] === child.pid || values[1] === child.pid)) { rss += values[2]; cpu += values[3]; }
+      }
+      peakRssKb = Math.max(peakRssKb, rss); peakCpuPercent = Math.max(peakCpuPercent, cpu);
+    } catch (_) {}
+  }, 100);
   child.stdout.on("data", chunk => { logs += chunk.toString(); });
   child.stderr.on("data", chunk => { logs += chunk.toString(); });
   const base = "http://127.0.0.1:" + port;
@@ -93,7 +106,15 @@ test("media library authenticates, compresses image/audio/video, lists and delet
     }
     const after = await (await fetch(base + "/api/admin/media", { headers })).json();
     assert.equal(after.length, 0);
+    const adminHtml = readFileSync(path.join(__dirname, "..", "admin.html"), "utf8");
+    const libraryHtml = readFileSync(path.join(__dirname, "..", "media-library.html"), "utf8");
+    assert.match(adminHtml, /chooseProductMedia/);
+    assert.match(adminHtml, /chaysa-media-selected/);
+    assert.match(libraryHtml, /انتخاب برای محصول/);
+    assert.ok(peakRssKb > 0, "resource sampler should observe server/ffmpeg process RSS");
+    console.log("MEDIA_RESOURCE_METRICS " + JSON.stringify({ peakRssKb, peakCpuPercent }));
   } finally {
+    clearInterval(resourceSampler);
     child.kill("SIGTERM");
     await Promise.race([new Promise(resolve => child.once("exit", resolve)), new Promise(resolve => setTimeout(resolve, 3000))]);
     fs.rmSync(root, { recursive: true, force: true });
