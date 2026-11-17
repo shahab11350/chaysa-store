@@ -628,3 +628,49 @@ test("Order rejects an unsupported customer messaging channel", async () => {
   assert.equal(response.status, 400);
   assert.match((await response.json()).error, /تلگرام یا روبیکا/);
 });
+
+
+test("Rubika webhook registration failure logs safe response metadata without secrets or response text", async () => {
+  const port = await reservePort();
+  const diagnosticDir = mkdtempSync(path.join(os.tmpdir(), "chaysa-rubika-diagnostic-test-"));
+  const diagnosticLog = path.join(diagnosticDir, "rubika-mock.jsonl");
+  writeFileSync(diagnosticLog, "", "utf8");
+  let diagnosticChild;
+  let diagnosticOutput = "";
+  try {
+    diagnosticChild = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], {
+      cwd: path.join(__dirname, ".."),
+      env: {
+        ...process.env,
+        PORT: String(port),
+        DATA_DIR: diagnosticDir,
+        ADMIN_PASSWORD: "diagnostic-test-only-password",
+        TELEGRAM_BOT_TOKEN: "",
+        TELEGRAM_WEBHOOK_SECRET: "",
+        RUBIKA_BOT_TOKEN: "diagnostic-test-token",
+        RUBIKA_WEBHOOK_URL: "https://preview.example.com/rubika/webhook/diagnostic-secret-path",
+        RUBIKA_MOCK_LOG: diagnosticLog,
+        RUBIKA_MOCK_REGISTRATION_MODE: "api-error",
+        NODE_OPTIONS: "--require " + path.join(__dirname, "mock-telegram-fetch.js")
+      },
+      stdio: ["ignore", "pipe", "pipe"]
+    });
+    diagnosticChild.stdout.on("data", chunk => { diagnosticOutput += chunk.toString(); });
+    diagnosticChild.stderr.on("data", chunk => { diagnosticOutput += chunk.toString(); });
+
+    for (let attempt = 0; attempt < 100; attempt++) {
+      if (diagnosticOutput.includes("Rubika webhook registration: failed")) break;
+      if (diagnosticChild.exitCode !== null) break;
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  } finally {
+    if (diagnosticChild && diagnosticChild.exitCode === null) {
+      diagnosticChild.kill("SIGTERM");
+      await new Promise(resolve => diagnosticChild.once("exit", resolve));
+    }
+    rmSync(diagnosticDir, { recursive: true, force: true });
+  }
+
+  assert.match(diagnosticOutput, /http=200 api=ERROR data=Rejected code=4321/);
+  assert.doesNotMatch(diagnosticOutput, /sensitive response text|diagnostic-test-token|diagnostic-secret-path/);
+});

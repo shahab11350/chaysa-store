@@ -348,6 +348,11 @@ async function sendRubikaText(chatId, text) {
  if(!token||typeof chatId!=="string"||!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return false;
  try{const r=await fetch("https://botapi.rubika.ir/v3/"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:chatId,text,disable_notification:false})});const d=await r.json();return r.ok&&d.status==="OK"&&Boolean(d.data&&d.data.message_id)}catch(_){return false}
 }
+function safeRubikaDiagnosticValue(value){
+ if(typeof value!=="string"&&typeof value!=="number")return "missing";
+ const safe=String(value).replace(/[^A-Za-z0-9_. -]/g,"").slice(0,48);
+ return safe||"empty";
+}
 function rubikaWebhookKey(){const token=process.env.RUBIKA_BOT_TOKEN||"";return token?crypto.createHash("sha256").update("CHAYSA-RUBIKA-WEBHOOK-V1:"+token).digest("hex").slice(0,40):""}
 function extractRubikaUpdates(body){
  const root=body&&typeof body==="object"?body:{};
@@ -1433,7 +1438,32 @@ app.listen(port, "0.0.0.0", () => {
     console.log("CHAYSA Telegram pair: sync failed");
   }
   const rubikaToken=process.env.RUBIKA_BOT_TOKEN||"",rubikaKey=rubikaWebhookKey();
-  if(rubikaToken&&rubikaKey){const url=(process.env.RUBIKA_WEBHOOK_URL||"https://chaysa.up.railway.app/rubika/webhook/"+rubikaKey).trim();fetch("https://botapi.rubika.ir/v3/"+rubikaToken+"/updateBotEndpoints",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url,type:"ReceiveUpdate"})}).then(async r=>{const d=await r.json();return r.ok&&d.status==="OK"&&d.data&&["Done","OK"].includes(d.data.status)}).then(ok=>console.log("Rubika webhook registration:",ok?"ok":"failed")).catch(()=>console.log("Rubika webhook registration failed"))}
+  if(rubikaToken&&rubikaKey){
+    const url=(process.env.RUBIKA_WEBHOOK_URL||"https://chaysa.up.railway.app/rubika/webhook/"+rubikaKey).trim();
+    fetch("https://botapi.rubika.ir/v3/"+rubikaToken+"/updateBotEndpoints",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({url,type:"ReceiveUpdate"})
+    }).then(async response=>{
+      let result;
+      try{result=await response.json()}catch(_){
+        console.log("Rubika webhook registration: failed", "http="+response.status, "reason=invalid_json");
+        return;
+      }
+      const success=response.ok&&result&&result.status==="OK"&&result.data&&["Done","OK"].includes(result.data.status);
+      if(success){console.log("Rubika webhook registration: ok");return}
+      const apiStatus=safeRubikaDiagnosticValue(result&&result.status);
+      const dataStatus=safeRubikaDiagnosticValue(result&&result.data&&result.data.status);
+      const errorCode=safeRubikaDiagnosticValue(
+        result&&(result.error_code??result.errorCode??(result.data&&(result.data.error_code??result.data.errorCode??result.data.code)))
+      );
+      const responseKeys=result&&typeof result==="object"?Object.keys(result).map(safeRubikaDiagnosticValue).join(","):"none";
+      const dataKeys=result&&result.data&&typeof result.data==="object"?Object.keys(result.data).map(safeRubikaDiagnosticValue).join(","):"none";
+      console.log("Rubika webhook registration: failed", "http="+response.status, "api="+apiStatus, "data="+dataStatus, "code="+errorCode, "keys="+responseKeys, "dataKeys="+dataKeys);
+    }).catch(error=>{
+      console.log("Rubika webhook registration: failed", "reason=request_error", "type="+safeRubikaDiagnosticValue(error&&error.name));
+    });
+  }
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   if (token && webhookSecret) {
