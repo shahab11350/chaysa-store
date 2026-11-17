@@ -23,16 +23,21 @@ global.fetch = async function (input, init = {}) {
       fs.appendFileSync(process.env.TELEGRAM_MOCK_LOG, JSON.stringify(entry) + "\n", "utf8");
     }
     const payload = entry.body ? JSON.parse(entry.body) : {};
-    const isOrderInvoice = String(payload.text || "").startsWith("فاکتور سفارش چایسا");
+    const messageText = String(payload.text || "");
+    const isOrderInvoice = messageText.startsWith("فاکتور سفارش چایسا");
+    const isCustomerStatus = messageText.startsWith("به‌روزرسانی سفارش چایسا");
     const failedOrderRecipients = String(process.env.TELEGRAM_MOCK_FAIL_ORDER_CHAT_IDS || "").split(",").map(x => x.trim());
+    const failedCustomerRecipients = String(process.env.TELEGRAM_MOCK_FAIL_CUSTOMER_CHAT_IDS || "").split(",").map(x => x.trim());
     const failOrderDelivery = isOrderInvoice && failedOrderRecipients.includes(String(payload.chat_id));
+    const failCustomerDelivery = isCustomerStatus && failedCustomerRecipients.includes(String(payload.chat_id));
+    const failDelivery = failOrderDelivery || failCustomerDelivery;
     return new Response(JSON.stringify({
-      ok: !failOrderDelivery,
-      result: !failOrderDelivery && String(url).endsWith("/sendMessage")
+      ok: !failDelivery,
+      result: !failDelivery && String(url).endsWith("/sendMessage")
         ? { message_id: 1 }
         : true
     }), {
-      status: failOrderDelivery ? 400 : 200,
+      status: failDelivery ? 400 : 200,
       headers: { "content-type": "application/json" }
     });
   }
