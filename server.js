@@ -1427,7 +1427,7 @@ app.use(express.static(ROOT, {
   index: "index.html",
   dotfiles: "ignore",
   setHeaders(res, filePath) {
-    if (/\\.(?:html|json)$/i.test(filePath)) {
+    if (/\.(?:html|json)$/i.test(filePath)) {
       res.setHeader("Cache-Control", "no-cache, must-revalidate");
     }
   }
