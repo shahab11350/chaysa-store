@@ -4,7 +4,7 @@
 .nav-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:16px}.nav-card{min-height:104px;text-align:right;padding:18px;background:#f7f5ef;color:#26372b;border:1px solid #e8dfca;display:flex;flex-direction:column;justify-content:center;gap:8px;transition:background .15s,border-color .15s}.nav-card:hover{background:#f0eadb;border-color:#c8b77f}.nav-card strong{font-size:16px}.nav-card span{font-size:12px;color:#777;font-weight:normal;line-height:1.8}.view .row h2{margin:0}@media(max-width:460px){.nav-grid{grid-template-columns:1fr 1fr;gap:8px}.nav-card{min-height:96px;padding:12px}.nav-card strong{font-size:14px}.nav-card span{font-size:11px}}
 .letter-preview{margin-top:14px;padding:20px;border:1px solid #d8c99f;border-radius:12px;background:#fffdf7;white-space:pre-wrap;line-height:2.1;overflow-wrap:anywhere;min-height:120px}
 #letterBody{display:block;width:100%;min-height:190px;padding:13px;border:1px solid #d9d2c2;border-radius:10px;font:14px/2 Tahoma;resize:vertical}
-.letter-brand{font:700 20px Arial,sans-serif;letter-spacing:3px;color:#244b37;text-align:left;direction:ltr}
+.letter-brand{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;border-bottom:2px solid #b99b55;padding:4px 0 14px;margin-bottom:14px}.letter-brand img{display:block;width:min(220px,70%);height:auto;object-fit:contain}.letter-brand-caption{font:12px Tahoma,sans-serif;color:#68756b;letter-spacing:0;direction:rtl}.letter-heading{text-align:center;font-weight:bold;color:#173b2b;margin:12px 0}.letter-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:#68756b;border-bottom:1px solid #e8dfca;padding:8px 0 12px;margin-bottom:14px}.letter-content{white-space:pre-wrap;overflow-wrap:anywhere;min-height:80px;line-height:2.2}.letter-signature{border-top:1px solid #e8dfca;margin-top:18px;padding-top:12px;text-align:right;line-height:2;font-weight:bold;color:#244b37}@media print{.letter-preview{border:0;box-shadow:none;border-radius:0;padding:0;background:#fff}}
 .letter-archive-item{padding:12px 0;border-bottom:1px solid #eee8d8;white-space:pre-wrap;overflow-wrap:anywhere}
 </style><header><b>CHAYSA</b><div>پنل مدیریت فروشگاه</div></header><main class="wrap">
 <section id="login" class="panel"><h2>ورود مدیر</h2><label>رمز عبور مدیریت</label><input id="password" type="password" autocomplete="current-password" placeholder="رمز عبور"><p class="muted">این صفحه برای مدیریت فروشگاه است و ورود آن با نشست امن سمت سرور انجام می‌شود.</p><button id="loginBtn">ورود به مدیریت</button></section>
@@ -71,13 +71,13 @@
 <button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button>
 <h2 style="margin-top:16px">نامه‌نگار چایسا</h2>
 <p class="muted">متن نامه را بنویس، پیش‌نمایش را بررسی کن و در صورت تأیید، آن را از مسیر ربات تلگرام چایسا ارسال کن. ارسال به هر دو حساب تلگرام پیوندخورده انجام می‌شود و نسخه نامه در بایگانی ثبت خواهد شد.</p>
-<div class="letter-preview" id="letterPreview"><div class="letter-brand">CHAYSA</div><div>برای ساخت پیش‌نمایش، متن نامه را وارد کن.</div></div>
+<div class="letter-preview" id="letterPreview"><div class="letter-brand"><img src="chaysa-logo-option4.svg" alt="لوگوی اصلی چایسا" width="300" height="158"><div class="letter-brand-caption">فروشگاه اینترنتی چایسا (CHAYSA)</div></div><div class="letter-heading">نامه رسمی</div><div>برای ساخت پیش‌نمایش، متن نامه را وارد کن.</div></div>
 <label for="letterTitle">عنوان نامه</label>
 <input id="letterTitle" maxlength="160" placeholder="عنوان نامه را وارد کن…">
 <label for="letterBody">متن نامه (برای ثبت عنوان به‌تنهایی، خالی بگذار)</label>
 <textarea id="letterBody" maxlength="3400" placeholder="متن نامه را اینجا بنویس…"></textarea>
 <p class="muted">پیوندها را به‌صورت نشانی کامل (https://…) داخل متن قرار بده؛ تلگرام آن‌ها را قابل لمس نمایش می‌دهد. این نسخه برای آزمایش نامه متنی است؛ پیوست تصویر در مرحله بعد اضافه می‌شود.</p>
-<p class="muted">برای جلوگیری از استفاده از لوگوی نادرست، فعلاً سربرگ با نشان متنی CHAYSA نمایش داده می‌شود؛ لوگوی تصویری مصوب پس از تطبیق فایل اصلی اضافه خواهد شد.</p>
+<p class="muted">سربرگ پیش‌نمایش با لوگوی اصلی و مصوب گزینه ۴ نمایش داده می‌شود. این لوگو در متن ارسالی تلگرام به‌صورت تصویر پیوست نمی‌شود.</p>
 <div class="row">
 <button type="button" id="letterPreviewBtn" class="secondary">به‌روزرسانی پیش‌نمایش</button>
 <button type="button" id="letterArchiveOnlyBtn" class="secondary">ثبت در بایگانی بدون ارسال</button>
@@ -108,20 +108,23 @@ function renderLetterPreview(){
  const body=$('letterBody').value.trim();
  const host=$('letterPreview');
  if(!letterMeta){host.textContent='اطلاعات شماره و زمان نامه هنوز دریافت نشده است.';return}
- const lines=[
-  'CHAYSA | فروشگاه اینترنتی چایسا',
-  'نامه رسمی',
-  ($('letterTitle').value.trim()?'عنوان: '+$('letterTitle').value.trim():''),
-  'شماره نامه: '+letterMeta.letterNumber,
-  'تاریخ و ساعت: '+letterMeta.dateTime,
-  '--------------------------------',
-  body||'متن نامه پس از تایپ در این قسمت نمایش داده می‌شود.',
-  '',
-  '--------------------------------',
-  'محمدرضا نظام',
-  'ناظر کیفی و ایده‌پرداز فروشگاه اینترنتی چایسا (CHAYSA)'
- ];
- host.textContent=lines.join('\n');
+ host.replaceChildren();
+ const brand=document.createElement('div');brand.className='letter-brand';
+ const logo=document.createElement('img');logo.src='/chaysa-logo-option4.svg';logo.alt='لوگوی اصلی چایسا';logo.width=300;logo.height=158;
+ const caption=document.createElement('div');caption.className='letter-brand-caption';caption.textContent='فروشگاه اینترنتی چایسا (CHAYSA)';
+ brand.append(logo,caption);
+ const heading=document.createElement('div');heading.className='letter-heading';heading.textContent='نامه رسمی';
+ const meta=document.createElement('div');meta.className='letter-meta';
+ const number=document.createElement('span');number.textContent='شماره نامه: '+letterMeta.letterNumber;
+ const date=document.createElement('span');date.textContent='تاریخ و ساعت: '+letterMeta.dateTime;
+ meta.append(number,date);
+ const title=$('letterTitle').value.trim();
+ if(title){const titleNode=document.createElement('div');titleNode.className='letter-heading';titleNode.textContent=title;host.append(brand,heading,titleNode,meta);}
+ else host.append(brand,heading,meta);
+ const content=document.createElement('div');content.className='letter-content';content.textContent=body||'متن نامه پس از تایپ در این قسمت نمایش داده می‌شود.';
+ const signature=document.createElement('div');signature.className='letter-signature';
+ signature.textContent='محمدرضا نظام\nناظر کیفی و ایده‌پرداز فروشگاه اینترنتی چایسا (CHAYSA)';
+ host.append(content,signature);
 }
 async function loadLetterArchive(){
  const host=$('letterArchive');host.textContent='در حال دریافت بایگانی…';

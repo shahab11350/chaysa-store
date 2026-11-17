@@ -99,6 +99,52 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 
 <meta name="chaysa-release" content="2026-11-14-invite-card-v1">
 
+
+<style id="chaysa-brand-refresh">
+:root{--chaysa-green:#173b2b;--chaysa-green-2:#244b37;--chaysa-gold:#c5a45b;--chaysa-cream:#f7f5ef;--chaysa-ink:#26372b}
+body{background:linear-gradient(180deg,#f8f6ef 0%,#f3f1e8 100%);color:var(--chaysa-ink)}
+header.chaysa-site-header{position:relative;display:flex;min-height:252px;flex-direction:column;align-items:center;justify-content:center;gap:5px;padding:25px 145px 24px;background:radial-gradient(ellipse at 50% 0%,#315b43 0%,#173b2b 62%,#10291e 100%);border-bottom:3px solid var(--chaysa-gold);text-align:center}
+.chaysa-brand-logo{display:block;width:min(300px,62vw);height:auto;max-height:142px;object-fit:contain;margin:0 auto 2px;filter:drop-shadow(0 7px 15px #0005)}
+header.chaysa-site-header h1{margin:0;color:#fff;font-size:clamp(20px,3vw,27px);letter-spacing:.2px}
+header.chaysa-site-header>p{margin:2px 0 0;color:#f0dca9;font-size:14px;line-height:1.9}
+nav{position:relative;z-index:20;gap:8px;padding:12px 14px;background:#214733;border-bottom:1px solid #c5a45b;box-shadow:0 5px 18px #142a1d18}
+nav a{padding:9px 13px;border:1px solid transparent;border-radius:999px;color:#fff;font-size:13px;transition:background .18s,border-color .18s}
+nav a:hover,nav a:focus-visible{background:#ffffff18;border-color:#c5a45b;outline:none}
+.hero{position:relative;isolation:isolate;overflow:hidden;max-width:1120px;margin:28px auto 20px;padding:54px 24px;border:1px solid #d8c58f;border-radius:24px;background:radial-gradient(circle at 12% 15%,#fff9e8 0,transparent 35%),linear-gradient(125deg,#e7ecdf 0%,#fbf8ef 52%,#efe5cb 100%);box-shadow:0 12px 32px #173b2b12}
+.hero:after{content:"";position:absolute;z-index:-1;left:-54px;bottom:-105px;width:250px;height:250px;border:1px solid #c5a45b55;border-radius:50%;box-shadow:0 0 0 18px #c5a45b0d,0 0 0 38px #c5a45b0a}
+.hero-inner{max-width:700px;margin:auto;text-align:center}
+.hero-kicker{display:inline-block;padding:6px 13px;border:1px solid #c5a45b;border-radius:999px;color:#806728;font-size:10px;font-weight:bold;letter-spacing:2px;direction:ltr}
+.hero h2{margin:15px 0 8px;color:#173b2b;font-size:clamp(25px,4vw,36px);line-height:1.6}
+.hero p{margin:0;color:#596857;font-size:15px;line-height:2.1}
+.hero .btn{min-width:180px;margin-top:20px;padding:13px 25px;border:1px solid #d7bd79;border-radius:999px;background:linear-gradient(135deg,#b99b55,#98783a);box-shadow:0 7px 16px #8b6d331f;font-weight:bold;transition:transform .18s,box-shadow .18s}
+.hero .btn:hover{transform:translateY(-2px);box-shadow:0 10px 20px #8b6d3330}
+#invite,#about{max-width:1060px;margin:18px auto;padding:28px 22px;border:1px solid #e7dfcb;border-radius:18px;background:#fffefa;box-shadow:0 7px 22px #173b2b0a}
+#invite h2,#about h2{color:#173b2b;margin-top:0}
+#invite p,#about p{color:#596657}
+#invite .btn{border-radius:999px}
+footer#contact{margin-top:28px;border-top:3px solid #c5a45b;background:linear-gradient(135deg,#173b2b,#10291e)}
+@media(max-width:700px){
+ header.chaysa-site-header{min-height:210px;padding:83px 12px 19px;gap:3px}
+ .chaysa-brand-logo{width:min(218px,58vw);max-height:104px}
+ header.chaysa-site-header h1{font-size:20px}
+ header.chaysa-site-header>p{font-size:12px}
+ #chaysaCalendar,#chaysaClock{top:9px!important;width:66px;height:66px;padding:5px;border-width:1px}
+ #chaysaCalendar{right:9px!important}
+ #chaysaClock{left:9px!important}
+ #chaysaCalendar .cc-title,#chaysaClock .cc-title{font-size:8px;margin-bottom:1px}
+ #chaysaClock .cc-time{font-size:11px}
+ #chaysaCalendar .cc-date{font-size:8px;line-height:1.4}
+ #chaysaClock .cc-zone{font-size:6px}
+ nav{justify-content:flex-start;gap:5px;padding:9px 8px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+ nav::-webkit-scrollbar{display:none}
+ nav a{flex:0 0 auto;padding:8px 11px;font-size:12px}
+ .hero{margin:16px 10px;padding:37px 18px;border-radius:18px}
+ .hero h2{font-size:25px}
+ .hero p{font-size:13px}
+ #invite,#about{margin:12px 10px;padding:22px 16px}
+}
+@media(prefers-reduced-motion:reduce){.hero .btn{transition:none}}
+</style>
 </head>
 <body>
 
@@ -116,7 +162,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 </style>
 
 
-<header>
+<header class="chaysa-site-header">
 <div id="chaysaCalendar" aria-label="تقویم چایسا">
   <div class="cc-title">تقویم</div>
   <div class="cc-date" id="chaysaClockDate">در حال بارگذاری...</div>
@@ -126,7 +172,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
   <div class="cc-time" id="chaysaClockTime">--:--:--</div>
   <div class="cc-zone">وقت محلی</div>
 </div>
-<div class="logo">CHAYSA</div>
+<img class="chaysa-brand-logo" src="chaysa-logo-option4.svg" alt="لوگوی اصلی چایسا" width="300" height="158">
 <h1>چایسا</h1>
 <p>فروشگاهی برای طعم‌های تازه</p>
 </header>
@@ -200,10 +246,14 @@ if(document.readyState==="loading"){
 </script>
 
 
-<div class="hero">
+<section class="hero" aria-labelledby="homeHeroTitle">
+<div class="hero-inner">
+<span class="hero-kicker">CHAYSA · TEA & MOMENTS</span>
+<h2 id="homeHeroTitle">لحظه‌ای برای چشیدن طعم تازه</h2>
 <p>از عطر چای و دمنوش تا طعم دل‌نشین ادویه</p>
 <a class="btn" href="products.html">مشاهده محصولات</a>
 </div>
+</section>
 <section id="invite" class="about">
 <h2>از دوستان خود برای چشیدن طعم زندگی دعوت کنید</h2>
 <p>یک دعوت دوستانه برای تجربه طعم‌های تازه در چایسا</p>
