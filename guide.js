@@ -22,9 +22,11 @@
     return String(value || "").toLowerCase().replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\u200e]/g, " ").replace(/\s+/g, " ").trim();
   }
   function clearResult() {
-    answer.hidden = true;
-    answer.removeAttribute("href");
-    healthNotice.hidden = true;
+    if (answer) {
+      answer.hidden = true;
+      answer.removeAttribute("href");
+    }
+    if (healthNotice) healthNotice.hidden = true;
     status.textContent = "";
     status.style.color = "#a33";
   }
@@ -77,7 +79,7 @@
       button.className = "chaysa-guide-prompt";
       button.textContent = item.label;
       button.addEventListener("click", function () {
-        medicine.value = "";
+        if (medicine) medicine.value = "";
         question.value = item.prompt;
         clearResult();
         question.focus();
@@ -148,10 +150,10 @@
   [question, medicine, product].filter(Boolean).forEach(function (field) {
     field.addEventListener("input", function () {
       clearResult();
-      if (field === question) { medicine.value = ""; renderSuggestions(); }
+      if (field === question) { if (medicine) medicine.value = ""; renderSuggestions(); }
     });
     field.addEventListener("change", function () {
-      if (field === product) medicine.value = "";
+      if (field === product && medicine) medicine.value = "";
       clearResult();
     });
   });
