@@ -217,7 +217,7 @@ async function loadOrders(){
   rows.slice().reverse().forEach(o=>{
    const box=document.createElement('div');box.style.cssText='border:1px solid #e8dfca;border-radius:10px;padding:12px;margin:10px 0;line-height:2';
    const title=document.createElement('b');title.textContent=o.id+' · '+o.status;
-   const detail=document.createElement('div');detail.textContent=(o.customer?.name||'')+' '+(o.customer?.family||'')+' · '+(o.customer?.contact||'')+' · '+Number(o.total||0).toLocaleString('fa-IR')+' تومان';
+   const detail=document.createElement('div');detail.textContent=(o.customer?.name||'')+' '+(o.customer?.family||'')+' · '+(o.customer?.contact||'')+' · '+(o.customer?.messengerPlatform==='rubika'?'روبیکا':'تلگرام')+' · '+(o.customer?.messengerId||'')+' · '+Number(o.total||0).toLocaleString('fa-IR')+' تومان';
    const items=document.createElement('div');items.textContent=(o.items||[]).map(x=>x.name+' × '+x.qty).join('، ');
    const select=document.createElement('select');['در انتظار بررسی','در حال آماده‌سازی','ارسال‌شده','تحویل‌شده','لغوشده'].forEach(v=>{const op=document.createElement('option');op.value=v;op.textContent=v;select.append(op)});select.value=o.status;
    select.onchange=async()=>{try{await api('orders/'+encodeURIComponent(o.id)+'/status',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:select.value})});await loadOrders()}catch(e){alert(e.message)}};
