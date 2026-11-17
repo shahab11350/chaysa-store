@@ -865,7 +865,7 @@ app.post("/api/admin/health-approval/send", requireAdmin, async (req, res) => {
   if (!/^-?\d+$/.test(bostaniChatId) || !process.env.TELEGRAM_BOT_TOKEN)
     return json(res, 503, { error: "تنظیمات امن ارسال تلگرام خانم بستانی کامل نیست." });
   const rows = readHealthApprovalRequests();
-  const active = rows.find(item => item.status === "pending" && item.deliveryStatus === "sent" && item.expiresAt && Date.parse(item.expiresAt) > Date.now());
+  const active = rows.find(item => item.status === "pending" && ["sent", "manual_link_ready"].includes(item.deliveryStatus) && item.expiresAt && Date.parse(item.expiresAt) > Date.now());
   if (active) return json(res, 409, { error: "یک درخواست بررسی فعال وجود دارد؛ برای جلوگیری از ایجاد لینک‌های موازی، ابتدا همان درخواست را پیگیری کنید.", requestId: active.id, expiresAt: active.expiresAt });
   const token = crypto.randomBytes(32).toString("base64url");
   const now = new Date();
@@ -875,6 +875,7 @@ app.post("/api/admin/health-approval/send", requireAdmin, async (req, res) => {
     status: "pending",
     tokenHash: healthApprovalTokenHash(token),
     reviewerChatId: bostaniChatId,
+    deliveryMethod: "telegram",
     version: "نسخه منتشرشده CHAYSA HEALTH در زمان ارسال",
     commit: process.env.RAILWAY_GIT_COMMIT_SHA || null,
     createdAt: now.toISOString(),
@@ -902,6 +903,47 @@ app.post("/api/admin/health-approval/send", requireAdmin, async (req, res) => {
   catch (_) { return json(res, 500, { error: "وضعیت ارسال ثبت نشد؛ پیش از تلاش مجدد، سوابق درخواست را بررسی کنید.", requestId: request.id }); }
   if (!sent) return json(res, 502, { error: "ارسال پیام تلگرام ناموفق بود؛ درخواست در سوابق با وضعیت ناموفق نگهداری شد.", requestId: request.id });
   return json(res, 201, { ok: true, requestId: request.id, deliveryStatus: "sent", expiresAt: request.expiresAt });
+});
+
+app.post("/api/admin/health-approval/create-link", requireAdmin, (req, res) => {
+  if (limited("health-approval-create-link:" + (req.ip || "unknown"), 5, 60 * 60 * 1000))
+    return json(res, 429, { error: "تعداد درخواست‌های ساخت لینک در این ساعت بیش از حد مجاز است." });
+  const rows = readHealthApprovalRequests();
+  const active = rows.find(item => item.status === "pending" &&
+    ["sent", "manual_link_ready"].includes(item.deliveryStatus) &&
+    item.expiresAt && Date.parse(item.expiresAt) > Date.now());
+  if (active) return json(res, 409, {
+    error: "یک درخواست بررسی فعال وجود دارد؛ برای جلوگیری از ساخت لینک موازی، ابتدا همان درخواست را پیگیری کنید.",
+    requestId: active.id,
+    expiresAt: active.expiresAt
+  });
+  const token = crypto.randomBytes(32).toString("base64url");
+  const now = new Date();
+  const request = {
+    id: crypto.randomUUID(),
+    section: "CHAYSA HEALTH",
+    status: "pending",
+    tokenHash: healthApprovalTokenHash(token),
+    reviewerChatId: null,
+    deliveryMethod: "manual_share",
+    version: "نسخه منتشرشده CHAYSA HEALTH در زمان ارسال",
+    commit: process.env.RAILWAY_GIT_COMMIT_SHA || null,
+    createdAt: now.toISOString(),
+    expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+    deliveryStatus: "manual_link_ready"
+  };
+  rows.push(request);
+  try { saveHealthApprovalRequests(rows); }
+  catch (_) { return json(res, 500, { error: "ایجاد درخواست بررسی در فضای پایدار انجام نشد." }); }
+  const link = "https://chaysa.up.railway.app/health-approval.html#" + token;
+  return json(res, 201, {
+    ok: true,
+    requestId: request.id,
+    deliveryStatus: request.deliveryStatus,
+    deliveryMethod: request.deliveryMethod,
+    expiresAt: request.expiresAt,
+    link
+  });
 });
 
 const LETTERS_ARCHIVE_FILE = path.join(DATA, "letters-archive.json");
@@ -1095,7 +1137,7 @@ app.post("/api/health-approval/view", (req, res) => {
   const found = findHealthApprovalRequest(req.body && req.body.token);
   if (!found) return json(res, 404, { error: "لینک بررسی معتبر نیست." });
   const { row } = found;
-  if (row.deliveryStatus !== "sent") return json(res, 403, { error: "این درخواست از مسیر رسمی ارسال نشده است." });
+  if (!["sent", "manual_link_ready"].includes(row.deliveryStatus)) return json(res, 403, { error: "این درخواست از مسیر رسمی صادر نشده است." });
   if (Date.parse(row.expiresAt) <= Date.now()) return json(res, 410, { error: "مهلت این لینک به پایان رسیده است." });
   if (row.status !== "pending") return json(res, 409, { error: "این درخواست قبلاً تعیین تکلیف شده است.", decision: row.decision || null });
   return json(res, 200, { ok: true, letter: HEALTH_APPROVAL_LETTER, version: row.version, expiresAt: row.expiresAt });
@@ -1117,7 +1159,7 @@ app.post("/api/health-approval/decision", async (req, res) => {
   const found = findHealthApprovalRequest(token);
   if (!found) return json(res, 404, { error: "لینک بررسی معتبر نیست." });
   const { rows: requests, row: request } = found;
-  if (request.deliveryStatus !== "sent") return json(res, 403, { error: "این درخواست از مسیر رسمی ارسال نشده است." });
+  if (!["sent", "manual_link_ready"].includes(request.deliveryStatus)) return json(res, 403, { error: "این درخواست از مسیر رسمی صادر نشده است." });
   if (Date.parse(request.expiresAt) <= Date.now()) return json(res, 410, { error: "مهلت این لینک به پایان رسیده است." });
   if (request.status !== "pending") return json(res, 409, { error: "این درخواست قبلاً ثبت شده است.", decision: request.decision || null });
   const archive = readHealthArchive();
@@ -1139,7 +1181,8 @@ app.post("/api/health-approval/decision", async (req, res) => {
       evidenceType: "online_decision",
       sourceRequestId: request.id,
       reviewerIdentityMethod: "private_bearer_link",
-      reviewerIdentityNote: "نام و نام خانوادگی توسط استفاده‌کننده لینک تایپ شده و مستقلاً احراز هویت نشده است؛ لینک اختصاصی به حساب تلگرام مقصد ارسال شده، اما این روش امضای الکترونیکی واجد شرایط یا احراز هویت حقوقی محسوب نمی‌شود.",
+      deliveryMethod: request.deliveryMethod || "telegram",
+      reviewerIdentityNote: "نام و نام خانوادگی توسط استفاده‌کننده لینک تایپ شده و مستقلاً احراز هویت نشده است؛ لینک اختصاصی از مسیر ثبت‌شده در درخواست در اختیار بررسی‌کننده قرار گرفته، اما این روش امضای الکترونیکی واجد شرایط یا احراز هویت حقوقی محسوب نمی‌شود.",
       telegramPair: (getChaysaTelegramPair() || []).map(member => ({
         chatId: member.id,
         linkedChatId: member.linkedChatId,
