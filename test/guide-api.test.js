@@ -771,6 +771,7 @@ test("invalid Telegram chat ID is rejected before any order is persisted or invo
 });
 
 test("invalid Rubika chat ID is rejected before any order is persisted or invoice is sent", async () => {
+  const beforeOrders = orderRows().length;
   const beforeMessages = telegramLog().filter(item => {
     if (!item.url.endsWith("/sendMessage")) return false;
     return String(JSON.parse(item.body).text || "").startsWith("فاکتور سفارش چایسا");
@@ -778,7 +779,7 @@ test("invalid Rubika chat ID is rejected before any order is persisted or invoic
   const result = await postOrder(validOrderPayload("rubika", "invalid-id"));
   assert.equal(result.status, 400);
   assert.match(result.body.error, /شناسه گفت‌وگوی روبیکا معتبر نیست/);
-  assert.equal(orderRows().length, 0);
+  assert.equal(orderRows().length, beforeOrders);
   const afterMessages = telegramLog().filter(item => {
     if (!item.url.endsWith("/sendMessage")) return false;
     return String(JSON.parse(item.body).text || "").startsWith("فاکتور سفارش چایسا");
