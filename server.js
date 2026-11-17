@@ -1453,9 +1453,9 @@ app.post("/api/admin/media", requireAdmin, mediaUpload.single("media"), async (r
       if (!["jpeg", "png", "webp", "avif"].includes(meta.format)) throw new Error("unsupported_image");
       await image.rotate().resize({ width: 2000, height: 2000, fit: "inside", withoutEnlargement: true }).webp({ quality: 82, effort: 5 }).toFile(output);
     } else if (kind === "audio") {
-      await runFfmpeg(["-i", source, "-vn", "-codec:a", "libmp3lame", "-b:a", "128k", "-ar", "44100", output]);
+      await runFfmpeg(["-i", source, "-vn", "-codec:a", "libmp3lame", "-b:a", "128k", "-ar", "44100", "-threads:a", "1", output]);
     } else {
-      await runFfmpeg(["-i", source, "-vf", "scale='min(1280,iw)':-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "28", "-c:a", "aac", "-b:a", "96k", "-movflags", "+faststart", "-pix_fmt", "yuv420p", output]);
+      await runFfmpeg(["-i", source, "-vf", "scale='min(1280,iw)':-2", "-c:v", "libx264", "-threads:v", "1", "-preset", "veryfast", "-crf", "28", "-c:a", "aac", "-threads:a", "1", "-b:a", "96k", "-movflags", "+faststart", "-pix_fmt", "yuv420p", output]);
     }
     const stat = fs.statSync(output);
     if (!stat.size) throw new Error("empty_output");
