@@ -563,7 +563,7 @@ test("Rubika webhook reveals the real chat ID on /start", async () => {
       new_message: { sender_type: "User", sender_id: chatId, text: "/start" } })
   });
   assert.equal(webhook.status, 200);
-  const calls = readFileSync(rubikaMockLog, "utf8").split("\\n").filter(Boolean).map(line => JSON.parse(line));
+  const calls = readFileSync(rubikaMockLog, "utf8").split("\n").filter(Boolean).map(line => JSON.parse(line));
   const welcome = calls.find(item => item.url.endsWith("/sendMessage"));
   assert.ok(welcome);
   assert.match(JSON.parse(welcome.body).text, /شناسه گفت‌وگوی شما/);
