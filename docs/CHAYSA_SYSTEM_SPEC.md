@@ -662,3 +662,13 @@ Volume فعلی Railway در مسیر `/data` برای ذخیره پایدار �
 - بررسی مجدد شاخه `chaysa-backup` تأیید کرد که `index.html` دیگر بخش راهنما، فرم راهنما یا بارگذاری `guide.js` را ندارد؛ فقط لینک `buying-services-guide.html` در منو باقی است و فرم پرسش عمومی حفظ شده است.
 - صفحه مستقل `buying-services-guide.html` در شاخه عملیاتی موجود است و شناسه‌های لازم برای `guide.js`، فرم راهنما، لینک محصولات و دعوت‌نامه را دارد.
 - Railway production deployment با شناسه `43c21e72-6253-45f3-b078-0a3019b1dfc8` در آخرین بررسی در وضعیت `BUILDING` بود؛ بنابراین انتشار زنده هنوز تأیید نشده است.
+
+
+## انتقال فرم پرسش‌وپاسخ عمومی به صفحه مستقل — 2026-11-17
+
+- صفحه اصلی فقط لینک ناوبری «پرسش از شما، پاسخ از ما» به مقصد `questions.html` را نمایش می‌دهد؛ بخش فرم، توضیح و ورودی‌های آن در `index.html` تکرار نمی‌شوند.
+- `questions.html` شامل همان شناسه‌های DOM موردنیاز handler موجود است: `chaysaQuestionForm`, `chaysaQuestionFirstName`, `chaysaQuestionLastName`, `chaysaQuestionText`, `chaysaTelegramUsername`, `chaysaQuestionSend`, `chaysaQuestionStatus`.
+- ارسال همچنان با `fetch("/api/questions")` و payload قبلی انجام می‌شود؛ اعتبارسنجی ورودی‌ها و ساخت پیوند اتصال به ربات بدون تغییر منطقی منتقل شده‌اند.
+- هیچ تغییر در API، داده‌های پرسش، اعلان، احراز هویت، سفارش، پرداخت یا منطق تجاری انجام نشده است.
+- معیار آزمون: فقط یک نسخه از فرم در صفحه مستقل، نبود فرم در صفحه اصلی، لینک منو به صفحه مستقل، حفظ handler و endpoint، و بررسی responsive layout.
+- وضعیت انتشار پس از CI و deployment ثبت می‌شود.
