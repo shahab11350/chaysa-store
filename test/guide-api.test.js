@@ -607,7 +607,8 @@ test("Rubika webhook registration uses ReceiveUpdate and accepts the documented 
   assert.deepEqual(JSON.parse(registration.body).type, "ReceiveUpdate");
   assert.match(JSON.parse(registration.body).url, /^https:\\/\\/preview\\.example\\.com\\//);
 });
-\ntest("Order rejects an unsupported customer messaging channel", async () => {
+
+test("Order rejects an unsupported customer messaging channel", async () => {
   const payload = {
     customer: {
       name: "آزمون", family: "خریدار", contact: "09120000002",
