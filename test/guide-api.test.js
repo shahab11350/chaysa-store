@@ -10,6 +10,7 @@ let child;
 let baseUrl;
 let dataDir;
 let mockLog;
+let rubikaMockLog;
 let output = "";
 
 async function reservePort() {
@@ -27,7 +28,9 @@ before(async () => {
   const port = await reservePort();
   dataDir = mkdtempSync(path.join(os.tmpdir(), "chaysa-guide-test-"));
   mockLog = path.join(dataDir, "telegram-mock.jsonl");
+  rubikaMockLog = path.join(dataDir, "rubika-mock.jsonl");
   writeFileSync(mockLog, "", "utf8");
+  writeFileSync(rubikaMockLog, "", "utf8");
   baseUrl = "http://127.0.0.1:" + port;
   child = spawn(process.execPath, [path.join(__dirname, "..", "server.js")], {
     cwd: path.join(__dirname, ".."),
@@ -38,7 +41,7 @@ before(async () => {
       ADMIN_PASSWORD: "guide-test-only-password",
       TELEGRAM_BOT_TOKEN: "test-bot-token",
       RUBIKA_BOT_TOKEN: "test-rubika-token",
-      RUBIKA_WEBHOOK_URL: "https://preview.example.com/rubika/webhook/test-key",
+      RUBIKA_MOCK_LOG: rubikaMockLog,
       TELEGRAM_WEBHOOK_SECRET: "test-webhook-secret",
       TELEGRAM_WEBHOOK_URL: "https://preview.example.com/telegram/webhook",
       CHAYSA_OWNER_CHAT_ID: "111111",
@@ -546,6 +549,23 @@ test("Order accepts Rubika as the selected customer messaging channel and stores
   assert.equal(order.customer.messengerId, "u0QFtn01dd26d72abc5c77b8e116cd79");
 });
 
+
+test("Rubika webhook reveals the real chat ID on /start", async () => {
+  const crypto = require("node:crypto");
+  const key = crypto.createHash("sha256").update("CHAYSA-RUBIKA-WEBHOOK-V1:test-rubika-token").digest("hex").slice(0, 40);
+  const chatId = "u0QFtn01dd26d72abc5c77b8e116cd79";
+  const webhook = await fetch(baseUrl + "/rubika/webhook/" + key, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ type: "NewMessage", chat_id: chatId,
+      new_message: { sender_type: "User", sender_id: chatId, text: "/start" } })
+  });
+  assert.equal(webhook.status, 200);
+  const calls = readFileSync(rubikaMockLog, "utf8").split("\\n").filter(Boolean).map(line => JSON.parse(line));
+  const welcome = calls.find(item => item.url.endsWith("/sendMessage"));
+  assert.ok(welcome);
+  assert.match(JSON.parse(welcome.body).text, /شناسه گفت‌وگوی شما/);
+  assert.match(JSON.parse(welcome.body).text, new RegExp(chatId));
+});
 
 test("Order rejects an unsupported customer messaging channel", async () => {
   const payload = {
