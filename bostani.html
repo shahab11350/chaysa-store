@@ -33,7 +33,15 @@ async function loadOrders(){
    const list=node('ul');(o.items||[]).forEach(item=>list.append(node('li',item.name+' · '+item.qty+' × '+money(item.unitPrice)+' = '+money(item.lineTotal))));box.append(list,node('b','جمع کل: '+money(o.total)));
    const label=node('label','وضعیت سفارش');const select=node('select');['در انتظار بررسی','در حال آماده‌سازی','ارسال‌شده','تحویل‌شده','لغوشده'].forEach(v=>{const option=node('option',v);option.value=v;option.selected=v===o.status;select.append(option)});label.append(select);
    const save=node('button','ثبت وضعیت');save.type='button';save.onclick=async()=>{save.disabled=true;try{await api('orders/'+encodeURIComponent(o.id)+'/status',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:select.value})});await loadOrders()}catch(e){alert(e.message);save.disabled=false}};
-   box.append(label,save);host.append(box);
+   const delivery=o.statusNotification||null;
+   const notice=node('div',!delivery?'اطلاع‌رسانی وضعیت هنوز انجام نشده است.':delivery.status==='sent'?'پیام وضعیت برای مشتری ارسال شد.':delivery.status==='pending'?'نتیجه ارسال پیام هنوز ثبت نشده است.':(delivery.error||'ارسال پیام به مشتری ناموفق بود.'),'muted');
+   box.append(label,save,notice);
+   if(delivery&&['failed','not_configured'].includes(delivery.status)){
+    const retry=node('button','تلاش مجدد ارسال پیام به مشتری');retry.type='button';
+    retry.onclick=async()=>{retry.disabled=true;try{await api('orders/'+encodeURIComponent(o.id)+'/status-notification/retry',{method:'POST'});await loadOrders()}catch(e){alert(e.message);retry.disabled=false}};
+    box.append(retry);
+   }
+   host.append(box);
   });
  }catch(e){status.textContent=e.message}
 }
