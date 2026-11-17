@@ -37,6 +37,8 @@ before(async () => {
       DATA_DIR: dataDir,
       ADMIN_PASSWORD: "guide-test-only-password",
       TELEGRAM_BOT_TOKEN: "test-bot-token",
+      RUBIKA_BOT_TOKEN: "test-rubika-token",
+      RUBIKA_WEBHOOK_URL: "https://preview.example.com/rubika/webhook/test-key",
       TELEGRAM_WEBHOOK_SECRET: "test-webhook-secret",
       TELEGRAM_WEBHOOK_URL: "https://preview.example.com/telegram/webhook",
       CHAYSA_OWNER_CHAT_ID: "111111",
@@ -522,7 +524,7 @@ test("Order accepts Rubika as the selected customer messaging channel and stores
   const payload = {
     customer: {
       name: "آزمون روبیکا", family: "خریدار", contact: "09120000001",
-      messengerPlatform: "rubika", messengerId: "rubika-test-chat-id",
+      messengerPlatform: "rubika", messengerId: "u0QFtn01dd26d72abc5c77b8e116cd79",
       province: "تهران", city: "تهران", address: "نشانی آزمایشی",
       postal: "1234567890", notes: "ندارد"
     },
@@ -541,7 +543,7 @@ test("Order accepts Rubika as the selected customer messaging channel and stores
   const order = saved.find(item => item.id === result.orderId);
   assert.ok(order);
   assert.equal(order.customer.messengerPlatform, "rubika");
-  assert.equal(order.customer.messengerId, "rubika-test-chat-id");
+  assert.equal(order.customer.messengerId, "u0QFtn01dd26d72abc5c77b8e116cd79");
 });
 
 
