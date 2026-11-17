@@ -349,15 +349,38 @@ async function sendRubikaText(chatId, text) {
  try{const r=await fetch("https://botapi.rubika.ir/v3/"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:chatId,text,disable_notification:false})});const d=await r.json();return r.ok&&d.status==="OK"&&Boolean(d.data&&d.data.message_id)}catch(_){return false}
 }
 function rubikaWebhookKey(){const token=process.env.RUBIKA_BOT_TOKEN||"";return token?crypto.createHash("sha256").update("CHAYSA-RUBIKA-WEBHOOK-V1:"+token).digest("hex").slice(0,40):""}
+function extractRubikaUpdates(body){
+ const root=body&&typeof body==="object"?body:{};
+ const data=root.data&&typeof root.data==="object"?root.data:null;
+ if(Array.isArray(root.updates))return root.updates;
+ if(Array.isArray(data&&data.updates))return data.updates;
+ if(root.update&&typeof root.update==="object")return [root.update];
+ if(data&&data.update&&typeof data.update==="object")return [data.update];
+ return [root];
+}
 async function handleRubikaUpdate(update){
- const msg=update&&(update.new_message||update.updated_message),chatId=String(update&&update.chat_id||"");
- if(!msg||msg.sender_type!=="User"||typeof msg.text!=="string"||!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return;
- if(["/start","شروع","/start@Chaysa2026bot"].includes(msg.text.trim()))await sendRubikaText(chatId,"به ربات چایسا خوش آمدید.\nشناسه گفت‌وگوی شما برای ثبت سفارش:\n"+chatId+"\nاین شناسه را پس از انتخاب روبیکا در فرم سفارش وارد کنید. فاکتور از همین گفت‌وگو ارسال می‌شود.");
+ if(!update||typeof update!=="object")return;
+ const type=String(update.type||"");
+ const msg=update.new_message||update.updated_message||null;
+ const chatId=String(update.chat_id||(msg&&msg.chat_id)||"");
+ if(!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return;
+ const welcome="به ربات چایسا خوش آمدید.\nشناسه گفت‌وگوی شما برای ثبت سفارش:\n"+chatId+"\nاین شناسه را پس از انتخاب روبیکا در فرم سفارش وارد کنید. فاکتور از همین گفت‌وگو ارسال می‌شود.";
+ if(type==="StartedBot"){
+  const sent=await sendRubikaText(chatId,welcome);
+  console.log("Rubika StartedBot response:",sent?"sent":"failed");
+  return;
+ }
+ if(!msg||msg.sender_type!=="User"||typeof msg.text!=="string")return;
+ const command=msg.text.trim();
+ if(command==="/start"||/^\/start@Chaysa2026bot$/i.test(command)||command==="شروع"){
+  const sent=await sendRubikaText(chatId,welcome);
+  console.log("Rubika /start response:",sent?"sent":"failed");
+ }
 }
 app.post("/rubika/webhook/:key",async(req,res)=>{
  const expected=rubikaWebhookKey(),supplied=String(req.params.key||"");
  if(!expected||supplied.length!==expected.length||!crypto.timingSafeEqual(Buffer.from(expected),Buffer.from(supplied)))return res.sendStatus(403);
- try{const body=req.body||{},updates=Array.isArray(body.updates)?body.updates:[body];for(const update of updates)await handleRubikaUpdate(update);return res.sendStatus(200)}catch(_){return res.sendStatus(500)}
+ try{for(const update of extractRubikaUpdates(req.body))await handleRubikaUpdate(update);return res.sendStatus(200)}catch(_){return res.sendStatus(500)}
 });
 
 async function sendTelegramText(chatId, text, replyMarkup) {
