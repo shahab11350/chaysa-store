@@ -674,3 +674,14 @@ test("Rubika webhook registration failure logs safe response metadata without se
   assert.match(diagnosticOutput, /http=200 api=ERROR data=Rejected code=4321/);
   assert.doesNotMatch(diagnosticOutput, /sensitive response text|diagnostic-test-token|diagnostic-secret-path/);
 });
+
+
+test("Storefront HTML and Iran location JSON require cache revalidation", async () => {
+  for (const route of ["/products.html", "/iran-locations.json"]) {
+    const response = await fetch(baseUrl + route);
+    assert.equal(response.status, 200, route + " should be served");
+    const cacheControl = response.headers.get("cache-control") || "";
+    assert.match(cacheControl, /no-cache/i, route + " must not be served as a fresh cached copy");
+    assert.match(cacheControl, /must-revalidate/i, route + " must be revalidated");
+  }
+});
