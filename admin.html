@@ -165,7 +165,7 @@ async function sendGeneralLetter(){
  if(!confirm('این نامه با سربرگ و امضای چایسا به هر دو حساب تلگرام مرتبط ارسال و در بایگانی ثبت شود؟'))return;
  button.disabled=true;out.textContent='در حال ثبت نامه و ارسال به تلگرام…';
  try{
-  const result=await api('letters/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+  const result=await api('letters/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:$('letterTitle').value.trim(),text})});
   out.textContent='نامه با موفقیت به هر دو حساب تلگرام ارسال و بایگانی شد. شماره نامه: '+result.letterNumber;
   letterMeta=await api('letters/meta');
   renderLetterPreview();
