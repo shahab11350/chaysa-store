@@ -1612,6 +1612,94 @@
       "S-IR-FASA-HERB-USE-2026"
     ],
     "iranianSourceCount": 11,
-    "usagePolicy": "منابع ایرانی بر اساس نقش تفکیک شده‌اند: مؤسسه/شبکه برای شناسایی مراکز؛ پایگاه نمایه برای بازیابی؛ نشریه برای یافتن مقاله؛ مقاله داوری‌شده برای ارزیابی ادعای مشخص. مطالب سنتی و آموزشی بدون شواهد مستقل، شاهد اثربخشی یا ایمنی محسوب نمی‌شوند."
-  }
+    "usagePolicy": "منابع ایرانی بر اساس نقش تفکیک شده‌اند: مؤسسه/شبکه برای شناسایی مراکز؛ پایگاه نمایه برای بازیابی؛ نشریه برای یافتن مقاله؛ مقاله داوری‌شده برای ارزیابی ادعای مشخص. مطالب سنتی و آموزشی بدون شواهد مستقل، شاهد اثربخشی یا ایمنی محسوب نمی‌شوند.",
+    "bookBibliographyAddedAt": "2026-11-17",
+    "bookCount": 5,
+    "note": "کتاب‌ها به‌عنوان منابع کتاب‌شناختی معرفی شده‌اند؛ این ثبت به معنی تأیید محتوای آن‌ها نیست. اطلاعات چاپ/ISBN در صورت نبود یا اختلاف باید از نسخه واقعی کنترل شود."
+  },
+  "bookBibliography": [
+    {
+      "id": "B-IR-ZARGARI",
+      "title": "گیاهان دارویی",
+      "author": "علی زرگری",
+      "publisher": "مؤسسه انتشارات و چاپ دانشگاه تهران",
+      "publicationDetails": "مجموعه پنج‌جلدی؛ چاپ‌های متعدد، از جمله چاپ ششم ۱۳۷۱ تا ۱۳۸۳ و چاپ هشتم جلد اول ۱۳۹۰ در رکوردهای کتاب‌شناختی",
+      "isbn": "برای مجموعه/جلدها ISBNهای جداگانه گزارش شده‌اند؛ باید با نسخه مورد استفاده تطبیق داده شود",
+      "language": "فارسی",
+      "scope": [
+        "شناسایی گیاهان دارویی ایران",
+        "اطلاعات گیاه‌شناختی و کاربردهای سنتی"
+      ],
+      "limitations": "مرجع گیاه‌شناختی/کتاب‌شناختی؛ ادعاهای درمانی آن بدون ارزیابی مطالعات جدید، شاهد بالینی تلقی نشود.",
+      "catalogueUrl": "https://ci.nii.ac.jp/ncid/BA75599855",
+      "recordType": "iranian_reference_book"
+    },
+    {
+      "id": "B-IR-MIRHAYDAR",
+      "title": "معارف گیاهی: کاربرد گیاهان در پیشگیری و درمان بیماری‌ها",
+      "author": "حسین میر حیدر",
+      "publisher": "دفتر نشر فرهنگ اسلامی",
+      "publicationDetails": "مجموعه هشت‌جلدی؛ چاپ نخست در بازه ۱۳۷۲ تا ۱۳۷۵",
+      "isbn": "در رکورد کتاب‌شناختی بازیابی‌شده درج نشده؛ از روی نسخه بررسی شود",
+      "language": "فارسی",
+      "scope": [
+        "شناخت گیاهان و نام‌های محلی و علمی",
+        "ترکیبات و کاربردهای گزارش‌شده",
+        "میوه‌ها، ادویه‌ها و گیاهان دارویی"
+      ],
+      "limitations": "اثر مرجع گردآوری/تاریخی؛ مطالب درمانی و سنتی باید با شواهد بالینی و راهنماهای به‌روز تطبیق داده شوند.",
+      "catalogueUrl": "https://ci.nii.ac.jp/ncid/BA73161900",
+      "recordType": "iranian_reference_book"
+    },
+    {
+      "id": "B-WHO-MONOGRAPHS-V1",
+      "title": "WHO Monographs on Selected Medicinal Plants, Volume 1",
+      "author": "World Health Organization",
+      "publisher": "World Health Organization, Geneva",
+      "publicationDetails": "1999",
+      "isbn": "92-4-154517-8",
+      "language": "English",
+      "scope": [
+        "هویت و کیفیت گیاهان دارویی منتخب",
+        "کاربردها، هشدارها، عوارض و اطلاعات داروشناختی"
+      ],
+      "limitations": "منبع قدیمی‌تر؛ برای وضعیت‌های ایمنی و شواهد جدید باید منابع به‌روزتر نیز بررسی شوند.",
+      "catalogueUrl": "https://storage.ghost.io/c/9d/9f/9d9f0e72-5623-49ea-8280-e9391c48faf5/content/files/2025/01/WHO-Monographs-vol-1.pdf",
+      "recordType": "international_reference_monograph"
+    },
+    {
+      "id": "B-WHO-MONOGRAPHS-V2",
+      "title": "WHO Monographs on Selected Medicinal Plants, Volume 2",
+      "author": "World Health Organization",
+      "publisher": "World Health Organization, Geneva",
+      "publicationDetails": "2002",
+      "isbn": "92-4-154537-2",
+      "language": "English",
+      "scope": [
+        "کنترل کیفیت و شناسایی گیاهان منتخب",
+        "اطلاعات داروشناختی، هشدارها و عوارض"
+      ],
+      "limitations": "منبع قدیمی‌تر؛ نسخه و وضعیت به‌روزرسانی هر تک‌نگاشت باید جداگانه بررسی شود.",
+      "catalogueUrl": "https://library.au.int/who-program-selected-medical-plants-3",
+      "recordType": "international_reference_monograph"
+    },
+    {
+      "id": "B-ESCOP-2003",
+      "title": "ESCOP Monographs: The Scientific Foundation for Herbal Medicinal Products",
+      "author": "European Scientific Cooperative on Phytotherapy (ESCOP)",
+      "publisher": "ESCOP / Thieme",
+      "publicationDetails": "ویرایش دوم، 2003؛ مجموعه تک‌نگاشت‌های گیاهان دارویی",
+      "isbn": "978-1-901964-07-3",
+      "language": "English",
+      "scope": [
+        "شواهد داروشناختی و بالینی",
+        "موارد مصرف، مقدارهای بررسی‌شده، منع مصرف، تداخل‌ها و عوارض"
+      ],
+      "limitations": "ویرایش چاپی 2003 است؛ ESCOP اکنون تک‌نگاشت‌های به‌روزشده را به‌صورت آنلاین نیز منتشر می‌کند و برای هر گیاه باید آخرین نسخه بررسی شود.",
+      "catalogueUrl": "https://www.escop.com/escop-products/publications/",
+      "recordType": "international_scientific_monograph"
+    }
+  ],
+  "bookBibliographyDisclaimer": "معرفی کتاب‌ها صرفاً جهت اطلاع‌رسانی است و به‌منزله تأیید یا تضمین صحت محتوای آن‌ها از سوی CHAYSA نیست.",
+  "bookBibliographyStatus": "bibliographic_discovery_only_not_endorsement"
 }
