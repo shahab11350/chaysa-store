@@ -1361,6 +1361,23 @@ app.post("/api/bostani/login",(req,res)=>{
  const exp=String(Date.now()+8*60*60*1000);res.cookie("chaysa_bostani",exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true});
 });
 app.post("/api/bostani/logout",(_req,res)=>{res.clearCookie("chaysa_bostani",{httpOnly:true,secure:true,sameSite:"strict",path:"/"});return json(res,200,{ok:true});});
+app.get("/api/bostani/orders",requireBostani,(_req,res)=>{
+ const allowedCustomerFields=["name","family","contact","messengerPlatform","messengerId","province","city","address","postal","notes"];
+ const rows=readOrders().map(o=>({
+  id:o.id,createdAt:o.createdAt,status:o.status||"در انتظار بررسی",
+  customer:Object.fromEntries(allowedCustomerFields.map(k=>[k,String(o.customer&&o.customer[k]||"")])),
+  items:Array.isArray(o.items)?o.items.map(x=>({sku:String(x.sku||""),name:String(x.name||""),qty:Number(x.qty)||0,unitPrice:Number(x.unitPrice)||0,lineTotal:Number(x.lineTotal)||0})):[],
+  total:Number(o.total)||0
+ })).reverse();
+ return json(res,200,rows);
+});
+app.patch("/api/bostani/orders/:id/status",requireBostani,(req,res)=>{
+ const allowed=["در انتظار بررسی","در حال آماده‌سازی","ارسال‌شده","تحویل‌شده","لغوشده"];
+ if(!allowed.includes(req.body.status))return json(res,400,{error:"وضعیت سفارش معتبر نیست."});
+ const rows=readOrders(),o=rows.find(x=>x.id===req.params.id);if(!o)return json(res,404,{error:"سفارش پیدا نشد."});
+ o.status=req.body.status;o.updatedAt=new Date().toISOString();if(o.status==="تحویل‌شده")o.deliveredAt=o.updatedAt;saveOrders(rows);
+ return json(res,200,{ok:true,id:o.id,status:o.status,updatedAt:o.updatedAt});
+});
 app.get("/api/bostani/questions",requireBostani,(_req,res)=>{const rows=readQuestions().map(q=>({id:q.id,createdAt:q.createdAt,question:q.question,status:q.status||"در انتظار اتصال مشتری",firstName:q.firstName||"",lastName:q.lastName||"",telegramUsername:q.telegramUsername||"",customerLinked:Boolean(q.customerChatId),customerUsername:q.customerUsername||"",reply:q.reply||"",repliedAt:q.repliedAt||""})).reverse();return json(res,200,rows);});
 app.post("/api/bostani/questions/:id/reply",requireBostani,async(req,res)=>{
  const key="bostani-reply:"+(req.ip||"unknown");if(limited(key,20,10*60*1000))return json(res,429,{ok:false,error:"تعداد پاسخ‌ها زیاد است؛ کمی بعد دوباره تلاش کنید."});
