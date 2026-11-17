@@ -29,7 +29,7 @@
 <div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">مدیریت محصولات</h2><div id="items"></div></div>
 </section>
 <section id="addProductView" class="admin-view hidden">
-<div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 id="formTitle" style="margin-top:16px">افزودن محصول</h2><input id="editIndex" type="hidden"><label>نام محصول</label><input id="name" placeholder="نام محصول"><div class="row"><div><label>شناسه کالا</label><input id="sku" placeholder="مثلاً 1401001"></div><div><label>قیمت (تومان)</label><input id="price" inputmode="numeric" placeholder="مثلاً ۴۷۹۰۰۰"></div></div><label>دسته‌بندی</label><select id="category"><option>چای</option><option>دمنوش</option><option>ادویه</option><option>عسل</option><option>سایر</option></select><label>عکس محصول</label><input id="photo" type="file" accept="image/*"><p class="muted">فقط عکس را انتخاب کن؛ چایسا اندازه و حجم آن را خودکار بهینه و به WebP تبدیل می‌کند.</p><div class="row"><button id="save">ذخیره محصول</button><button id="clear" class="secondary">پاک‌کردن فرم</button></div></div>
+<div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 id="formTitle" style="margin-top:16px">افزودن محصول</h2><input id="editIndex" type="hidden"><label>نام محصول</label><input id="name" placeholder="نام محصول"><div class="row"><div><label>شناسه کالا</label><input id="sku" placeholder="مثلاً 1401001"></div><div><label>قیمت (تومان)</label><input id="price" inputmode="numeric" placeholder="مثلاً ۴۷۹۰۰۰"></div></div><label>دسته‌بندی</label><select id="category"><option>چای</option><option>دمنوش</option><option>ادویه</option><option>عسل</option><option>سایر</option></select><label>عکس محصول</label><input id="photo" type="file" accept="image/*"><div class="row" style="margin-top:8px"><button type="button" class="secondary" id="chooseProductMedia">انتخاب از کتابخانه تصاویر</button><button type="button" class="secondary" id="clearProductMedia">حذف انتخاب کتابخانه</button></div><div id="selectedMediaPreview" class="muted">هنوز تصویری از کتابخانه انتخاب نشده است.</div><p class="muted">می‌توانی عکس تازه بارگذاری کنی یا از کتابخانه مرکزی انتخاب کنی.</p><div class="row"><button id="save">ذخیره محصول</button><button id="clear" class="secondary">پاک‌کردن فرم</button></div></div>
 </section>
 <section id="ordersView" class="admin-view hidden">
 <div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">سفارش‌ها و پیگیری تحویل</h2><button id="refreshOrders" class="secondary">به‌روزرسانی سفارش‌ها</button><div id="orders" class="muted">در حال بارگذاری…</div></div>
@@ -96,7 +96,7 @@
 </section>
 </main>
 <script>
-let products=[];
+let products=[];let selectedMediaImage='';
 const $=id=>document.getElementById(id), status=m=>$('status').textContent=m;
 function showDashboard(){ showAdminView('adminHome'); }
 async function api(path,opts={}){const r=await fetch('/api/admin/'+path,{credentials:'same-origin',...opts});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'خطا در ارتباط با سرور');return d}
@@ -301,7 +301,7 @@ function goBackAdminView(){
  showAdminView(previousView,{remember:false});
 }
 document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.view==='addProductView')$('clear').click();showAdminView(button.dataset.view);if(button.dataset.view==='healthArchiveView')loadHealthArchive();if(button.dataset.view==='letterComposerView')loadLetterComposer()}));
-$('openMediaLibrary').addEventListener('click',()=>{window.location.href='/media-library.html'});
+$('openMediaLibrary').addEventListener('click',()=>{window.open('/media-library.html','chaysaMediaLibrary')});
 document.querySelectorAll('[data-back]').forEach(button=>button.addEventListener('click',goBackAdminView));
 $('refreshOrders').onclick=loadOrders;
 $('refreshHealthArchive').onclick=loadHealthArchive;
@@ -325,8 +325,11 @@ $('refreshAnalytics').onclick=loadAnalytics;
 $('refreshQuestions').onclick=loadQuestions;
 $('logout').onclick=async()=>{await api('logout',{method:'POST'});location.reload()};
 $('telegramLookup').onclick=async()=>{const out=$('telegramResult');out.textContent='در حال دریافت…';try{const d=await api('telegram/recipients');const info='ربات متصل: '+(d.bot_username?'@'+d.bot_username:'نامشخص')+' | پیام‌های در انتظار: '+(d.pending_update_count??'نامشخص');const pairInfo=d.chaysa_pair?.linked?'\\nپیوند دوطرفه حساب‌های تلگرام: فعال':'\\nپیوند دوطرفه حساب‌های تلگرام: غیرفعال یا نیازمند بررسی تنظیمات';if(d.recipients.length){out.textContent=info+pairInfo+'\\n'+d.recipients.map(x=>'شناسه: '+x.id+' | کاربر: '+(x.username?'@'+x.username:x.first_name||'بدون نام')+(x.linked?' | متصل به: '+x.linkedChatId:'')).join('\\n')}else if(d.webhook_active){out.textContent=info+'\\nوب‌هوک برای این ربات فعال است؛ دریافت پیام با روش فعلی ممکن نیست. لازم نیست دوباره /start بزنید.'+(d.last_webhook_error?'\\nخطای آخر وب‌هوک: '+d.last_webhook_error:'')}else if(d.telegram_description){out.textContent=info+'\\nخطای تلگرام: '+d.telegram_description}else{out.textContent=info+'\\nصف دریافت خالی است؛ احتمالاً پیام‌ها قبلاً توسط یک دریافت‌کننده دیگر خوانده شده‌اند. لازم نیست فعلاً دوباره /start بزنید.'}}catch(e){out.textContent=e.message}};
-function fill(i){const p=products[i];$('editIndex').value=i;$('name').value=p.name;$('sku').value=p.sku||'';$('price').value=p.price||'';$('category').value=p.category||'چای';$('formTitle').textContent='ویرایش محصول';showAdminView('addProductView')}
-$('clear').onclick=()=>{['editIndex','name','sku','price','photo'].forEach(x=>$(x).value='');$('formTitle').textContent='افزودن محصول'};
+function fill(i){const p=products[i];selectedMediaImage='';$('selectedMediaPreview').textContent=p.image?'تصویر فعلی محصول: '+p.image:'هنوز تصویری از کتابخانه انتخاب نشده است.';$('editIndex').value=i;$('name').value=p.name;$('sku').value=p.sku||'';$('price').value=p.price||'';$('category').value=p.category||'چای';$('formTitle').textContent='ویرایش محصول';showAdminView('addProductView')}
+$('clear').onclick=()=>{['editIndex','name','sku','price','photo'].forEach(x=>$(x).value='');selectedMediaImage='';$('selectedMediaPreview').textContent='هنوز تصویری از کتابخانه انتخاب نشده است.';$('formTitle').textContent='افزودن محصول'};
+$('chooseProductMedia').onclick=()=>window.open('/media-library.html?select=image','chaysaMediaLibrary');
+$('clearProductMedia').onclick=()=>{selectedMediaImage='';$('selectedMediaPreview').textContent='انتخاب کتابخانه پاک شد؛ در صورت ویرایش، تصویر قبلی حفظ می‌شود.'};
+window.addEventListener('message',event=>{if(event.origin!==location.origin||!event.data||event.data.type!=='chaysa-media-selected'||typeof event.data.url!=='string'||!event.data.url.startsWith('/media/'))return;selectedMediaImage=event.data.url;$('photo').value='';$('selectedMediaPreview').textContent='تصویر انتخاب‌شده از کتابخانه: '+selectedMediaImage});
 async function compressProductImage(file){
  if(!file||!file.type.startsWith('image/'))throw Error('لطفاً یک فایل تصویری انتخاب کن.');
  let bitmap;
@@ -344,6 +347,6 @@ async function compressProductImage(file){
  if(!blob)throw Error('آماده‌سازی خودکار عکس انجام نشد.');
  return new File([blob],'chaysa-product.webp',{type:'image/webp'});
 }
-$('save').onclick=async()=>{try{const name=$('name').value.trim(),price=Number($('price').value.replace(/[^0-9]/g,''));if(!name||!price)throw Error('نام و قیمت محصول را کامل وارد کن.');let image=products[Number($('editIndex').value)]?.image||'';const file=$('photo').files[0];if(file){status('در حال آماده‌سازی خودکار عکس…');const optimized=await compressProductImage(file);const fd=new FormData();fd.append('image',optimized);status('در حال بارگذاری عکس…');const uploaded=await api('upload',{method:'POST',body:fd});image=uploaded.url}const p={name,sku:$('sku').value.trim(),price,category:$('category').value,image,active:products[Number($('editIndex').value)]?.active!==false};const idx=$('editIndex').value;if(idx==='')products.push(p);else products[Number(idx)]=p;await saveAll();$('clear').click()}catch(e){status(e.message)}};
+$('save').onclick=async()=>{try{const name=$('name').value.trim(),price=Number($('price').value.replace(/[^0-9]/g,''));if(!name||!price)throw Error('نام و قیمت محصول را کامل وارد کن.');let image=selectedMediaImage||products[Number($('editIndex').value)]?.image||'';const file=$('photo').files[0];if(file){status('در حال آماده‌سازی خودکار عکس…');const optimized=await compressProductImage(file);const fd=new FormData();fd.append('image',optimized);status('در حال بارگذاری عکس…');const uploaded=await api('upload',{method:'POST',body:fd});image=uploaded.url;selectedMediaImage=''}const p={name,sku:$('sku').value.trim(),price,category:$('category').value,image,active:products[Number($('editIndex').value)]?.active!==false};const idx=$('editIndex').value;if(idx==='')products.push(p);else products[Number(idx)]=p;await saveAll();$('clear').click()}catch(e){status(e.message)}};
 (async()=>{try{await load();$('login').classList.add('hidden');$('app').classList.remove('hidden');await loadOrders();await loadQuestions();await loadAnalytics()}catch{} })();
 </script></html>
