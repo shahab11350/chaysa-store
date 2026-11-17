@@ -348,6 +348,12 @@ async function sendRubikaText(chatId, text) {
  if(!token||typeof chatId!=="string"||!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return false;
  try{const r=await fetch("https://botapi.rubika.ir/v3/"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:chatId,text,disable_notification:false})});const d=await r.json();return r.ok&&d.status==="OK"&&Boolean(d.data&&d.data.message_id)}catch(_){return false}
 }
+async function notifyBostaniRubika(message) {
+ const chatId=String(process.env.CHAYSA_BOSTANI_RUBIKA_CHAT_ID||"").trim();
+ if(!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return {status:"not_configured",sent:false};
+ const sent=await sendRubikaText(chatId,message);
+ return {status:sent?"sent":"failed",sent};
+}
 function safeRubikaDiagnosticValue(value){
  if(typeof value!=="string"&&typeof value!=="number")return "missing";
  const safe=String(value).replace(/[^A-Za-z0-9_. -]/g,"").slice(0,48);
@@ -1393,15 +1399,19 @@ app.post("/api/questions",async(req,res)=>{
   const rows=readQuestions();rows.push(item);
   try{saveQuestions(rows)}catch(_){return json(res,500,{ok:false,error:"ثبت پرسش انجام نشد. لطفاً دوباره تلاش کنید."})}
   const message=["پرسش جدید از فروشگاه چایسا","شناسه: "+item.id,"زمان: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"نام مشتری: "+firstName+" "+lastName,"آیدی تلگرام مشتری: @"+telegramUsername,"--------------------","متن پرسش:",question].join("\n");
-  const results=await Promise.all(recipients.map(async chat_id=>{
-    try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id,text:message,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok===true}catch(_){return false}
-  }));
+  const [results,rubikaNotice]=await Promise.all([
+    Promise.all(recipients.map(async chat_id=>{
+      try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id,text:message,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok===true}catch(_){return false}
+    })),
+    notifyBostaniRubika(message)
+  ]);
   item.delivered=results.filter(Boolean).length;
   item.delivery=item.delivered===2?"ارسال‌شده برای هر دو گیرنده":"ارسال ناقص";
+  item.rubikaNotification={status:rubikaNotice.status,attemptedAt:rubikaNotice.status==="not_configured"?null:new Date().toISOString()};
   item.updatedAt=new Date().toISOString();
-  try{const current=readQuestions();const saved=current.find(x=>x.id===item.id);if(saved){saved.delivered=item.delivered;saved.delivery=item.delivery;saved.updatedAt=item.updatedAt;saveQuestions(current)}}catch(_){}
-  if(item.delivered!==2)return json(res,502,{ok:false,error:"ارسال پرسش به هر دو گیرنده کامل نشد. لطفاً کمی بعد دوباره تلاش کنید.",delivered:item.delivered,requestId:item.id});
-  return json(res,200,{ok:true,delivered:2,requestId:item.id});
+  try{const current=readQuestions();const saved=current.find(x=>x.id===item.id);if(saved){saved.delivered=item.delivered;saved.delivery=item.delivery;saved.rubikaNotification=item.rubikaNotification;saved.updatedAt=item.updatedAt;saveQuestions(current)}}catch(_){}
+  if(item.delivered!==2)return json(res,502,{ok:false,error:"ارسال پرسش به هر دو گیرنده تلگرام کامل نشد. وضعیت ارسال روبیکا جداگانه ثبت شده است.",delivered:item.delivered,rubikaNotificationStatus:rubikaNotice.status,requestId:item.id});
+  return json(res,200,{ok:true,delivered:2,rubikaNotificationStatus:rubikaNotice.status,requestId:item.id});
 });
 app.post("/api/orders",async(req,res)=>{
  const key="order:"+(req.ip||"unknown");if(limited(key,5,10*60*1000))return json(res,429,{error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کن."});
@@ -1421,19 +1431,20 @@ app.post("/api/orders",async(req,res)=>{
  const invoice=["فاکتور سفارش چایسا","شناسه سفارش: "+order.id,"تاریخ: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"وضعیت: "+order.status,"مشخصات خریدار",c.name+" "+c.family,"تماس: "+c.contact,"پیام‌رسان انتخابی: "+(c.messengerPlatform==="rubika"?"روبیکا":"تلگرام"),"شناسه پیام‌رسان: "+c.messengerId,"استان/شهر: "+c.province+" / "+c.city,"نشانی: "+c.address,"کد پستی: "+c.postal,"توضیحات: "+c.notes,"اقلام سفارش",...items.map(x=>x.name+" | "+x.sku+" | "+x.qty+" × "+x.unitPrice.toLocaleString("en-US")+" = "+x.lineTotal.toLocaleString("en-US")+" تومان"),"جمع کل: "+total.toLocaleString("en-US")+" تومان",order.deliveryRule].join("\n");
  const token=process.env.TELEGRAM_BOT_TOKEN||"",recipients=String(process.env.ORDER_CHAT_IDS||"").split(",").map(x=>x.trim()).filter(x=>/^-?\d+$/.test(x));
  const configured=Boolean(token&&recipients.length===2&&new Set(recipients).size===2);
- let delivered=0;
- if(configured){
-  const rs=await Promise.all(recipients.map(async id=>{try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:id,text:invoice,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok}catch(_){return false}}));
-  delivered=rs.filter(Boolean).length;
- }
+ const [telegramResults,rubikaNotice]=await Promise.all([
+  configured?Promise.all(recipients.map(async id=>{try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:id,text:invoice,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok}catch(_){return false}})):Promise.resolve([]),
+  notifyBostaniRubika(invoice)
+ ]);
+ const delivered=telegramResults.filter(Boolean).length;
  const notificationStatus=!configured?"not_configured":delivered===recipients.length?"sent":delivered>0?"partial":"failed";
- order.notification={status:notificationStatus,delivered,recipientCount:configured?recipients.length:0,attemptedAt:configured?new Date().toISOString():null};
+ order.notification={status:notificationStatus,delivered,recipientCount:configured?recipients.length:0,attemptedAt:configured?new Date().toISOString():null,
+  rubikaStatus:rubikaNotice.status,rubikaAttemptedAt:rubikaNotice.status==="not_configured"?null:new Date().toISOString()};
  let notificationStatusSaved=true;
  try{saveOrders(rows)}catch(_){notificationStatusSaved=false}
  let customerDelivered=c.messengerPlatform==="rubika"?await sendRubikaText(customerId,invoice):await sendTelegramText(customerId,invoice);
  order.customerDelivery={platform:c.messengerPlatform,status:customerDelivered?"sent":"failed",attemptedAt:new Date().toISOString()};
  let customerDeliveryStatusSaved=true;try{saveOrders(rows)}catch(_){customerDeliveryStatusSaved=false}
- return json(res,200,{ok:true,orderId:order.id,invoice,delivered,recipientCount:configured?recipients.length:0,notificationStatus,notificationStatusSaved,customerDeliveryStatus:order.customerDelivery.status,customerDeliveryStatusSaved});
+ return json(res,200,{ok:true,orderId:order.id,invoice,delivered,recipientCount:configured?recipients.length:0,notificationStatus,notificationStatusSaved,rubikaNotificationStatus:rubikaNotice.status,customerDeliveryStatus:order.customerDelivery.status,customerDeliveryStatusSaved});
 });
 // Do not expose server-side source, package metadata, or deployment configuration.
 app.use((req, res, next) => {
