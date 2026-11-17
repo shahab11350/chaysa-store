@@ -1454,6 +1454,7 @@ app.post("/api/admin/media", requireAdmin, mediaUpload.single("media"), async (r
     }
     const stat = fs.statSync(output);
     if (!stat.size) throw new Error("empty_output");
+    if (stat.size >= inputBytes) throw new Error("no_size_reduction");
     const row = { id, name: path.basename(req.file.originalname || outputName).slice(0, 180), kind, mime: kind === "image" ? "image/webp" : kind === "audio" ? "audio/mpeg" : "video/mp4", file: outputName, size: stat.size, originalSize: inputBytes, createdAt: new Date().toISOString(), url: "/media/" + outputName };
     const rows = readMediaIndex();
     rows.unshift(row);
@@ -1706,7 +1707,7 @@ app.use(express.static(ROOT, {
   }
 }));
 app.use((err, _req, res, _next) => {
-  if (err && err.code === "LIMIT_FILE_SIZE") return json(res, 400, { error: "حجم عکس نباید بیشتر از ۵ مگابایت باشد." });
+  if (err && err.code === "LIMIT_FILE_SIZE") return json(res, 400, { error: "حجم فایل نباید بیشتر از ۱۰۰ مگابایت باشد." });
   return json(res, 500, { error: "خطای داخلی سرور." });
 });
 const port = Number(process.env.PORT || 3000);
