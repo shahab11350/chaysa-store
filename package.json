@@ -6,7 +6,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test:guide": "node --test test/guide-api.test.js"
+    "test:guide": "node --test test/guide-api.test.js test/order-notifications.test.js",
+    "test": "node --test test/*.test.js"
   },
   "engines": {
     "node": ">=20"
