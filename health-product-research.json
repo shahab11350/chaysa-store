@@ -1460,6 +1460,127 @@
       "supports": [
         "Review of human, preclinical and interaction studies for Hibiscus sabdariffa; authors report mostly mild GI adverse events in trials but note limitations in trial reporting, possible drug concentration changes and insufficient long-term safety evidence."
       ]
+    },
+    {
+      "id": "S-IR-IMP",
+      "title": "پژوهشکده گیاهان دارویی جهاد دانشگاهی",
+      "publisher": "ACECR / Institute of Medicinal Plants, Iran",
+      "url": "https://www.imp.ac.ir",
+      "sourceType": "iranian_research_institute",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "پژوهش‌های نهادی در حوزه گیاهان دارویی، فارماکوگنوزی، کشت و فرآوری؛ برای داده‌های علمی باید به مقاله یا گزارش مشخص این مرکز ارجاع داده شود."
+      ]
+    },
+    {
+      "id": "S-IR-IJMAPR",
+      "title": "Iranian Journal of Medicinal and Aromatic Plants Research",
+      "publisher": "Research Institute of Forests and Rangelands / AREEO, Iran",
+      "url": "https://ijmapr.areeo.ac.ir",
+      "sourceType": "iranian_peer_reviewed_journal",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "پژوهش‌های گیاه‌شناسی، شناسایی، کشت، فیتوشیمی و گیاهان دارویی ایران؛ هر مقاله باید جداگانه از نظر روش و نوع مطالعه ارزیابی شود."
+      ]
+    },
+    {
+      "id": "S-IR-JMP",
+      "title": "Journal of Medicinal Plants",
+      "publisher": "ACECR, Iran",
+      "url": "https://jmp.ir",
+      "sourceType": "iranian_peer_reviewed_journal",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "مقالات پژوهشی و مروری درباره گیاهان دارویی؛ یافته‌های آزمایشگاهی، حیوانی و انسانی باید از یکدیگر تفکیک شوند و ادعای درمانی صرفاً از عنوان مقاله استخراج نشود."
+      ]
+    },
+    {
+      "id": "S-IR-RJP",
+      "title": "Research Journal of Pharmacognosy",
+      "publisher": "Iranian Society of Pharmacognosy Specialists, Iran",
+      "url": "https://www.rjpharmacognosy.ir",
+      "sourceType": "iranian_peer_reviewed_journal",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "پژوهش‌های فارماکوگنوزی، شناسایی مواد مؤثره، کنترل کیفیت و مطالعات مرتبط با فرآورده‌های طبیعی؛ ارزیابی باید در سطح مقاله انجام شود."
+      ]
+    },
+    {
+      "id": "S-IR-IJMPT",
+      "title": "Iranian Journal of Medicinal Plants Technology",
+      "publisher": "Iranian Association of Medicinal Plants, Iran",
+      "url": "https://www.magiran.com/magazine/7899",
+      "sourceType": "iranian_peer_reviewed_journal_index_record",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "ردیابی مقالات فناوری، تولید، فرآوری و زنجیره تأمین گیاهان دارویی؛ صفحه نمایه برای شناسایی نشریه است و جایگزین متن کامل مقاله نیست."
+      ]
+    },
+    {
+      "id": "S-IR-SID",
+      "title": "Scientific Information Database (SID)",
+      "publisher": "Academic Center for Education, Culture and Research / Iran",
+      "url": "https://sid.ir",
+      "sourceType": "iranian_academic_index",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "جست‌وجو و بازیابی مقالات علمی فارسی و انگلیسی منتشرشده در ایران؛ اعتبار هر مقاله باید بر اساس نشریه، داوری، روش و متن کامل سنجیده شود."
+      ]
+    },
+    {
+      "id": "S-IR-MAGIRAN-IJMAPR",
+      "title": "اطلاعات نشریه تحقیقات گیاهان دارویی و معطر ایران",
+      "publisher": "Magiran journal metadata record",
+      "url": "https://www.magiran.com/magazine/about/3503",
+      "sourceType": "journal_metadata_index",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "تأیید اطلاعات کتاب‌شناختی و ناشر نشریه؛ برای نتیجه علمی باید به مقاله اصلی ارجاع شود."
+      ]
+    },
+    {
+      "id": "S-IR-MPNET",
+      "title": "شبکه ملی پژوهش و فناوری گیاهان دارویی",
+      "publisher": "Iranian National Network for Medicinal Plants Research and Technology",
+      "url": "https://mpnet.ir",
+      "sourceType": "iranian_research_network_directory",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "شناسایی مراکز، گروه‌ها و ظرفیت‌های پژوهشی حوزه گیاهان دارویی در ایران؛ منبع فهرست مراکز است و به‌تنهایی مرجع اثربخشی یا ایمنی نیست."
+      ]
+    },
+    {
+      "id": "S-IR-IHMS",
+      "title": "جامعه گیاه‌درمانی ایران و آرشیو فصلنامه هوما",
+      "publisher": "Iranian Herbal Medicine Society",
+      "url": "https://www.ihms.ir",
+      "sourceType": "iranian_professional_association_secondary",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "منبع تکمیلی برای آشنایی عمومی و ردیابی مطالب/نشریات مرتبط؛ محتوای آموزشی یا سنتی آن بدون تأیید مستقل وارد بخش شواهد بالینی نمی‌شود."
+      ]
+    },
+    {
+      "id": "S-IR-OSTOKHUDUS-2025",
+      "title": "Phytochemical and morphometric authentication of medicinal plants marketed as Ostokhudus in Iran",
+      "publisher": "Scientific Reports / PubMed; authors affiliated with Iranian research institutions",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/40676169/",
+      "sourceType": "peer_reviewed_primary_research_iranian_samples",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "نمونه مشخصی از پژوهش اصالت‌سنجی ریخت‌سنجی و فیتوشیمیایی گیاهان عرضه‌شده با نام استوخودوس در ایران؛ یافته‌ها فقط به نمونه‌ها و دامنه همان مقاله مربوط‌اند، نه همه محصولات بازار."
+      ]
+    },
+    {
+      "id": "S-IR-FASA-HERB-USE-2026",
+      "title": "Use of medicinal herbs in an Iranian population: cross-sectional findings from the Fasa PERSIAN Cohort Study",
+      "publisher": "BMJ Open / PubMed; Shiraz University of Medical Sciences, Iran",
+      "url": "https://pubmed.ncbi.nlm.nih.gov/42252134/",
+      "sourceType": "peer_reviewed_observational_population_study",
+      "accessedAt": "2026-11-17",
+      "supports": [
+        "الگوی خوداظهاری مصرف گیاهان دارویی در جمعیت مورد مطالعه فسا؛ مطالعه مقطعی درباره شیوع و الگوی مصرف است و اثربخشی یا ایمنی درمانی گیاهان را اثبات نمی‌کند."
+      ]
     }
   ],
   "researchGaps": [
@@ -1474,5 +1595,23 @@
     "بررسی اختصاصی چای ترش/Hibiscus sabdariffa بر اساس مرور نظام‌مند 2026؛ تعیین دوز و شکل فرآورده قبل از هر تعمیم.",
     "بررسی دقیق گزنه و رزماری با تطبیق بخش گیاه و شکل فرآورده با برچسب SKUهای چایسا."
   ],
-  "disclaimer": "این فایل پیش‌نویس پژوهشی است. تا تکمیل مدارک اختصاصی و بازبینی تخصصی، برای پاسخ سلامت مشتریان یا انتشار عمومی استفاده نشود."
+  "disclaimer": "این فایل پیش‌نویس پژوهشی است. تا تکمیل مدارک اختصاصی و بازبینی تخصصی، برای پاسخ سلامت مشتریان یا انتشار عمومی استفاده نشود.",
+  "sourceExpansion": {
+    "iranianSourcesAddedAt": "2026-11-17",
+    "newlyAddedSourceIds": [
+      "S-IR-IMP",
+      "S-IR-IJMAPR",
+      "S-IR-JMP",
+      "S-IR-RJP",
+      "S-IR-IJMPT",
+      "S-IR-SID",
+      "S-IR-MAGIRAN-IJMAPR",
+      "S-IR-MPNET",
+      "S-IR-IHMS",
+      "S-IR-OSTOKHUDUS-2025",
+      "S-IR-FASA-HERB-USE-2026"
+    ],
+    "iranianSourceCount": 11,
+    "usagePolicy": "منابع ایرانی بر اساس نقش تفکیک شده‌اند: مؤسسه/شبکه برای شناسایی مراکز؛ پایگاه نمایه برای بازیابی؛ نشریه برای یافتن مقاله؛ مقاله داوری‌شده برای ارزیابی ادعای مشخص. مطالب سنتی و آموزشی بدون شواهد مستقل، شاهد اثربخشی یا ایمنی محسوب نمی‌شوند."
+  }
 }
