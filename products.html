@@ -603,6 +603,8 @@ document.addEventListener("DOMContentLoaded", async function () {
         status.textContent="سفارش با شناسه "+result.orderId+" در سامانه ثبت شد، اما دریافت پیش‌فاکتور توسط مدیران تأیید نشده است ("+delivery+persistence+"). سفارش را دوباره ثبت نکنید؛ شناسه و فاکتور را نگه دارید.";
         status.classList.add("warning");
       }
+      const customerDeliveryText=result.customerDeliveryStatus==="sent"?"فاکتور به پیام‌رسان انتخابی شما ارسال شد.":"ارسال فاکتور به پیام‌رسان انتخابی تأیید نشد؛ شناسه سفارش را نگه دارید و سفارش را دوباره ثبت نکنید.";
+      status.textContent += " " + customerDeliveryText;
       status.hidden=false;
       checkout.querySelector(".issued-invoice-text").textContent=result.invoice;
       checkout.querySelector(".issued-invoice").hidden=false;
