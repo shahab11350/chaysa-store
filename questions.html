@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="ثبت پرسش، ابهام یا پیشنهاد برای فروشگاه اینترنتی چایسا">
+<title>پرسش از شما، پاسخ از ما | چایسا</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f5ef;color:#26372b;font-family:Tahoma,sans-serif}
+header{padding:24px 15px;text-align:center;background:radial-gradient(ellipse at 50% 0%,#315b43 0%,#173b2b 62%,#10291e 100%);border-bottom:3px solid #c5a45b;color:#fff}
+header img{display:block;width:min(220px,55vw);max-height:112px;object-fit:contain;margin:0 auto 8px}
+header h1{margin:0;font-size:24px}
+header p{margin:6px 0 0;color:#f0dca9}
+nav{display:flex;justify-content:center;padding:12px;background:#214733}
+nav a{color:#fff;text-decoration:none;padding:9px 18px;border:1px solid #c5a45b;border-radius:999px}
+main{width:min(760px,calc(100% - 24px));margin:28px auto;padding:24px 20px;border:1px solid #e7dfcb;border-radius:18px;background:#fffefa;box-shadow:0 7px 22px #173b2b0a}
+main h2{text-align:center;color:#173b2b;margin:0 0 10px}
+main>section>p{text-align:center;line-height:2;color:#596657;margin:0 0 20px}
+#chaysaQuestionForm{background:#fff;border:1px solid #e6d9b8;border-radius:16px;padding:20px;text-align:right;box-shadow:0 4px 16px #0000000a}
+#chaysaQuestionForm label{display:block;font-weight:bold;margin:0 0 8px}
+#chaysaQuestionForm input,#chaysaQuestionForm textarea{width:100%;padding:12px;border:1px solid #d8d0bd;border-radius:10px;font:14px Tahoma;margin-bottom:14px}
+#chaysaQuestionForm textarea{font:14px/2 Tahoma;resize:vertical}
+#chaysaQuestionForm .telegram-field{display:flex;direction:ltr;align-items:stretch;border:1px solid #d8d0bd;border-radius:10px;overflow:hidden;background:#fff}
+#chaysaQuestionForm .telegram-field span{display:flex;align-items:center;justify-content:center;min-width:46px;padding:0 12px;background:#f1eee5;color:#244b37;font:bold 18px Tahoma;border-right:1px solid #d8d0bd}
+#chaysaQuestionForm .telegram-field input{flex:1;min-width:0;margin:0;padding:13px;border:0;outline:none;direction:ltr;text-align:left}
+#chaysaQuestionForm small{display:block;color:#777;margin-top:6px;line-height:1.8}
+#chaysaQuestionSend{display:block;width:100%;border:0;border-radius:10px;background:#244b37;color:#fff;padding:14px;font:bold 14px Tahoma;cursor:pointer;margin-top:14px}
+#chaysaQuestionSend:disabled{opacity:.65;cursor:wait}
+#chaysaQuestionStatus{margin:12px 0 0;font-size:13px;text-align:center;line-height:2}
+footer{margin-top:28px;padding:22px;text-align:center;background:#173b2b;color:#fff;line-height:2}
+@media(max-width:480px){main{padding:20px 14px}header h1{font-size:21px}}
+</style>
+</head>
+<body>
+<header>
+<img src="chaysa-logo-option4.svg" alt="لوگوی اصلی چایسا">
+<h1>چایسا</h1>
+<p>فروشگاهی برای طعم‌های تازه</p>
+</header>
+<nav><a href="index.html">بازگشت به صفحه اصلی</a></nav>
+<main>
+<section id="questions">
+  <h2>پرسش از شما، پاسخ از ما</h2>
+  <p>سؤال، ابهام یا پیشنهادت رو برامون بنویس. بعد از ثبت پرسش، برای دریافت پاسخ از همکارمون، اتصال تلگرام رو کامل کن.</p>
+  <form id="chaysaQuestionForm" >
+    <label for="chaysaQuestionFirstName" >نام <span style="color:#b33">*</span></label>
+    <input id="chaysaQuestionFirstName" type="text" required maxlength="60" autocomplete="given-name" placeholder="نام" >
+    <label for="chaysaQuestionLastName" style="display:block;font-weight:bold;margin:0 0 8px">نام خانوادگی <span style="color:#b33">*</span></label>
+    <input id="chaysaQuestionLastName" type="text" required maxlength="80" autocomplete="family-name" placeholder="نام خانوادگی" >
+    <label for="chaysaQuestionText" style="display:block;font-weight:bold;margin:0 0 8px">متن سؤال یا درخواست</label>
+    <textarea id="chaysaQuestionText" required maxlength="2000" rows="4" placeholder="سؤالت رو اینجا بنویس..." ></textarea>
+    <label for="chaysaTelegramUsername" style="display:block;font-weight:bold;margin:16px 0 8px">آیدی تلگرام <span style="color:#b33">*</span></label>
+    <div class="telegram-field">
+      <span aria-hidden="true" >@</span>
+      <input id="chaysaTelegramUsername" type="text" required minlength="5" maxlength="32" pattern="[A-Za-z0-9_]{5,32}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="آیدی شما بدون @ " >
+    </div>
+    <small >واردکردن آیدی تلگرام برای دریافت پاسخ الزامی است؛ فقط نام کاربری را بنویس، علامت @ از قبل قرار داده شده.</small>
+    <button id="chaysaQuestionSend" type="submit" >ارسال پرسش</button>
+    <p id="chaysaQuestionStatus" role="status" aria-live="polite" ></p>
+  </form>
+</section>
+</main>
+<footer><strong>CHAYSA | چایسا</strong><p>راهی برای انتخاب‌های تازه</p></footer>
+<script>
+(function(){
+  const form=document.getElementById("chaysaQuestionForm");
+  if(!form)return;
+  const firstName=document.getElementById("chaysaQuestionFirstName");
+  const lastName=document.getElementById("chaysaQuestionLastName");
+  const question=document.getElementById("chaysaQuestionText");
+  const telegramUsername=document.getElementById("chaysaTelegramUsername");
+  const button=document.getElementById("chaysaQuestionSend");
+  const status=document.getElementById("chaysaQuestionStatus");
+  form.addEventListener("submit",async function(event){
+    event.preventDefault();
+    if(!firstName.value.trim()||!lastName.value.trim()){
+      status.textContent="لطفاً نام و نام خانوادگی را وارد کن.";
+      status.style.color="#a33";
+      (!firstName.value.trim()?firstName:lastName).focus();
+      return;
+    }
+    if(!question.value.trim()){
+      status.textContent="لطفاً متن پرسش را بنویس.";
+      status.style.color="#a33";
+      return;
+    }
+    const username=telegramUsername.value.trim().replace(/^@+/,"");
+    if(!/^[A-Za-z0-9_]{5,32}$/.test(username)){
+      status.textContent="لطفاً آیدی تلگرام معتبر را بدون @ وارد کن (۵ تا ۳۲ نویسه؛ حروف انگلیسی، عدد و زیرخط).";
+      status.style.color="#a33";
+      telegramUsername.focus();
+      return;
+    }
+    button.disabled=true;
+    button.textContent="در حال ارسال...";
+    status.textContent="";
+    try{
+      const response=await fetch("/api/questions",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({firstName:firstName.value.trim(),lastName:lastName.value.trim(),question:question.value.trim(),telegramUsername:username})
+      });
+      const result=await response.json();
+      if(!response.ok||!result.ok)throw new Error(result.error||"ارسال ناموفق");
+      status.style.color="#24613d";
+      status.replaceChildren(
+        document.createTextNode("پرسشت با موفقیت ثبت و برای همکارمون در تلگرام فرستاده شد. برای اینکه پاسخ رو دریافت کنی، دکمه زیر رو بزن و در ربات چایسا گزینه Start رو انتخاب کن. "),
+        document.createElement("br")
+      );
+      const connect=document.createElement("a");
+      connect.href="https://t.me/Chaysa113502026bot?start="+encodeURIComponent(result.requestId);
+      connect.target="_blank";
+      connect.rel="noopener noreferrer";
+      connect.textContent="اتصال به تلگرام برای دریافت پاسخ";
+      connect.style.cssText="display:inline-block;margin-top:10px;padding:10px 14px;background:#244b37;color:#fff;border-radius:9px;text-decoration:none;font-weight:bold";
+      status.appendChild(connect);
+      form.reset();
+    }catch(error){
+      status.textContent=(error&&error.message)||"ارسال پرسش انجام نشد. لطفاً دوباره تلاش کن.";
+      status.style.color="#a33";
+    }finally{
+      button.disabled=false;
+      button.textContent="ارسال پرسش";
+    }
+  });
+})();
+
+</script>
+</body>
+</html>
