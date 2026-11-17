@@ -34,15 +34,20 @@ test("media library authenticates, compresses image/audio/video, lists and delet
   let peakRssKb = 0, peakCpuPercent = 0;
   const resourceSampler = setInterval(async () => {
     try {
-      const { stdout } = await run("ps", ["-eo", "pid=,ppid=,rss=,pcpu="]);
+      const [parent, children] = await Promise.all([
+        run("ps", ["-o", "rss=,pcpu=", "-p", String(child.pid)]),
+        run("ps", ["-o", "rss=,pcpu=", "--ppid", String(child.pid)])
+      ]);
       let rss = 0, cpu = 0;
-      for (const line of stdout.trim().split("\n")) {
-        const values = line.trim().split(/\s+/).map(Number);
-        if (values.length === 4 && (values[0] === child.pid || values[1] === child.pid)) { rss += values[2]; cpu += values[3]; }
+      for (const output of [parent.stdout, children.stdout]) {
+        const values = output.trim().split(/\s+/).map(Number);
+        if (values.length >= 2 && Number.isFinite(values[0]) && Number.isFinite(values[1])) {
+          for (let i = 0; i + 1 < values.length; i += 2) { rss += values[i]; cpu += values[i + 1]; }
+        }
       }
       peakRssKb = Math.max(peakRssKb, rss); peakCpuPercent = Math.max(peakCpuPercent, cpu);
     } catch (_) {}
-  }, 100);
+  }, 50);
   child.stdout.on("data", chunk => { logs += chunk.toString(); });
   child.stderr.on("data", chunk => { logs += chunk.toString(); });
   const base = "http://127.0.0.1:" + port;
