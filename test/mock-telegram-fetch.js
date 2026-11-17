@@ -1,4 +1,5 @@
 const fs = require("node:fs");
+const failedCustomerOnce = new Set();
 const originalFetch = global.fetch.bind(global);
 
 global.fetch = async function (input, init = {}) {
@@ -28,8 +29,13 @@ global.fetch = async function (input, init = {}) {
     const isCustomerStatus = messageText.startsWith("به‌روزرسانی سفارش چایسا");
     const failedOrderRecipients = String(process.env.TELEGRAM_MOCK_FAIL_ORDER_CHAT_IDS || "").split(",").map(x => x.trim());
     const failedCustomerRecipients = String(process.env.TELEGRAM_MOCK_FAIL_CUSTOMER_CHAT_IDS || "").split(",").map(x => x.trim());
+    const failOnceRecipients = String(process.env.TELEGRAM_MOCK_FAIL_CUSTOMER_ONCE_CHAT_IDS || "").split(",").map(x => x.trim());
     const failOrderDelivery = isOrderInvoice && failedOrderRecipients.includes(String(payload.chat_id));
-    const failCustomerDelivery = isCustomerStatus && failedCustomerRecipients.includes(String(payload.chat_id));
+    const chatKey = String(payload.chat_id);
+    const failCustomerDelivery = isCustomerStatus &&
+      (failedCustomerRecipients.includes(chatKey) ||
+       (failOnceRecipients.includes(chatKey) && !failedCustomerOnce.has(chatKey)));
+    if (failCustomerDelivery && failOnceRecipients.includes(chatKey)) failedCustomerOnce.add(chatKey);
     const failDelivery = failOrderDelivery || failCustomerDelivery;
     return new Response(JSON.stringify({
       ok: !failDelivery,
