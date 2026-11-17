@@ -88,6 +88,13 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .chaysa-health-home-link:hover{background:#173b2b}
 .chaysa-health-home-link:focus-visible{outline:3px solid #b99b55;outline-offset:3px}
 @media(max-width:650px){.chaysa-health-home-section{margin:12px auto 20px;padding:0 12px}.chaysa-health-home-card{align-items:stretch;flex-direction:column;gap:14px;padding:22px 20px}.chaysa-health-home-copy h2{font-size:18px}.chaysa-health-home-link{width:100%;box-sizing:border-box;text-align:center}}
+
+/* Place CHAYSA HEALTH beside the Q&A section in the homepage tools grid. */
+@media(min-width:701px){.chaysa-home-tools>#chaysaGuide{grid-column:1 / -1}}
+.chaysa-home-tools>.chaysa-health-home-section{width:100%;max-width:none;min-width:0;margin:0;padding:0}
+.chaysa-home-tools>.chaysa-health-home-section .chaysa-health-home-card{height:100%;min-height:100%;align-items:stretch;justify-content:center;flex-direction:column;gap:16px;padding:26px 22px}
+.chaysa-home-tools>.chaysa-health-home-section .chaysa-health-home-link{width:100%;box-sizing:border-box;text-align:center}
+@media(max-width:700px){.chaysa-home-tools>#chaysaGuide{grid-column:auto}.chaysa-home-tools>.chaysa-health-home-section{margin:0;padding:0}}
 </style>
 
 <meta name="chaysa-release" content="2026-11-14-invite-card-v1">
@@ -208,18 +215,6 @@ if(document.readyState==="loading"){
 <p>چایسا، فروشگاهی برای انتخاب‌های متنوع امروز و فردا؛ با نگاهی به فرصت‌های تازه در آینده.</p>
 </section>
 
-<section class="chaysa-health-home-section" aria-labelledby="chaysaHealthHomeTitle">
-  <div class="chaysa-health-home-card">
-    <div class="chaysa-health-home-copy">
-      <p class="chaysa-health-home-kicker">CHAYSA HEALTH</p>
-      <h2 id="chaysaHealthHomeTitle">مشاور سلامت چایسا</h2>
-      <p>فضایی مستقل برای شناخت علمی محصولات گیاهی، نکات ایمنی مصرف و بررسی تداخل‌های احتمالی چای و دمنوش با داروها.</p>
-      <p class="chaysa-health-home-status">در حال تکمیل</p>
-    </div>
-    <a class="chaysa-health-home-link" href="health-advisor.html">ورود به مشاور سلامت</a>
-  </div>
-</section>
-
 <div class="chaysa-home-tools">
 <section id="chaysaGuide" class="about chaysa-guide" aria-labelledby="chaysaGuideTitle">
   <h2 id="chaysaGuideTitle">راهنمای چایسا</h2>
@@ -247,6 +242,18 @@ if(document.readyState==="loading"){
   </form>
   <p class="chaysa-guide-privacy">پرسش شما در داده‌های چایسا ذخیره نمی‌شود. در بخش سلامت، پس از کلیک روی «دریافت پاسخ»، فقط نام محصول و دارو برای جست‌وجو به گوگل فرستاده می‌شود؛ اطلاعات شخصی، شماره تماس، نشانی یا شرح پرونده پزشکی را وارد نکنید.</p>
   <p id="chaysaGuideHealthNotice" class="chaysa-guide-health" hidden></p>
+</section>
+
+<section class="chaysa-health-home-section" aria-labelledby="chaysaHealthHomeTitle">
+  <div class="chaysa-health-home-card">
+    <div class="chaysa-health-home-copy">
+      <p class="chaysa-health-home-kicker">CHAYSA HEALTH</p>
+      <h2 id="chaysaHealthHomeTitle">مشاور سلامت چایسا</h2>
+      <p>فضایی مستقل برای شناخت علمی محصولات گیاهی، نکات ایمنی مصرف و بررسی تداخل‌های احتمالی چای و دمنوش با داروها.</p>
+      <p class="chaysa-health-home-status">در حال تکمیل</p>
+    </div>
+    <a class="chaysa-health-home-link" href="health-advisor.html">ورود به مشاور سلامت</a>
+  </div>
 </section>
 
 <section id="questions" class="about" style="max-width:none">
