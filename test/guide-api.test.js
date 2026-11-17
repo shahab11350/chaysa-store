@@ -722,3 +722,79 @@ test("Storefront HTML and Iran location JSON require cache revalidation", async 
     assert.match(cacheControl, /must-revalidate/i, route + " must be revalidated");
   }
 });
+
+let orderTestIp = 1;
+function validOrderPayload(platform = "telegram", messengerId = "333333") {
+  return {
+    customer: {
+      name: "آزمون", family: "خریدار", contact: "09120000000",
+      messengerPlatform: platform, messengerId,
+      province: "تهران", city: "تهران", address: "نشانی آزمایشی",
+      postal: "1234567890", notes: "بدون توضیح"
+    },
+    termsAccepted: true,
+    termsAcceptedAt: new Date().toISOString(),
+    items: [{ sku: "1401008", qty: 1 }]
+  };
+}
+
+async function postOrder(payload) {
+  const response = await fetch(baseUrl + "/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-Forwarded-For": "198.51.100." + (orderTestIp++) },
+    body: JSON.stringify(payload)
+  });
+  return { status: response.status, body: await response.json() };
+}
+
+function orderRows() {
+  const file = path.join(dataDir, "orders.json");
+  try { return JSON.parse(readFileSync(file, "utf8")); }
+  catch (_) { return []; }
+}
+
+test("invalid Telegram chat ID is rejected before any order is persisted or invoice is sent", async () => {
+  const beforeOrders = orderRows().length;
+  const beforeMessages = telegramLog().filter(item => {
+    if (!item.url.endsWith("/sendMessage")) return false;
+    return String(JSON.parse(item.body).text || "").startsWith("فاکتور سفارش چایسا");
+  }).length;
+  const result = await postOrder(validOrderPayload("telegram", "@not-a-numeric-chat"));
+  assert.equal(result.status, 400);
+  assert.match(result.body.error, /شناسه گفت‌وگوی تلگرام معتبر نیست/);
+  assert.equal(orderRows().length, beforeOrders);
+  const afterMessages = telegramLog().filter(item => {
+    if (!item.url.endsWith("/sendMessage")) return false;
+    return String(JSON.parse(item.body).text || "").startsWith("فاکتور سفارش چایسا");
+  }).length;
+  assert.equal(afterMessages, beforeMessages);
+});
+
+test("invalid Rubika chat ID is rejected before any order is persisted or invoice is sent", async () => {
+  const beforeOrders = orderRows().length;
+  const beforeMessages = telegramLog().filter(item => {
+    if (!item.url.endsWith("/sendMessage")) return false;
+    return String(JSON.parse(item.body).text || "").startsWith("فاکتور سفارش چایسا");
+  }).length;
+  const result = await postOrder(validOrderPayload("rubika", "invalid-id"));
+  assert.equal(result.status, 400);
+  assert.match(result.body.error, /شناسه گفت‌وگوی روبیکا معتبر نیست/);
+  assert.equal(orderRows().length, beforeOrders);
+  const afterMessages = telegramLog().filter(item => {
+    if (!item.url.endsWith("/sendMessage")) return false;
+    return String(JSON.parse(item.body).text || "").startsWith("فاکتور سفارش چایسا");
+  }).length;
+  assert.equal(afterMessages, beforeMessages);
+});
+
+test("valid order still persists and sends the invoice through the selected messenger", async () => {
+  const beforeOrders = orderRows().length;
+  const result = await postOrder(validOrderPayload("rubika", "RubikaChat_123456"));
+  assert.equal(result.status, 200);
+  assert.equal(result.body.ok, true);
+  assert.equal(orderRows().length, beforeOrders + 1);
+  const savedOrder = orderRows().at(-1);
+  assert.equal(savedOrder.customer.messengerPlatform, "rubika");
+  assert.equal(savedOrder.customerDelivery.status, "sent");
+  assert.equal(result.body.customerDeliveryStatus, "sent");
+});
