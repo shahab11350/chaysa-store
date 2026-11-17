@@ -951,7 +951,7 @@ app.post("/api/admin/letters/archive", requireAdmin, (req, res) => {
   if (limited("admin-letter-archive:" + (req.ip || "unknown"), 30, 60 * 60 * 1000))
     return json(res, 429, { error: "تعداد ثبت نامه بیش از حد مجاز است؛ کمی بعد دوباره تلاش کنید." });
   const title = typeof (req.body && req.body.title) === "string"
-    ? req.body.title.replace(/[\\u0000-\\u001f\\u007f]/g, "").replace(/\\s+/g, " ").trim() : "";
+    ? req.body.title.replace(/[\u0000-\u001f\u007f]/g, "").replace(/\s+/g, " ").trim() : "";
   const body = typeof (req.body && req.body.text) === "string" ? req.body.text.trim() : "";
   if (!title || title.length > 160)
     return json(res, 400, { error: "عنوان نامه الزامی است و نباید بیشتر از ۱۶۰ نویسه باشد." });
@@ -970,6 +970,7 @@ app.post("/api/admin/letters/archive", requireAdmin, (req, res) => {
     dateTime: meta.dateTime,
     title,
     body,
+    registeredBy: "محمدرضا نظام",
     formattedMessage: body ? formatGeneralChaysaLetter(meta, body) : "",
     signatureName: "محمدرضا نظام",
     signatureRole: "ناظر کیفی و ایده‌پرداز فروشگاه اینترنتی چایسا (CHAYSA)",
