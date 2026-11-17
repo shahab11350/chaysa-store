@@ -13,6 +13,7 @@ on:
       - chaysa-backup
     paths:
       - "server.js"
+      - "preview/**"
       - "products.html"
       - "admin.html"
       - "media-library.html"
@@ -40,6 +41,21 @@ jobs:
         run: npm install
       - name: Check server JavaScript syntax
         run: node --check server.js
+      - name: Check isolated media preview server syntax
+        run: |
+          node --check preview/media-library/server.js
+          node -e "JSON.parse(require('fs').readFileSync('preview/media-library/package.json', 'utf8'))"
+      - name: Check isolated media preview page JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('preview/media-library/index.html').read_text(encoding='utf-8')
+          scripts = source.split('<script>')
+          if len(scripts) < 2:
+              raise SystemExit('preview inline script not found')
+          Path('/tmp/chaysa-preview.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
+          PY
+          node --check /tmp/chaysa-preview.js
       - name: Check admin inline JavaScript syntax
         run: |
           python - <<'PY'
