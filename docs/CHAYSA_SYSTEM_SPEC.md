@@ -443,3 +443,11 @@ Volume فعلی Railway در مسیر `/data` برای ذخیره پایدار �
 - اعلان مدیریتی پیش‌فاکتور فعلاً همچنان از Telegram استفاده می‌کند؛ این مسیر از پیام مستقیم مشتری مستقل است.
 - تا زمان ایجاد/اتصال ربات روبیکا، ثبت secret، پیاده‌سازی دریافت شناسه چت و آزمون واقعی هر دو کانال، پشتیبانی عملیاتی دوطرفه تکمیل‌شده محسوب نمی‌شود.
 - تغییرات اولیه انتخاب و ذخیره پیام‌رسان در PR #18، شاخه آزمایشی fix/prelaunch-order-notification-status-2026-11-17، commit `9ebd7e8c3aafe509a4229d3bf46a2bf9ffa78545` قرار گرفته است. PR باز و ادغام‌نشده است؛ CI این commit هنوز تأیید نشده و انتشار production انجام نشده است.
+
+
+## اتصال سفارش به Rubika Bot API v3 — 2026-11-17
+- API پایه `https://botapi.rubika.ir/v3/{TOKEN}/{METHOD}` با POST و JSON استفاده می‌شود؛ ارسال فقط با HTTP موفق، `status: OK` و وجود `data.message_id` موفق است.
+- وب‌هوک با `updateBotEndpoints` و نوع `ReceiveUpdate` تنظیم می‌شود. پیام از `new_message` و شناسه چت از `chat_id` به‌دست می‌آید.
+- مسیر `/rubika/webhook/:key` کلید مشتق‌شده از توکن را با SHA-256 و مقایسه ثابت‌زمان بررسی می‌کند. توکن در URL و log ثبت نمی‌شود.
+- `/start` شناسه گفت‌وگو را به مشتری اعلام می‌کند. فاکتور مشتری فقط از کانال انتخابی ارسال و وضعیت آن در `customerDelivery` جدا از اعلان مدیران ثبت می‌شود.
+- مرجع فنی: https://github.com/AliRn76/rubika-bot/blob/master/docs/fa/docs/methods.md و https://github.com/AliRn76/rubika-bot/blob/master/rubika_bot/models.py. آزمون زنده و انتشار هنوز تأیید نشده است.
