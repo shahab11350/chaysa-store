@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const sharp = require("sharp");
 const ffmpegPath = require("ffmpeg-static");
 const { spawn } = require("child_process");
+sharp.concurrency(1);
 
 const app = express();
 const ROOT = __dirname;
@@ -1423,7 +1424,7 @@ const mediaUpload = multer({
 let mediaProcessing = false;
 function runFfmpeg(args) {
   return new Promise((resolve, reject) => {
-    const child = spawn(ffmpegPath, ["-hide_banner", "-loglevel", "error", "-y", ...args], { stdio: ["ignore", "ignore", "pipe"] });
+    const child = spawn(ffmpegPath, ["-hide_banner", "-loglevel", "error", "-y", "-threads", "1", "-filter_threads", "1", ...args], { stdio: ["ignore", "ignore", "pipe"] });
     let error = "", settled = false;
     const timeout = setTimeout(() => { child.kill("SIGKILL"); if (!settled) { settled = true; reject(new Error("media_processing_timeout")); } }, 120000);
     child.stderr.on("data", chunk => { error += chunk.toString().slice(0, 3000); });
