@@ -13,6 +13,9 @@ header{background:#173b2b;color:white;text-align:center;padding:30px 15px}
 header p{margin-bottom:0;color:#eee3c5}
 nav{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;background:#244b37;padding:16px}
 nav a{color:white;text-decoration:none;font-size:14px}
+nav a.chaysa-health-nav-link{display:inline-block;padding:8px 16px;margin:-8px 0;border:1px solid #8a6a1f;border-radius:9px;background:#d9b85f;color:#173b2b;font-weight:bold;box-shadow:0 3px 10px #8a6a1f35;transition:background .2s ease,transform .2s ease}
+nav a.chaysa-health-nav-link:hover{background:#c5a247;transform:translateY(-1px)}
+nav a.chaysa-health-nav-link:focus-visible{outline:3px solid #fff;outline-offset:3px}
 .hero{padding:65px 15px;text-align:center;background:linear-gradient(135deg,#e5eadc,#f7f5ef)}
 .hero h2{font-size:26px;color:#173b2b}
 .hero p{line-height:2}
@@ -75,27 +78,6 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 @media(max-width:700px){.chaysa-home-tools{grid-template-columns:minmax(0,1fr);gap:4px;padding:0 10px}.chaysa-home-tools>section{padding-left:6px;padding-right:6px}}
 
 
-/* Independent CHAYSA HEALTH entry card on homepage */
-.chaysa-health-home-section{max-width:1100px;margin:18px auto 28px;padding:0 16px}
-.chaysa-health-home-card{position:relative;display:flex;align-items:center;justify-content:space-between;gap:24px;overflow:hidden;padding:26px 30px;border:1px solid #c9b477;border-radius:20px;background:linear-gradient(120deg,#e8eee3 0%,#f8f7ef 58%,#f3ecd9 100%);box-shadow:0 8px 26px #183b2b12;text-align:right}
-.chaysa-health-home-card:before{content:"";position:absolute;top:0;right:0;bottom:0;width:6px;background:linear-gradient(180deg,#b99b55,#244b37)}
-.chaysa-health-home-copy{min-width:0}
-.chaysa-health-home-kicker{margin:0 0 5px;color:#6f874d;font:bold 12px/1.6 Tahoma,sans-serif;letter-spacing:2px;direction:ltr;text-align:right}
-.chaysa-health-home-copy h2{margin:0 0 8px;color:#173b2b;font-size:21px;text-align:right}
-.chaysa-health-home-copy>p:not(.chaysa-health-home-kicker){margin:0;color:#536454;font-size:13px;line-height:2}
-.chaysa-health-home-status{display:inline-block!important;margin-top:10px!important;padding:3px 12px;border:1px solid #c5ad6c;border-radius:20px;background:#fffaf0;color:#806728!important;font-size:11px!important}
-.chaysa-health-home-link{flex:0 0 auto;display:inline-block;padding:13px 20px;border:2px solid #8a6a1f;border-radius:10px;background:#d9b85f;color:#173b2b;text-decoration:none;font:bold 14px Tahoma,sans-serif;white-space:nowrap;box-shadow:0 4px 12px #8a6a1f30;transition:background .2s ease,transform .2s ease}
-.chaysa-health-home-link:hover{background:#c5a247;transform:translateY(-1px)}
-.chaysa-health-home-link:focus-visible{outline:3px solid #173b2b;outline-offset:3px}
-.chaysa-health-home-link:focus-visible{outline:3px solid #b99b55;outline-offset:3px}
-@media(max-width:650px){.chaysa-health-home-section{margin:12px auto 20px;padding:0 12px}.chaysa-health-home-card{align-items:stretch;flex-direction:column;gap:14px;padding:22px 20px}.chaysa-health-home-copy h2{font-size:18px}.chaysa-health-home-link{width:100%;box-sizing:border-box;text-align:center}}
-
-/* Place CHAYSA HEALTH beside the Q&A section in the homepage tools grid. */
-@media(min-width:701px){.chaysa-home-tools>#chaysaGuide{grid-column:1 / -1}}
-.chaysa-home-tools>.chaysa-health-home-section{width:100%;max-width:none;min-width:0;margin:0;padding:0}
-.chaysa-home-tools>.chaysa-health-home-section .chaysa-health-home-card{height:100%;min-height:100%;align-items:stretch;justify-content:center;flex-direction:column;gap:16px;padding:26px 22px}
-.chaysa-home-tools>.chaysa-health-home-section .chaysa-health-home-link{width:100%;box-sizing:border-box;text-align:center}
-@media(max-width:700px){.chaysa-home-tools>#chaysaGuide{grid-column:auto}.chaysa-home-tools>.chaysa-health-home-section{margin:0;padding:0}}
 </style>
 
 <meta name="chaysa-release" content="2026-11-14-invite-card-v1">
@@ -182,6 +164,7 @@ footer#contact{margin-top:28px;border-top:3px solid #c5a45b;background:linear-gr
 <a href="products.html">محصولات</a>
 <a href="tutorials.html">فیلم‌های آموزشی</a>
 <a href="#about">درباره ما</a>
+<a class="chaysa-health-nav-link" href="health-advisor.html">مشاور سلامت</a>
 <a href="#questions">پرسش از شما، پاسخ از ما</a>
 </nav>
 <div id="chaysaMusicPlayer" aria-label="موسیقی چایسا">
@@ -291,17 +274,7 @@ if(document.readyState==="loading"){
   <p class="chaysa-guide-privacy">برای جست‌وجوی راهنمای خدمات، فقط عبارت‌های عمومی مرتبط با خرید و خدمات چایسا استفاده می‌شود؛ اطلاعات شخصی، شماره سفارش یا اطلاعات پرداخت را وارد نکنید.</p>
 </section>
 
-<section class="chaysa-health-home-section" aria-labelledby="chaysaHealthHomeTitle">
-  <div class="chaysa-health-home-card">
-    <div class="chaysa-health-home-copy">
-      <p class="chaysa-health-home-kicker">CHAYSA HEALTH</p>
-      <h2 id="chaysaHealthHomeTitle">مشاور سلامت چایسا</h2>
-      <p>فضایی مستقل برای شناخت علمی محصولات گیاهی، نکات ایمنی مصرف و بررسی تداخل‌های احتمالی چای و دمنوش با داروها.</p>
-      <p class="chaysa-health-home-status">در حال تکمیل</p>
-    </div>
-    <a class="chaysa-health-home-link" href="health-advisor.html">ورود به مشاور سلامت</a>
-  </div>
-</section>
+
 
 <section id="questions" class="about" style="max-width:none">
   <h2>پرسش از شما، پاسخ از ما</h2>
