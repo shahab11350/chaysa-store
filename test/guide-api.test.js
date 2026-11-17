@@ -754,6 +754,7 @@ function orderRows() {
 }
 
 test("invalid Telegram chat ID is rejected before any order is persisted or invoice is sent", async () => {
+  const beforeOrders = orderRows().length;
   const beforeMessages = telegramLog().filter(item => {
     if (!item.url.endsWith("/sendMessage")) return false;
     return String(JSON.parse(item.body).text || "").startsWith("فاکتور سفارش چایسا");
@@ -761,7 +762,7 @@ test("invalid Telegram chat ID is rejected before any order is persisted or invo
   const result = await postOrder(validOrderPayload("telegram", "@not-a-numeric-chat"));
   assert.equal(result.status, 400);
   assert.match(result.body.error, /شناسه گفت‌وگوی تلگرام معتبر نیست/);
-  assert.equal(orderRows().length, 0);
+  assert.equal(orderRows().length, beforeOrders);
   const afterMessages = telegramLog().filter(item => {
     if (!item.url.endsWith("/sendMessage")) return false;
     return String(JSON.parse(item.body).text || "").startsWith("فاکتور سفارش چایسا");
@@ -786,11 +787,13 @@ test("invalid Rubika chat ID is rejected before any order is persisted or invoic
 });
 
 test("valid order still persists and sends the invoice through the selected messenger", async () => {
+  const beforeOrders = orderRows().length;
   const result = await postOrder(validOrderPayload("rubika", "RubikaChat_123456"));
   assert.equal(result.status, 200);
   assert.equal(result.body.ok, true);
-  assert.equal(orderRows().length, 1);
-  assert.equal(orderRows()[0].customer.messengerPlatform, "rubika");
-  assert.equal(orderRows()[0].customerDelivery.status, "sent");
+  assert.equal(orderRows().length, beforeOrders + 1);
+  const savedOrder = orderRows().at(-1);
+  assert.equal(savedOrder.customer.messengerPlatform, "rubika");
+  assert.equal(savedOrder.customerDelivery.status, "sent");
   assert.equal(result.body.customerDeliveryStatus, "sent");
 });
