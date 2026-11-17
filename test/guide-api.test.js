@@ -547,6 +547,9 @@ test("Order accepts Rubika as the selected customer messaging channel and stores
   assert.ok(order);
   assert.equal(order.customer.messengerPlatform, "rubika");
   assert.equal(order.customer.messengerId, "u0QFtn01dd26d72abc5c77b8e116cd79");
+  assert.equal(result.customerDeliveryStatus, "sent");
+  assert.equal(result.customerDeliveryStatusSaved, true);
+  assert.equal(order.customerDelivery.status, "sent");
 });
 
 
