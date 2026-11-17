@@ -23,6 +23,13 @@ global.fetch = async function (input, init = {}) {
     if (process.env.TELEGRAM_MOCK_LOG) {
       fs.appendFileSync(process.env.TELEGRAM_MOCK_LOG, JSON.stringify(entry) + "\n", "utf8");
     }
+    const method = String(url).split("/").pop().split("?")[0];
+    if (method === "getMe") {
+      return new Response(JSON.stringify({
+        ok: true,
+        result: { id: 123456789, is_bot: true, first_name: "CHAYSA", username: "ChaysaBotTest" }
+      }), { status: 200, headers: { "content-type": "application/json" } });
+    }
     const payload = entry.body ? JSON.parse(entry.body) : {};
     const messageText = String(payload.text || "");
     const isOrderInvoice = messageText.startsWith("فاکتور سفارش چایسا");
