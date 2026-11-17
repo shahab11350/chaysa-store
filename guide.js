@@ -12,6 +12,7 @@
   const status = document.getElementById("chaysaGuideStatus");
   const answer = document.getElementById("chaysaGuideAnswer");
   const healthNotice = document.getElementById("chaysaGuideHealthNotice");
+  const notice = root.querySelector("#chaysaGuideNotice") || healthNotice;
   const prepare = document.getElementById("chaysaGuidePrepare");
   const mode = root.dataset.guideMode === "health" ? "health" : "general";
   const allowedCategories = mode === "health" ? ["products", "safety"] : ["services", "custom"];
@@ -26,7 +27,7 @@
       answer.hidden = true;
       answer.removeAttribute("href");
     }
-    if (healthNotice) healthNotice.hidden = true;
+    if (notice) notice.hidden = true;
     status.textContent = "";
     status.style.color = "#a33";
   }
@@ -208,9 +209,9 @@
       }
       answer.href = target.toString();
       answer.hidden = false;
-      if (result.notice && healthNotice) {
-        healthNotice.textContent = result.notice + (result.rule ? " " + result.rule : "");
-        healthNotice.hidden = false;
+      if (result.notice && notice) {
+        notice.textContent = result.notice + (mode === "health" && result.rule ? " " + result.rule : "");
+        notice.hidden = false;
       }
       status.style.color = "#24613d";
       status.textContent = "پرسش در محدوده راهنمای چایساست. برای مشاهده نتایج، دکمه زیر را بزنید.";
