@@ -216,7 +216,7 @@ if(document.readyState==="loading"){
 </section>
 
 <div class="chaysa-home-tools">
-<section id="chaysaGuide" class="about chaysa-guide" aria-labelledby="chaysaGuideTitle">
+<section id="chaysaGuide" class="about chaysa-guide" data-guide-mode="general" aria-labelledby="chaysaGuideTitle">
   <h2 id="chaysaGuideTitle">راهنمای چایسا</h2>
   <aside class="chaysa-guide-trial-notice" role="note" aria-label="وضعیت آزمایشی راهنمای چایسا">
     <strong>نسخه آزمایشی</strong>
@@ -229,19 +229,15 @@ if(document.readyState==="loading"){
   <div id="chaysaGuideCategories" class="chaysa-guide-options" aria-label="دسته‌بندی راهنما"></div>
   <div id="chaysaGuidePrompts" class="chaysa-guide-prompts" aria-live="polite"></div>
   <form id="chaysaGuideForm" class="chaysa-guide-form">
-    <label for="chaysaGuideProduct">محصول چایسا</label>
-    <select id="chaysaGuideProduct"><option value="">انتخاب محصول</option></select>
-    <label for="chaysaGuideMedicine" id="chaysaGuideMedicineLabel" hidden>نام دارو (فقط برای بررسی تداخل)</label>
-    <input id="chaysaGuideMedicine" type="text" maxlength="60" autocomplete="off" placeholder="در صورت پرسش درباره تداخل، نام ژنریک یا تجاری دارو را وارد کنید" hidden>
     <label for="chaysaGuideQuestion">پرسش شما</label>
-    <textarea id="chaysaGuideQuestion" rows="3" maxlength="400" required placeholder="پرسش مرتبط با محصولات یا خدمات چایسا را بنویسید..."></textarea>
+    <textarea id="chaysaGuideQuestion" rows="3" maxlength="400" required placeholder="پرسش مرتبط با خرید یا خدمات چایسا را بنویسید..."></textarea>
     <div id="chaysaGuideSuggestions" class="chaysa-guide-prompts" aria-label="پیشنهادهای جست‌وجو"></div>
     <button id="chaysaGuidePrepare" type="submit">بررسی و آماده‌سازی پرسش</button>
     <p id="chaysaGuideStatus" role="status" aria-live="polite"></p>
     <a id="chaysaGuideAnswer" class="chaysa-guide-answer" hidden target="_blank" rel="noopener noreferrer">دریافت پاسخ</a>
+    <p id="chaysaGuideNotice" class="chaysa-guide-privacy" role="note" hidden></p>
   </form>
-  <p class="chaysa-guide-privacy">پرسش شما در داده‌های چایسا ذخیره نمی‌شود. در بخش سلامت، پس از کلیک روی «دریافت پاسخ»، فقط نام محصول و دارو برای جست‌وجو به گوگل فرستاده می‌شود؛ اطلاعات شخصی، شماره تماس، نشانی یا شرح پرونده پزشکی را وارد نکنید.</p>
-  <p id="chaysaGuideHealthNotice" class="chaysa-guide-health" hidden></p>
+  <p class="chaysa-guide-privacy">برای جست‌وجوی راهنمای خدمات، فقط عبارت‌های عمومی مرتبط با خرید و خدمات چایسا استفاده می‌شود؛ اطلاعات شخصی، شماره سفارش یا اطلاعات پرداخت را وارد نکنید.</p>
 </section>
 
 <section class="chaysa-health-home-section" aria-labelledby="chaysaHealthHomeTitle">
