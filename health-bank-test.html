@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>آزمایش بانک پژوهشی سلامت | چایسا</title>
+<style>
+:root{color-scheme:light;--green:#244b37;--gold:#b99b55;--paper:#f7f6ef;--ink:#26372b;--muted:#657267;--line:#e3ddcc}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font:14px/2 Tahoma,Arial,sans-serif}
+header{background:#173b2b;color:white;padding:22px 16px;border-bottom:3px solid var(--gold)}
+.wrap{width:min(1100px,calc(100% - 24px));margin:auto}
+header .wrap{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+header img{width:130px;max-height:68px;object-fit:contain}header h1{font-size:21px;margin:0}header p{margin:2px 0;color:#e9ddb9;font-size:12px}
+a{color:var(--green)}.warning{margin:20px 0;padding:16px 18px;background:#fff8e8;border:1px solid #d7c18b;border-right:5px solid var(--gold);border-radius:12px;color:#634e22}
+.warning strong{display:block}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
+.stat,.panel,.item{background:white;border:1px solid var(--line);border-radius:12px;padding:14px}.stat b{display:block;font-size:23px;color:var(--green);line-height:1.5}.stat span{font-size:11px;color:var(--muted)}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+nav button,.filters button{border:1px solid var(--gold);border-radius:20px;padding:8px 14px;background:#fff;color:var(--green);font:12px Tahoma;cursor:pointer}
+nav button[aria-pressed=true],.filters button[aria-pressed=true]{background:var(--green);color:white}
+.panel{margin:14px 0}.panel h2{font-size:17px;margin:0 0 10px;color:var(--green)}
+.controls{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}.controls input,.controls select{flex:1;min-width:190px;padding:11px;border:1px solid #d6d0c0;border-radius:9px;font:13px Tahoma;background:white}
+.filters{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.item h3{font-size:14px;margin:0 0 5px;color:var(--green)}.item p{margin:4px 0;font-size:12px;line-height:1.9}.muted{color:var(--muted)}.tag{display:inline-block;border-radius:20px;background:#edf2eb;padding:2px 8px;font-size:10px;margin:2px}
+.item ul{margin:5px 0;padding-right:20px;font-size:11px}.item a{overflow-wrap:anywhere;font-size:11px}
+.hidden{display:none!important}.empty{padding:20px;text-align:center;color:var(--muted)}
+footer{text-align:center;padding:25px;color:var(--muted);font-size:11px}
+@media(max-width:650px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.list{grid-template-columns:1fr}header h1{font-size:17px}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><div><h1>آزمایش بانک پژوهشی CHAYSA HEALTH</h1><p>پیش‌نمایش مستقل داده‌ها — بدون اتصال به پاسخ‌گوی مشتری</p></div><img src="/chaysa-logo-option4.svg" alt="لوگوی چایسا"></div></header>
+<main class="wrap">
+<div class="warning"><strong>حالت آزمایشی — غیرقابل استفاده برای پاسخ پزشکی مشتری</strong><span id="statusText">در حال بارگذاری بانک پژوهشی…</span><br>این بانک پیش‌نویس پژوهشی است. ادعاهای اختصاصی محصولات هنوز تأیید نشده‌اند؛ این صفحه فقط برای بازبینی ساختار، جست‌وجو و کیفیت داده‌هاست و هیچ توصیه یا پاسخ پزشکی صادر نمی‌کند.</div>
+<section class="stats" id="stats"></section>
+<nav aria-label="بخش‌های بانک">
+<button data-tab="products" aria-pressed="true">محصولات</button><button data-tab="botanicals" aria-pressed="false">پرونده‌های گیاهی</button><button data-tab="safety" aria-pressed="false">قواعد ایمنی</button><button data-tab="sources" aria-pressed="false">منابع علمی</button><button data-tab="books" aria-pressed="false">کتاب‌شناسی</button><button data-tab="gaps" aria-pressed="false">کمبودهای پژوهش</button>
+</nav>
+<section class="panel" id="contentPanel">
+<div class="controls"><input id="search" type="search" placeholder="جست‌وجو در اطلاعات این بخش…"><select id="category"><option value="">همه دسته‌ها</option></select></div>
+<div id="list" class="list"></div>
+</section>
+<section class="panel"><h2>حدود استفاده از داده‌ها</h2><p id="disclaimer"></p><p id="bookDisclaimer" class="muted"></p></section>
+</main>
+<footer>CHAYSA HEALTH | پیش‌نمایش داده پژوهشی — نسخه آزمایشی</footer>
+<script>
+(function(){
+const $=s=>document.querySelector(s), state={data:null,tab:"products",query:"",category:""};
+function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=String(txt);return n}
+function card(title,lines){const c=el("article","item");c.append(el("h3","",title));lines.forEach(x=>{if(x!==null&&x!==undefined&&x!=="")c.append(el("p","",x))});return c}
+function listOf(title,arr){const c=el("article","item");c.append(el("h3","",title));const ul=el("ul");arr.forEach(v=>ul.append(el("li","",v)));c.append(ul);return c}
+function renderStats(d){const values=[["محصول",d.products.length],["پرونده گیاهی",d.botanicalProfiles.length],["منبع علمی",d.sources.length],["کتاب",d.bookBibliography.length]];$("#stats").replaceChildren(...values.map(([label,num])=>{const x=el("div","stat");x.append(el("b","",num),el("span","",label));return x}))}
+function setTabs(){document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.tab===state.tab)))}
+function render(){
+const d=state.data;if(!d)return;const box=$("#list");box.replaceChildren();$("#category").classList.toggle("hidden",state.tab!=="products");
+const q=state.query.trim().toLocaleLowerCase("fa");
+let records=[];
+if(state.tab==="products") records=d.products.filter(x=>(!state.category||x.category===state.category)&&JSON.stringify(x).toLocaleLowerCase("fa").includes(q)).map(x=>({title:x.name,lines:[("SKU: "+(x.sku||"ثبت نشده")+" | "+x.category+" | "+(x.active?"فعال":"غیرفعال")),("وضعیت ترکیبات: "+x.compositionStatus),x.nameInterpretationWarning],lists:[["کمبود شواهد",x.missingEvidence],["ادعاهای اختصاصی محصول",x.productSpecificClaims]]}));
+if(state.tab==="botanicals") records=d.botanicalProfiles.filter(x=>JSON.stringify(x).toLocaleLowerCase("fa").includes(q)).map(x=>({title:x.commonName+" ("+x.scientificName+")",lines:[x.identityStatus,x.summary,x.evidence,x.safety,x.interaction,x.formCaution],lists:[["شناسه منابع",x.sourceIds]]}));
+if(state.tab==="safety") records=d.generalSafetyRules.filter(x=>JSON.stringify(x).toLocaleLowerCase("fa").includes(q)).map((x,i)=>({title:x.title||x.topic||("قاعده ایمنی "+(i+1)),lines:[x.description||x.rule||JSON.stringify(x)],lists:[["منابع",x.sourceIds||[]]]}));
+if(state.tab==="sources") records=d.sources.filter(x=>JSON.stringify(x).toLocaleLowerCase("fa").includes(q)).map(x=>({title:x.id+" — "+x.title,lines:[x.publisher,x.sourceType,"پشتیبانی: "+(x.supports||[]).join("؛ ")],url:x.url}));
+if(state.tab==="books") records=d.bookBibliography.filter(x=>JSON.stringify(x).toLocaleLowerCase("fa").includes(q)).map(x=>({title:x.title||x.name,lines:[x.author,x.publisher,x.year,x.description]}));
+if(state.tab==="gaps") records=(d.researchGaps||[]).filter(x=>JSON.stringify(x).toLocaleLowerCase("fa").includes(q)).map((x,i)=>({title:"مورد "+(i+1),lines:[typeof x==="string"?x:JSON.stringify(x)]}));
+records.forEach(r=>{const c=card(r.title,r.lines);(r.lists||[]).forEach(([t,a])=>{if(a?.length)c.append(listOf(t,a))});if(r.url){const a=el("a","",r.url);a.href=r.url;a.target="_blank";a.rel="noopener noreferrer";c.append(a)}box.append(c)});
+if(!records.length)box.append(el("p","empty","موردی با این جست‌وجو پیدا نشد."));
+}
+function load(d){state.data=d;renderStats(d);$("#statusText").textContent="بانک پژوهشی با موفقیت بارگذاری شد؛ وضعیت فایل: "+d.status+" | تاریخ تهیه: "+d.createdAt+" | "+d.scope;$("#disclaimer").textContent=d.disclaimer||"";$("#bookDisclaimer").textContent=d.bookBibliographyDisclaimer||"";const cats=[...new Set(d.products.map(x=>x.category).filter(Boolean))];$("#category").replaceChildren(el("option","","همه دسته‌ها"));cats.forEach(x=>{const o=el("option","",x);o.value=x;$("#category").append(o)});render()}
+document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>{state.tab=b.dataset.tab;state.category="";$("#category").value="";setTabs();render()}));
+$("#search").addEventListener("input",e=>{state.query=e.target.value;render()});
+$("#category").addEventListener("change",e=>{state.category=e.target.value;render()});
+fetch("/data/health/health-product-research.json",{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("HTTP "+r.status);return r.json()}).then(load).catch(e=>{$("#statusText").textContent="بارگذاری بانک ناموفق بود: "+e.message;$("#list").textContent="فایل داده در دسترس نیست."});
+})();
+</script>
+</body></html>
