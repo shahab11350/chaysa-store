@@ -111,6 +111,7 @@ function renderLetterPreview(){
  const lines=[
   'CHAYSA | فروشگاه اینترنتی چایسا',
   'نامه رسمی',
+  ($('letterTitle').value.trim()?'عنوان: '+$('letterTitle').value.trim():''),
   'شماره نامه: '+letterMeta.letterNumber,
   'تاریخ و ساعت: '+letterMeta.dateTime,
   '--------------------------------',
@@ -126,7 +127,7 @@ async function loadLetterArchive(){
  const host=$('letterArchive');host.textContent='در حال دریافت بایگانی…';
  try{
   const rows=await api('letters');host.replaceChildren();
-  if(!rows.length){host.textContent='هنوز نامه‌ای ارسال نشده است.';return}
+  if(!rows.length){host.textContent='هنوز نامه‌ای در بایگانی ثبت نشده است.';return}
   rows.forEach(row=>{
    const item=document.createElement('div');item.className='letter-archive-item';
    const deliveryLabel=row.deliveryStatus==='not_sent'?'فقط در بایگانی؛ ارسال نشده':row.deliveryStatus==='sent'?'ارسال به هر دو حساب':row.deliveryStatus==='partial'?'ارسال ناقص':row.deliveryStatus==='pending'?'در انتظار نتیجه ارسال':'ارسال ناموفق';
