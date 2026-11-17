@@ -437,7 +437,7 @@ async function deliverOrderStatusNotification(order) {
   const platform = String(customer.messengerPlatform || "");
   const chatId = String(customer.messengerId || "").trim();
   if (platform === "telegram") {
-    if (!process.env.TELEGRAM_BOT_TOKEN || !/^-?\\d{5,20}$/.test(chatId))
+    if (!process.env.TELEGRAM_BOT_TOKEN || !/^-?\d{5,20}$/.test(chatId))
       return { status: "not_configured", platform, error: "شناسه یا اتصال تلگرام مشتری آماده نیست." };
     const sent = await sendTelegramText(chatId, orderCustomerStatusMessage(order));
     return { status: sent ? "sent" : "failed", platform, error: sent ? null : "ارسال پیام تلگرام ناموفق بود." };
