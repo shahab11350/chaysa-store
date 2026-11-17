@@ -15,6 +15,7 @@ on:
       - "server.js"
       - "products.html"
       - "admin.html"
+      - "media-library.html"
       - "health-approval.html"
       - "letter-receipt.html"
       - "docs/CHAYSA_PROJECT_MASTER.md"
@@ -50,6 +51,17 @@ jobs:
           Path('/tmp/chaysa-admin.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
           PY
           node --check /tmp/chaysa-admin.js
+      - name: Check media library inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('media-library.html').read_text(encoding='utf-8')
+          scripts = source.split('<script>')
+          if len(scripts) < 2:
+              raise SystemExit('media library inline script not found')
+          Path('/tmp/chaysa-media-library.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
+          PY
+          node --check /tmp/chaysa-media-library.js
       - name: Check receipt page inline JavaScript syntax
         run: |
           python - <<'PY'
