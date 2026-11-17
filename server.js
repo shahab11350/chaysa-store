@@ -1420,13 +1420,15 @@ const mediaUpload = multer({
     cb(null, allowed.test(file.mimetype));
   }
 });
+let mediaProcessing = false;
 function runFfmpeg(args) {
   return new Promise((resolve, reject) => {
     const child = spawn(ffmpegPath, ["-hide_banner", "-loglevel", "error", "-y", ...args], { stdio: ["ignore", "ignore", "pipe"] });
-    let error = "";
+    let error = "", settled = false;
+    const timeout = setTimeout(() => { child.kill("SIGKILL"); if (!settled) { settled = true; reject(new Error("media_processing_timeout")); } }, 120000);
     child.stderr.on("data", chunk => { error += chunk.toString().slice(0, 3000); });
-    child.on("error", reject);
-    child.on("close", code => code === 0 ? resolve() : reject(new Error(error || "media_conversion_failed")));
+    child.on("error", cause => { if (!settled) { settled = true; clearTimeout(timeout); reject(cause); } });
+    child.on("close", code => { clearTimeout(timeout); if (settled) return; settled = true; code === 0 ? resolve() : reject(new Error(error || "media_conversion_failed")); });
   });
 }
 app.get("/api/admin/media", requireAdmin, (_req, res) => {
@@ -1435,6 +1437,8 @@ app.get("/api/admin/media", requireAdmin, (_req, res) => {
 app.post("/api/admin/media", requireAdmin, mediaUpload.single("media"), async (req, res) => {
   if (!req.file) return json(res, 400, { error: "فرمت فایل پشتیبانی نمی‌شود یا فایل انتخاب نشده است." });
   const source = req.file.path;
+  if (mediaProcessing) { try { fs.unlinkSync(source); } catch (_) {} return json(res, 429, { error: "پردازش رسانه دیگری در حال انجام است؛ کمی بعد دوباره تلاش کنید." }); }
+  mediaProcessing = true;
   const id = crypto.randomUUID();
   const inputBytes = req.file.size;
   const mime = req.file.mimetype;
@@ -1466,6 +1470,7 @@ app.post("/api/admin/media", requireAdmin, mediaUpload.single("media"), async (r
     return json(res, 422, { error: "پردازش فایل انجام نشد؛ فرمت یا محتوای فایل را بررسی کنید." });
   } finally {
     try { if (fs.existsSync(source)) fs.unlinkSync(source); } catch (_) {}
+    mediaProcessing = false;
   }
 });
 app.delete("/api/admin/media/:id", requireAdmin, (req, res) => {
