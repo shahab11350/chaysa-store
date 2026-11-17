@@ -372,7 +372,7 @@ async function handleRubikaUpdate(update){
  }
  if(!msg||msg.sender_type!=="User"||typeof msg.text!=="string")return;
  const command=msg.text.trim();
- if(command==="/start"||/^\\/start@Chaysa2026bot$/i.test(command)||command==="شروع"){
+ if(command==="/start"||/^\/start@Chaysa2026bot$/i.test(command)||command==="شروع"){
   const sent=await sendRubikaText(chatId,welcome);
   console.log("Rubika /start response:",sent?"sent":"failed");
  }
