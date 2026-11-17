@@ -398,6 +398,76 @@ test("CHAYSA HEALTH approval link is delivered privately, one-time and archived 
 });
 
 
+
+test("CHAYSA HEALTH approval can be created and completed without Telegram delivery", async () => {
+  const login = await fetch(baseUrl + "/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: "guide-test-only-password" })
+  });
+  assert.equal(login.status, 200);
+  const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
+  const beforeMessages = telegramLog().length;
+
+  const create = await fetch(baseUrl + "/api/admin/health-approval/create-link", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: "{}"
+  });
+  assert.equal(create.status, 201);
+  const created = await create.json();
+  assert.equal(created.deliveryStatus, "manual_link_ready");
+  assert.equal(created.deliveryMethod, "manual_share");
+  assert.match(created.link, /^https:\/\/chaysa\.up\.railway\.app\/health-approval\.html#[A-Za-z0-9_-]{43}$/);
+  assert.equal(telegramLog().length, beforeMessages, "manual link creation must not call Telegram");
+
+  const duplicate = await fetch(baseUrl + "/api/admin/health-approval/create-link", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: "{}"
+  });
+  assert.equal(duplicate.status, 409);
+
+  const token = new URL(created.link).hash.slice(1);
+  const view = await fetch(baseUrl + "/api/health-approval/view", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token })
+  });
+  assert.equal(view.status, 200);
+  const letter = await view.json();
+  assert.match(letter.letter, /بخش مشاور سلامت/);
+
+  const decision = await fetch(baseUrl + "/api/health-approval/decision", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, reviewerName: "بتول بستانی", decision: "تأیید می‌شود" })
+  });
+  assert.equal(decision.status, 200);
+  const result = await decision.json();
+  assert.ok(result.archiveRecordId);
+
+  const archiveResponse = await fetch(baseUrl + "/api/admin/health-archive", {
+    headers: { Cookie: cookie }
+  });
+  assert.equal(archiveResponse.status, 200);
+  const archive = await archiveResponse.json();
+  const record = archive.find(item => item.id === result.archiveRecordId);
+  assert.ok(record);
+  assert.equal(record.deliveryMethod, "manual_share");
+  assert.equal(record.reviewerName, "بتول بستانی");
+  assert.equal(record.decision, "تأیید می‌شود");
+  assert.match(record.reviewerIdentityNote, /مستقلاً احراز هویت نشده/);
+
+  const replay = await fetch(baseUrl + "/api/health-approval/decision", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token, reviewerName: "بتول بستانی", decision: "تأیید نمی‌شود" })
+  });
+  assert.equal(replay.status, 409);
+});
+
+
 async function postLetterReceiptCallback(callbackData, chatId = "222222", callbackId = "letter-callback-test") {
   return fetch(baseUrl + "/telegram/webhook", {
     method: "POST",
