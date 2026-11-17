@@ -5,7 +5,7 @@ global.fetch = async function (input, init = {}) {
   const url = typeof input === "string" ? input : input.url;
   if (String(url).startsWith("https://botapi.rubika.ir/v3/")) {
     const entry={url:String(url),method:init.method||"POST",body:typeof init.body==="string"?init.body:""};
-    if(process.env.RUBIKA_MOCK_LOG)fs.appendFileSync(process.env.RUBIKA_MOCK_LOG,JSON.stringify(entry)+"\\n","utf8");
+    if(process.env.RUBIKA_MOCK_LOG)fs.appendFileSync(process.env.RUBIKA_MOCK_LOG,JSON.stringify(entry)+"\n","utf8");
     const method=String(url).split("/").pop();
     const data=method==="updateBotEndpoints"?{status:"Done"}:{message_id:"rubika-test-message"};
     return new Response(JSON.stringify({status:"OK",data}),{status:200,headers:{"content-type":"application/json"}});
