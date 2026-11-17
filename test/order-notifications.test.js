@@ -65,7 +65,7 @@ before(async () => {
       CHAYSA_OWNER_CHAT_ID: "111111", CHAYSA_BOSTANI_CHAT_ID: "222222",
       ORDER_CHAT_IDS: "111111,222222",
       TELEGRAM_MOCK_LOG: telegramLog, RUBIKA_MOCK_LOG: rubikaLog,
-      TELEGRAM_MOCK_FAIL_CUSTOMER_CHAT_IDS: "666666",
+      TELEGRAM_MOCK_FAIL_CUSTOMER_ONCE_CHAT_IDS: "666666",
       NODE_OPTIONS: "--require " + path.join(__dirname, "mock-telegram-fetch.js")
     },
     stdio: ["ignore", "pipe", "pipe"]
