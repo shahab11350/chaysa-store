@@ -7,13 +7,16 @@
   "scripts": {
     "start": "node server.js",
     "test:guide": "node --test test/guide-api.test.js test/order-notifications.test.js",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "test:media": "node --test test/media-library.test.js"
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
     "express": "^4.21.2",
-    "multer": "^1.4.5-lts.1"
+    "multer": "^1.4.5-lts.1",
+    "sharp": "^0.34.4",
+    "ffmpeg-static": "^5.2.0"
   }
 }

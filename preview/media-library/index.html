@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>کتابخانه رسانه چایسا · نمونه آزمایشی</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f7f5ef;color:#26372b;font:15px Tahoma,sans-serif}
+header{background:#173b2b;color:#fff;padding:20px;text-align:center}header b{color:#e6cc85;font-size:23px}
+.wrap{max-width:1000px;margin:20px auto;padding:0 14px}.panel{background:#fff;border:1px solid #e8dfca;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 4px 14px #0000000a}
+h2{font-size:18px;margin:0 0 14px}button,input{font:inherit}button{border:0;border-radius:9px;padding:11px 15px;background:#244b37;color:#fff;cursor:pointer}
+button.secondary{background:#eee9dc;color:#443b2a}button.danger{background:#9d3939}button:disabled{opacity:.5;cursor:wait}
+input{width:100%;padding:12px;border:1px solid #d9d2c2;border-radius:9px;background:#fff}.muted{font-size:12px;color:#777;line-height:2}
+.status{padding:10px;border-radius:8px;background:#f7f5ef;margin:12px 0;line-height:2;overflow-wrap:anywhere}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px}.item{border:1px solid #e8dfca;border-radius:12px;padding:10px;min-width:0}
+.item img,.item video{width:100%;height:130px;object-fit:contain;background:#f7f5ef;border-radius:8px}.item audio{width:100%;margin:12px 0}
+.name{font-size:12px;overflow-wrap:anywhere;margin:8px 0}.meta{font-size:11px;color:#777;line-height:1.8}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.row button{flex:0 0 auto}
+.progress{height:8px;background:#eee;border-radius:10px;overflow:hidden;margin:10px 0}.progress>div{height:100%;width:0;background:#b99b55;transition:width .15s}
+.hidden{display:none!important}.warning{border-right:3px solid #b99b55;padding:8px 12px;background:#faf7ed}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.panel{padding:13px}.item{padding:7px}.item img,.item video{height:100px}}
+</style></head>
+<body>
+<header><b>CHAYSA</b><div>کتابخانه مرکزی رسانه · نمونه آزمایشی مستقل</div></header>
+<main class="wrap">
+<section class="panel" id="loginPanel">
+<h2>ورود به نمونه آزمایشی</h2>
+<p class="muted">این محیط مستقل از سایت اصلی چایساست. برای آزمایش، رمز دسترسی نمونه را وارد کن.</p>
+<form id="loginForm"><input id="password" type="password" autocomplete="current-password" placeholder="رمز آزمایشی" required><div class="status" id="loginStatus" aria-live="polite">پس از ورود می‌توانی فایل انتخاب و بارگذاری کنی.</div><button id="loginButton" type="submit">ورود</button></form>
+</section>
+<section id="appPanel" class="hidden">
+<section class="panel">
+<div class="row"><h2 style="margin:0;flex:1">افزودن رسانه</h2><button class="secondary" id="logout">خروج</button></div>
+<p class="muted">تصویر، موسیقی یا ویدئو را انتخاب کن. فایل هنگام بارگذاری به‌صورت خودکار بهینه می‌شود. فایل اصلی پس از پردازش نگهداری نمی‌شود.</p>
+<input id="files" type="file" accept="image/jpeg,image/png,image/webp,image/avif,audio/mpeg,audio/mp4,audio/aac,audio/ogg,audio/wav,audio/webm,video/mp4,video/quicktime,video/webm,video/x-matroska">
+<div class="muted">حداکثر فایل ورودی: ۱۰۰ مگابایت. خروجی: تصویر WebP، صوت MP3 و ویدئو MP4.</div>
+<div class="warning muted">این نمونه روی فضای موقت رایگان اجرا می‌شود؛ فایل‌ها ممکن است با خوابیدن یا راه‌اندازی مجدد سرویس پاک شوند. فایل مهم بارگذاری نکن.</div>
+<div class="progress hidden" id="progress"><div id="bar"></div></div>
+<div class="status" id="status" aria-live="polite">آماده انتخاب فایل.</div>
+<button id="upload">بارگذاری و کاهش خودکار حجم</button>
+</section>
+<section class="panel"><div class="row"><h2 style="flex:1">رسانه‌های ذخیره‌شده</h2><button class="secondary" id="refresh">به‌روزرسانی</button></div><div id="library" class="grid"></div></section>
+</section>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const fmt=n=>{if(n<1024)return n+' بایت';if(n<1048576)return (n/1024).toFixed(1)+' کیلوبایت';return (n/1048576).toFixed(2)+' مگابایت'};
+async function api(url,opts={}){const r=await fetch(url,{credentials:'same-origin',...opts});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'خطا در ارتباط با سرور');return d}
+function node(tag,text,cls){const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e}
+async function showSession(){try{const a=await api('/api/auth');$('loginPanel').classList.toggle('hidden',a.authenticated);$('appPanel').classList.toggle('hidden',!a.authenticated);if(a.authenticated)await load()}catch(e){$('loginStatus').textContent=e.message}}
+async function load(){const host=$('library');host.replaceChildren();try{const rows=await api('/api/admin/media');if(!rows.length){host.append(node('p','هنوز رسانه‌ای بارگذاری نشده است.','muted'));return}for(const r of rows){const card=node('article',undefined,'item');let preview;if(r.kind==='image'){preview=node('img');preview.src=r.url;preview.alt=r.name}else if(r.kind==='video'){preview=node('video');preview.src=r.url;preview.controls=true;preview.preload='metadata'}else{preview=node('div');preview.textContent='فایل صوتی';preview.append(node('audio'));preview.lastChild.src=r.url;preview.lastChild.controls=true}const name=node('div',r.name,'name');const meta=node('div',r.kind+' · '+fmt(r.originalSize)+' ← '+fmt(r.size),'meta');const del=node('button','حذف','danger');del.onclick=async()=>{if(!confirm('این فایل از نمونه آزمایشی حذف شود؟'))return;try{await api('/api/admin/media/'+encodeURIComponent(r.id),{method:'DELETE'});await load()}catch(e){alert(e.message)}};card.append(preview,name,meta,del);host.append(card)}}catch(e){$('status').textContent=e.message}}
+function uploadFile(file){return new Promise((resolve,reject)=>{const xhr=new XMLHttpRequest();xhr.open('POST','/api/admin/media');xhr.withCredentials=true;xhr.upload.onprogress=e=>{if(e.lengthComputable)$('bar').style.width=Math.round(e.loaded/e.total*100)+'%'};xhr.onload=()=>{let d={};try{d=JSON.parse(xhr.responseText)}catch{};if(xhr.status>=200&&xhr.status<300)resolve(d);else reject(Error(d.error||'بارگذاری ناموفق بود'))};xhr.onerror=()=>reject(Error('ارتباط هنگام بارگذاری قطع شد'));const data=new FormData();data.append('media',file);xhr.send(data)})}
+$('loginForm').onsubmit=async e=>{e.preventDefault();$('loginButton').disabled=true;try{await api('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('password').value})});$('password').value='';await showSession()}catch(err){$('loginStatus').textContent=err.message}finally{$('loginButton').disabled=false}};
+$('logout').onclick=async()=>{try{await api('/api/logout',{method:'POST'});await showSession()}catch(e){$('status').textContent=e.message}};
+$('upload').onclick=async()=>{const file=$('files').files[0];if(!file){$('status').textContent='ابتدا یک فایل انتخاب کن.';return}if(file.size>100*1024*1024){$('status').textContent='حجم فایل بیشتر از ۱۰۰ مگابایت است.';return}$('upload').disabled=true;$('progress').classList.remove('hidden');$('bar').style.width='0%';$('status').textContent='در حال بارگذاری و پردازش خودکار…';try{const r=await uploadFile(file);const saved=r.originalSize-r.size;$('status').textContent='انجام شد؛ حجم از '+fmt(r.originalSize)+' به '+fmt(r.size)+' رسید. '+(saved>0?'صرفه‌جویی '+Math.round(saved/r.originalSize*100)+'٪':'');$('files').value='';await load()}catch(e){$('status').textContent=e.message}finally{$('upload').disabled=false}};
+$('refresh').onclick=load;showSession();
+</script></body></html>

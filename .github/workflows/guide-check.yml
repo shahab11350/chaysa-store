@@ -13,8 +13,10 @@ on:
       - chaysa-backup
     paths:
       - "server.js"
+      - "preview/**"
       - "products.html"
       - "admin.html"
+      - "media-library.html"
       - "health-approval.html"
       - "letter-receipt.html"
       - "docs/CHAYSA_PROJECT_MASTER.md"
@@ -36,9 +38,24 @@ jobs:
         with:
           node-version: "20"
       - name: Install dependencies
-        run: npm install --ignore-scripts
+        run: npm install
       - name: Check server JavaScript syntax
         run: node --check server.js
+      - name: Check isolated media preview server syntax
+        run: |
+          node --check preview/media-library/server.js
+          node -e "JSON.parse(require('fs').readFileSync('preview/media-library/package.json', 'utf8'))"
+      - name: Check isolated media preview page JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('preview/media-library/index.html').read_text(encoding='utf-8')
+          scripts = source.split('<script>')
+          if len(scripts) < 2:
+              raise SystemExit('preview inline script not found')
+          Path('/tmp/chaysa-preview.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
+          PY
+          node --check /tmp/chaysa-preview.js
       - name: Check admin inline JavaScript syntax
         run: |
           python - <<'PY'
@@ -50,6 +67,17 @@ jobs:
           Path('/tmp/chaysa-admin.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
           PY
           node --check /tmp/chaysa-admin.js
+      - name: Check media library inline JavaScript syntax
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          source = Path('media-library.html').read_text(encoding='utf-8')
+          scripts = source.split('<script>')
+          if len(scripts) < 2:
+              raise SystemExit('media library inline script not found')
+          Path('/tmp/chaysa-media-library.js').write_text(scripts[-1].split('</script>', 1)[0], encoding='utf-8')
+          PY
+          node --check /tmp/chaysa-media-library.js
       - name: Check receipt page inline JavaScript syntax
         run: |
           python - <<'PY'
@@ -74,3 +102,5 @@ jobs:
           node --check /tmp/chaysa-health-approval.js
       - name: Run guide API tests
         run: npm run test:guide
+      - name: Run media library integration tests
+        run: npm run test:media
