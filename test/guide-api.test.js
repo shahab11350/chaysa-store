@@ -460,3 +460,45 @@ test("general letters use a direct Telegram inline receipt button", async () => 
   archive = JSON.parse(readFileSync(archivePath, "utf8"));
   assert.equal(archive[0].receivedByTelegramId, "222222");
 });
+
+
+test("product image upload requires admin access and validates actual WebP content", async () => {
+  const unauthenticatedForm = new FormData();
+  unauthenticatedForm.append("image", new Blob(["not-an-image"], { type: "image/webp" }), "fake.webp");
+  const unauthenticated = await fetch(baseUrl + "/api/admin/upload", {
+    method: "POST", body: unauthenticatedForm
+  });
+  assert.equal(unauthenticated.status, 401);
+
+  const login = await fetch(baseUrl + "/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: "guide-test-only-password" })
+  });
+  assert.equal(login.status, 200);
+  const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
+
+  const spoofed = new FormData();
+  spoofed.append("image", new Blob(["not-a-webp-file"], { type: "image/webp" }), "fake.webp");
+  const rejected = await fetch(baseUrl + "/api/admin/upload", {
+    method: "POST", headers: { Cookie: cookie }, body: spoofed
+  });
+  assert.equal(rejected.status, 400);
+  assert.match((await rejected.json()).error, /WebP/);
+
+  const wrongMime = new FormData();
+  wrongMime.append("image", new Blob(["RIFF0000WEBP"], { type: "image/png" }), "fake.png");
+  const rejectedMime = await fetch(baseUrl + "/api/admin/upload", {
+    method: "POST", headers: { Cookie: cookie }, body: wrongMime
+  });
+  assert.equal(rejectedMime.status, 400);
+
+  const validWebpHeader = new FormData();
+  validWebpHeader.append("image", new Blob(["RIFF0000WEBP"], { type: "image/webp" }), "photo.webp");
+  const accepted = await fetch(baseUrl + "/api/admin/upload", {
+    method: "POST", headers: { Cookie: cookie }, body: validWebpHeader
+  });
+  assert.equal(accepted.status, 200);
+  const body = await accepted.json();
+  assert.match(body.url, /^\/media\/[a-f0-9-]+\.webp$/);
+});

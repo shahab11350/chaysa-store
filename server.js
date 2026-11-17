@@ -712,14 +712,20 @@ app.put("/api/admin/products", requireAdmin, (req, res) => {
 const upload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, MEDIA),
-    filename: (_req, file, cb) => {
-      const ext = path.extname(file.originalname || "").toLowerCase().replace(/[^.a-z0-9]/g, "");
-      cb(null, crypto.randomUUID() + (ext || ".img"));
+    filename: (_req, _file, cb) => {
+      cb(null, crypto.randomUUID() + ".webp");
     }
   }),
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
-  fileFilter: (_req, file, cb) => cb(null, /^image\/(jpeg|png|webp|gif|avif)$/i.test(file.mimetype))
+  fileFilter: (_req, file, cb) => cb(null, file.mimetype === "image/webp")
 });
+function isProductWebp(file) {
+  if (!file || !file.path) return false;
+  const head = fs.readFileSync(file.path).subarray(0, 12);
+  return head.length === 12 &&
+    head.toString("ascii", 0, 4) === "RIFF" &&
+    head.toString("ascii", 8, 12) === "WEBP";
+}
 
 const HEALTH_ARCHIVE_DIR = path.join(DATA, "health-archive");
 const HEALTH_ARCHIVE_FILE = path.join(DATA, "health-archive.json");
@@ -1204,7 +1210,11 @@ app.get("/api/admin/health-archive/:id/evidence", requireAdmin, (req, res) => {
 });
 
 app.post("/api/admin/upload", requireAdmin, upload.single("image"), (req, res) => {
-  if (!req.file) return json(res, 400, { error: "فقط فایل تصویری تا ۵ مگابایت مجاز است." });
+  if (!req.file) return json(res, 400, { error: "فقط تصویر WebP معتبر تا ۵ مگابایت مجاز است." });
+  if (!isProductWebp(req.file)) {
+    try { fs.unlinkSync(req.file.path); } catch (_) {}
+    return json(res, 400, { error: "محتوای فایل با قالب واقعی WebP مطابقت ندارد." });
+  }
   return json(res, 200, { url: "/media/" + path.basename(req.file.filename) });
 });
 app.use("/media", express.static(MEDIA, { maxAge: "1y", immutable: true, fallthrough: false }));
