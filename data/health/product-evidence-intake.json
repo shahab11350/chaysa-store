@@ -1,0 +1,2636 @@
+{
+  "schemaVersion": 1,
+  "title": "CHAYSA HEALTH — Product Evidence Intake",
+  "status": "awaiting_manufacturer_documents",
+  "createdAt": "2026-11-17",
+  "instructions": "این فایل فقط الگوی گردآوری مدرک است. فیلدهای خالی را حدس نزنید. مدرک باید به SKU دقیق متصل و قابل ردیابی باشد. داده تا بازبینی تخصصی برای پاسخ مشتری مجاز نیست.",
+  "requiredEvidence": [
+    {
+      "key": "label",
+      "label": "تصویر/متن کامل برچسب"
+    },
+    {
+      "key": "ingredients",
+      "label": "فهرست مواد تشکیل‌دهنده و مقدار/درصد"
+    },
+    {
+      "key": "net_content",
+      "label": "وزن خالص و تعداد تی‌بگ/بسته"
+    },
+    {
+      "key": "preparation",
+      "label": "روش دم‌آوری سازنده"
+    },
+    {
+      "key": "storage_batch",
+      "label": "شرایط نگهداری و تاریخ/بچ"
+    },
+    {
+      "key": "manufacturer_license",
+      "label": "تولیدکننده و مجوز/استاندارد"
+    },
+    {
+      "key": "allergens",
+      "label": "آلرژن و آلودگی متقاطع"
+    }
+  ],
+  "records": [
+    {
+      "recordIndex": 1,
+      "sku": "1401008",
+      "productName": "چای نارگیل کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": [
+        "duplicate_name_requires_catalog_match"
+      ]
+    },
+    {
+      "recordIndex": 2,
+      "sku": "1401029",
+      "productName": "چای کوهی",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 3,
+      "sku": "1401034",
+      "productName": "چای سبز و رزماری",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 4,
+      "sku": "1403001",
+      "productName": "چای ماسالا",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 5,
+      "sku": "1401025",
+      "productName": "چای کرن‌بری کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 6,
+      "sku": "1401018",
+      "productName": "چای سبز و زیره کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 7,
+      "sku": "1401028",
+      "productName": "چای سیلان و گل محمدی",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 8,
+      "sku": "1401026",
+      "productName": "چای اولانگ",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 9,
+      "sku": "1401017",
+      "productName": "چای سبز کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 10,
+      "sku": "1401016",
+      "productName": "چای بهارنارنج کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 11,
+      "sku": "1401022",
+      "productName": "چای سفید",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 12,
+      "sku": "1401021",
+      "productName": "مخلوط چای سفید و سبز",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 13,
+      "sku": "1401014",
+      "productName": "چای زعفرانی کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 14,
+      "sku": "1401020",
+      "productName": "مخلوط چای سیاه و گیاه به‌لیمو",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 15,
+      "sku": "1401010",
+      "productName": "چای معطر وانیل کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 16,
+      "sku": "1401019",
+      "productName": "مخلوط چای سبز و گیاه نعناع‌فلفلی",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 17,
+      "sku": "1401013",
+      "productName": "چای سبز",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 18,
+      "sku": "1401011",
+      "productName": "چای ترش کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 19,
+      "sku": "1401012",
+      "productName": "چای سیاه کله‌مورچه",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 20,
+      "sku": "1401009",
+      "productName": "چای بلوبری کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 21,
+      "sku": "1401005",
+      "productName": "چای معجون زعفرانی کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 22,
+      "sku": "1401006",
+      "productName": "چای زنجبیل کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 23,
+      "sku": "1401004",
+      "productName": "چای کلاسیک کیسه‌ای با عطر برگاموت",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 24,
+      "sku": "1401002",
+      "productName": "چای هل کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 25,
+      "sku": "1402014",
+      "productName": "دمنوش آکاکلد هرب 012",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 26,
+      "sku": "1402012",
+      "productName": "دمنوش به 013",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 27,
+      "sku": "1402011",
+      "productName": "دمنوش ژینگو 011",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 28,
+      "sku": "1402013",
+      "productName": "دمنوش فنل فیت هرب 015",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 29,
+      "sku": "1402015",
+      "productName": "دمنوش هیکلد هرب 014",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 30,
+      "sku": "1402008",
+      "productName": "دمنوش زیرفون 007",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 31,
+      "sku": "1402007",
+      "productName": "دمنوش میوه‌های قرمز 008",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 32,
+      "sku": "1402005",
+      "productName": "دمنوش انرژی‌زا 002",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 33,
+      "sku": "1402004",
+      "productName": "دمنوش آرامش 001",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 34,
+      "sku": "1402003",
+      "productName": "دمنوش آویشن 004",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 35,
+      "sku": "1402002",
+      "productName": "دمنوش بابونه 005",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 36,
+      "sku": "1402001",
+      "productName": "دمنوش گزنه 003",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 37,
+      "sku": "1402017",
+      "productName": "دمنوش میوه‌های استوایی",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 38,
+      "sku": "1402016",
+      "productName": "دمنوش فلفل",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 39,
+      "sku": "41090",
+      "productName": "ادویه سوسیس",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 40,
+      "sku": "41089",
+      "productName": "ادویه همبرگر",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 41,
+      "sku": "41088",
+      "productName": "ادویه فلافل",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 42,
+      "sku": "41079",
+      "productName": "ادویه پلویی",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 43,
+      "sku": "41096",
+      "productName": "ادویه مراکشی",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 44,
+      "sku": "41095",
+      "productName": "ادویه فرانسوی",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 45,
+      "sku": "41073",
+      "productName": "ادویه جوجه‌کباب",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 46,
+      "sku": "41072",
+      "productName": "ادویه تندوری",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 47,
+      "sku": "41091",
+      "productName": "ادویه مکزیکی (تاکو)",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": []
+    },
+    {
+      "recordIndex": 48,
+      "sku": null,
+      "productName": "چای نارگیل کیسه‌ای",
+      "evidenceStatus": "not_received",
+      "compositionStatus": "unverified",
+      "evidence": {
+        "label": {
+          "status": "missing",
+          "fileOrUrl": null,
+          "notes": null
+        },
+        "ingredients": {
+          "status": "missing",
+          "verbatim": null,
+          "quantities": null,
+          "source": null
+        },
+        "netContent": {
+          "status": "missing",
+          "value": null,
+          "source": null
+        },
+        "preparation": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "storageBatch": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        },
+        "manufacturerLicense": {
+          "status": "missing",
+          "manufacturer": null,
+          "licenseOrStandard": null,
+          "source": null
+        },
+        "allergens": {
+          "status": "missing",
+          "verbatim": null,
+          "source": null
+        }
+      },
+      "review": {
+        "botanicalIdentity": "not_reviewed",
+        "evidenceQuality": "not_reviewed",
+        "safetyReview": "not_reviewed",
+        "reviewer": null,
+        "reviewedAt": null
+      },
+      "flags": [
+        "missing_sku",
+        "duplicate_name_requires_catalog_match"
+      ]
+    }
+  ]
+}
