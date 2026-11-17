@@ -50,6 +50,17 @@
 <p class="muted">با این دکمه، لینک یک‌بارمصرف و هفت‌روزه ساخته و فقط به حساب تلگرام خانم بستانی ارسال می‌شود. پس از ثبت یکی از سه نتیجه، پرونده به‌صورت خودکار در بایگانی ثبت و اعلان آن برای دو حساب مرتبط ارسال می‌شود.</p>
 <button id="sendHealthApproval">ایجاد و ارسال نامه در تلگرام</button><div id="healthApprovalSendStatus" class="muted" aria-live="polite"></div>
 </div>
+<div style="border:1px solid #d9e5d9;border-radius:12px;padding:14px;margin:14px 0;background:#f8fbf7">
+<h3>ساخت لینک امن برای ارسال خارج از تلگرام</h3>
+<p class="muted">این روش به ربات تلگرام وابسته نیست. لینک اختصاصی یک‌بارمصرف و هفت‌روزه ساخته می‌شود؛ آن را فقط برای خانم بستانی از طریق پیام‌رسان دلخواه بفرستید. لینک تا زمان انقضا یا ثبت نتیجه فعال می‌ماند.</p>
+<button id="createHealthApprovalLink" type="button">ساخت لینک اختصاصی تأیید</button>
+<div id="healthApprovalManualStatus" class="muted" aria-live="polite"></div>
+<div id="healthApprovalManualLinkBox" class="hidden">
+<label for="healthApprovalManualLink">لینک خصوصی تأیید (محرمانه)</label>
+<input id="healthApprovalManualLink" type="text" readonly autocomplete="off" dir="ltr">
+<button id="copyHealthApprovalManualLink" class="secondary" type="button">کپی لینک</button>
+</div>
+</div>
 <div style="border:1px solid #e8dfca;border-radius:12px;padding:14px;margin:14px 0">
 <h3>ثبت پرونده جدید</h3>
 <label for="healthReviewer">نام و نام خانوادگی بررسی‌کننده</label><input id="healthReviewer" maxlength="120" placeholder="سرکار خانم بستانی">
@@ -282,6 +293,23 @@ $('sendHealthApproval').onclick=async()=>{
   out.textContent='نامه با موفقیت به ربات تلگرام خانم بستانی ارسال شد. مهلت لینک: '+new Date(result.expiresAt).toLocaleString('fa-IR')+' · شناسه درخواست: '+result.requestId;
  }catch(e){out.textContent=e.message}
  finally{button.disabled=false}
+};
+$('createHealthApprovalLink').onclick=async()=>{
+ const button=$('createHealthApprovalLink'),out=$('healthApprovalManualStatus'),box=$('healthApprovalManualLinkBox');
+ if(!confirm('یک لینک خصوصی و یک‌بارمصرف برای ارسال دستی به خانم بستانی ساخته شود؟'))return;
+ button.disabled=true;out.textContent='در حال ساخت لینک امن…';box.classList.add('hidden');
+ try{
+  const result=await api('health-approval/create-link',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+  $('healthApprovalManualLink').value=result.link;
+  box.classList.remove('hidden');
+  out.textContent='لینک ساخته شد. آن را فقط برای خانم بستانی ارسال کنید. اعتبار تا: '+new Date(result.expiresAt).toLocaleString('fa-IR')+' · شناسه درخواست: '+result.requestId;
+ }catch(e){out.textContent=e.message}
+ finally{button.disabled=false}
+};
+$('copyHealthApprovalManualLink').onclick=async()=>{
+ const field=$('healthApprovalManualLink'),out=$('healthApprovalManualStatus');
+ try{await navigator.clipboard.writeText(field.value);out.textContent='لینک خصوصی کپی شد؛ آن را فقط برای خانم بستانی بفرستید.'}
+ catch(_){field.focus();field.select();out.textContent='لینک انتخاب شد؛ از گزینه کپی مرورگر استفاده کنید.'}
 };
 $('saveHealthArchive').onclick=saveHealthArchive;
 $('letterPreviewBtn').onclick=renderLetterPreview;
