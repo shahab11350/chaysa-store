@@ -451,3 +451,11 @@ Volume فعلی Railway در مسیر `/data` برای ذخیره پایدار �
 - مسیر `/rubika/webhook/:key` کلید مشتق‌شده از توکن را با SHA-256 و مقایسه ثابت‌زمان بررسی می‌کند. توکن در URL و log ثبت نمی‌شود.
 - `/start` شناسه گفت‌وگو را به مشتری اعلام می‌کند. فاکتور مشتری فقط از کانال انتخابی ارسال و وضعیت آن در `customerDelivery` جدا از اعلان مدیران ثبت می‌شود.
 - مرجع فنی: https://github.com/AliRn76/rubika-bot/blob/master/docs/fa/docs/methods.md و https://github.com/AliRn76/rubika-bot/blob/master/rubika_bot/models.py. آزمون زنده و انتشار هنوز تأیید نشده است.
+
+
+## وضعیت عملیاتی اتصال روبیکا — 2026-11-17
+- PR #20 ادغام شد: commit `c7a28d743c92b20d92e5931e739e2cc5c03a99a4`.
+- CI run `44002816930`: SUCCESS؛ ۱۶ تست و بررسی نحو سرور موفق.
+- Railway deployment `7835855e-ae38-4aad-88e6-b801dc7d5168`: SUCCESS؛ لاگ startup، ثبت وب‌هوک روبیکا را با وضعیت `ok` گزارش کرد.
+- آزمون زنده health endpoint پس از انتشار: HTTP پاسخ JSON با `ok: true` و سرویس `chaysa-backup`.
+- محدودیت آزمون: هنوز پیام واقعی `/start` از روبیکا دریافت نشده و ارسال فاکتور به یک شناسه واقعی مشتری آزمایش نشده است. تا انجام آن، تحویل واقعی به کاربر نهایی تأییدشده محسوب نمی‌شود.
