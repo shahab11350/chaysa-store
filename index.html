@@ -222,7 +222,7 @@ if(document.readyState==="loading"){
     <strong>نسخه آزمایشی</strong>
     <p>این بخش در مرحله آزمایش و بررسی قرار دارد و استفاده از آن فعلاً جنبه آزمایشی دارد.</p>
     <p><strong>تأیید محتوایی و عملکردی:</strong> سرکار خانم بستانی، تأییدکننده اصلی راهنمای چایسا.</p>
-    <p><strong>تأیید فنی:</strong> آقای نظام، مالک پروژه چایسا؛ پس از بررسی صحت عملکرد، امنیت و پایداری سامانه.</p>
+    <p><strong>مسئول محتوای سایت:</strong> محمدرضا نظام؛ مسئول تهیه، تدوین، بازبینی، اصلاح و به‌روزرسانی محتوای تمام بخش‌های سایت چایسا.</p><p><strong>تأیید فنی:</strong> پس از بررسی صحت عملکرد، امنیت و پایداری سامانه.</p>
     <p>تا دریافت و ثبت هر دو تأیید، این بخش در وضعیت آزمایشی باقی می‌ماند.</p>
   </aside>
   <p>راهنمای انتخاب محصول و پرسش‌های مرتبط با محصولات و خدمات چایسا</p>
@@ -283,7 +283,9 @@ if(document.readyState==="loading"){
 /* نمایش محصولات هر دسته در صفحه‌ای جداگانه با کارت‌های مستقل */
 document.addEventListener("DOMContentLoaded", function () {
   const section = document.querySelector("#products");
+  if (!section) return; // این کد فقط در صفحه محصولات اجرا می‌شود.
   const categoryGrid = section.querySelector(".grid");
+  if (!categoryGrid) return;
   const page = document.createElement("div");
   page.className = "product-page";
   page.hidden = true;
