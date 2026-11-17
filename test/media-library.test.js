@@ -36,8 +36,8 @@ test("media library authenticates, compresses image/audio/video, lists and delet
     try {
       const { stdout } = await run("ps", ["-eo", "pid=,ppid=,rss=,pcpu="]);
       let rss = 0, cpu = 0;
-      for (const line of stdout.trim().split("\\n")) {
-        const values = line.trim().split(/\\s+/).map(Number);
+      for (const line of stdout.trim().split("\n")) {
+        const values = line.trim().split(/\s+/).map(Number);
         if (values.length === 4 && (values[0] === child.pid || values[1] === child.pid)) { rss += values[2]; cpu += values[3]; }
       }
       peakRssKb = Math.max(peakRssKb, rss); peakCpuPercent = Math.max(peakCpuPercent, cpu);
