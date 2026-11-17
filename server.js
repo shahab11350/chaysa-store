@@ -272,11 +272,22 @@ function readOrders(){try{const x=JSON.parse(fs.readFileSync(ORDERS_FILE,"utf8")
 function saveOrders(x){const t=ORDERS_FILE+".tmp";fs.writeFileSync(t,JSON.stringify(x,null,2),"utf8");fs.renameSync(t,ORDERS_FILE)}
 function normalizeDigits(v){return String(v||"").replace(/[۰-۹]/g,d=>String("۰۱۲۳۴۵۶۷۸۹".indexOf(d))).replace(/[٠-٩]/g,d=>String("٠١٢٣٤٥٦٧٨٩".indexOf(d)))}
 app.get("/api/admin/orders",requireAdmin,(_req,res)=>json(res,200,readOrders()));
-app.patch("/api/admin/orders/:id/status",requireAdmin,(req,res)=>{
+app.patch("/api/admin/orders/:id/status",requireAdmin,async(req,res)=>{
  const allowed=["در انتظار بررسی","در حال آماده‌سازی","ارسال‌شده","تحویل‌شده","لغوشده"];
  if(!allowed.includes(req.body.status))return json(res,400,{error:"وضعیت سفارش معتبر نیست."});
  const rows=readOrders(),o=rows.find(x=>x.id===req.params.id);if(!o)return json(res,404,{error:"سفارش پیدا نشد."});
- o.status=req.body.status;o.updatedAt=new Date().toISOString();if(o.status==="تحویل‌شده")o.deliveredAt=o.updatedAt;saveOrders(rows);return json(res,200,{ok:true,order:o});
+ try {
+  const result=await updateOrderStatus(rows,o,req.body.status);
+  return json(res,200,{ok:true,order:o,changed:result.changed,customerNotification:result.notification});
+ } catch (_) { return json(res,500,{error:"ثبت وضعیت سفارش انجام نشد."}); }
+});
+app.post("/api/admin/orders/:id/status-notification/retry",requireAdmin,async(req,res)=>{
+ const rows=readOrders(),o=rows.find(x=>x.id===req.params.id);if(!o)return json(res,404,{error:"سفارش پیدا نشد."});
+ try {
+  const result=await retryOrderStatusNotification(rows,o);
+  if(!result.ok)return json(res,409,{ok:false,error:result.error,customerNotification:o.statusNotification||null});
+  return json(res,200,{ok:true,customerNotification:o.statusNotification});
+ } catch (_) { return json(res,500,{ok:false,error:"ثبت نتیجه تلاش مجدد انجام نشد."}); }
 });
 const TELEGRAM_RECIPIENTS_FILE = path.join(DATA, "telegram-recipients.json");
 function readTelegramRecipients() {
@@ -408,6 +419,71 @@ async function sendTelegramText(chatId, text, replyMarkup) {
     const result = await response.json();
     return response.ok && result.ok === true;
   } catch (_) { return false; }
+}
+
+const ORDER_STATUSES = ["در انتظار بررسی","در حال آماده‌سازی","ارسال‌شده","تحویل‌شده","لغوشده"];
+function orderCustomerStatusMessage(order) {
+  const firstName = String(order.customer && order.customer.name || "").trim();
+  return [
+    "به‌روزرسانی سفارش چایسا",
+    firstName ? firstName + " عزیز،" : "مشتری گرامی،",
+    "شماره سفارش: " + String(order.id || ""),
+    "وضعیت جدید: " + String(order.status || ""),
+    "برای پیگیری، شناسه سفارش را نزد خود نگه دارید."
+  ].join("\n");
+}
+async function deliverOrderStatusNotification(order) {
+  const customer = order.customer || {};
+  const platform = String(customer.messengerPlatform || "");
+  const chatId = String(customer.messengerId || "").trim();
+  if (platform === "telegram") {
+    if (!process.env.TELEGRAM_BOT_TOKEN || !/^-?\d{5,20}$/.test(chatId))
+      return { status: "not_configured", platform, error: "شناسه یا اتصال تلگرام مشتری آماده نیست." };
+    const sent = await sendTelegramText(chatId, orderCustomerStatusMessage(order));
+    return { status: sent ? "sent" : "failed", platform, error: sent ? null : "ارسال پیام تلگرام ناموفق بود." };
+  }
+  if (platform === "rubika") {
+    if (!process.env.RUBIKA_BOT_TOKEN || !/^[A-Za-z0-9_-]{12,80}$/.test(chatId))
+      return { status: "not_configured", platform, error: "شناسه یا اتصال روبیکای مشتری آماده نیست." };
+    const sent = await sendRubikaText(chatId, orderCustomerStatusMessage(order));
+    return { status: sent ? "sent" : "failed", platform, error: sent ? null : "ارسال پیام روبیکا ناموفق بود." };
+  }
+  return { status: "not_configured", platform: "", error: "پیام‌رسان ثبت‌شده مشتری پشتیبانی نمی‌شود." };
+}
+async function updateOrderStatus(rows, order, nextStatus) {
+  const previousStatus = String(order.status || "در انتظار بررسی");
+  if (previousStatus === nextStatus)
+    return { changed: false, notification: order.statusNotification || null };
+  const now = new Date().toISOString();
+  order.status = nextStatus;
+  order.updatedAt = now;
+  if (nextStatus === "تحویل‌شده") order.deliveredAt = now;
+  order.statusNotification = {
+    status: "pending", platform: String(order.customer && order.customer.messengerPlatform || ""),
+    attemptedAt: null, updatedAt: now, attempts: Number(order.statusNotification && order.statusNotification.attempts || 0) + 1,
+    transitionId: crypto.randomUUID(), error: null
+  };
+  saveOrders(rows);
+  const delivery = await deliverOrderStatusNotification(order);
+  Object.assign(order.statusNotification, delivery, { attemptedAt: new Date().toISOString() });
+  try { saveOrders(rows); }
+  catch (_) { return { changed: true, notification: { ...order.statusNotification, persistence: "failed" } }; }
+  return { changed: true, notification: order.statusNotification };
+}
+async function retryOrderStatusNotification(rows, order) {
+  const previous = order.statusNotification;
+  if (!previous || !["failed","not_configured"].includes(previous.status))
+    return { ok: false, error: "فقط پیام ناموفق یا تنظیم‌نشده قابل تلاش مجدد است." };
+  previous.status = "pending";
+  previous.error = null;
+  previous.attemptedAt = null;
+  previous.attempts = Number(previous.attempts || 0) + 1;
+  previous.transitionId = crypto.randomUUID();
+  saveOrders(rows);
+  const delivery = await deliverOrderStatusNotification(order);
+  Object.assign(previous, delivery, { attemptedAt: new Date().toISOString() });
+  saveOrders(rows);
+  return { ok: true };
 }
 function buildOwnerProgressReport() {
   const orders = readOrders();
@@ -1365,18 +1441,28 @@ app.get("/api/bostani/orders",requireBostani,(_req,res)=>{
  const allowedCustomerFields=["name","family","contact","messengerPlatform","messengerId","province","city","address","postal","notes"];
  const rows=readOrders().map(o=>({
   id:o.id,createdAt:o.createdAt,status:o.status||"در انتظار بررسی",
+  statusNotification:o.statusNotification?{status:o.statusNotification.status,platform:o.statusNotification.platform,attemptedAt:o.statusNotification.attemptedAt||null,attempts:Number(o.statusNotification.attempts)||0,error:o.statusNotification.error||null}:null,
   customer:Object.fromEntries(allowedCustomerFields.map(k=>[k,String(o.customer&&o.customer[k]||"")])),
   items:Array.isArray(o.items)?o.items.map(x=>({sku:String(x.sku||""),name:String(x.name||""),qty:Number(x.qty)||0,unitPrice:Number(x.unitPrice)||0,lineTotal:Number(x.lineTotal)||0})):[],
   total:Number(o.total)||0
  })).reverse();
  return json(res,200,rows);
 });
-app.patch("/api/bostani/orders/:id/status",requireBostani,(req,res)=>{
- const allowed=["در انتظار بررسی","در حال آماده‌سازی","ارسال‌شده","تحویل‌شده","لغوشده"];
- if(!allowed.includes(req.body.status))return json(res,400,{error:"وضعیت سفارش معتبر نیست."});
+app.patch("/api/bostani/orders/:id/status",requireBostani,async(req,res)=>{
+ if(!ORDER_STATUSES.includes(req.body.status))return json(res,400,{error:"وضعیت سفارش معتبر نیست."});
  const rows=readOrders(),o=rows.find(x=>x.id===req.params.id);if(!o)return json(res,404,{error:"سفارش پیدا نشد."});
- o.status=req.body.status;o.updatedAt=new Date().toISOString();if(o.status==="تحویل‌شده")o.deliveredAt=o.updatedAt;saveOrders(rows);
- return json(res,200,{ok:true,id:o.id,status:o.status,updatedAt:o.updatedAt});
+ try {
+  const result=await updateOrderStatus(rows,o,req.body.status);
+  return json(res,200,{ok:true,id:o.id,status:o.status,updatedAt:o.updatedAt,changed:result.changed,customerNotification:result.notification});
+ } catch (_) { return json(res,500,{error:"ثبت وضعیت سفارش انجام نشد."}); }
+});
+app.post("/api/bostani/orders/:id/status-notification/retry",requireBostani,async(req,res)=>{
+ const rows=readOrders(),o=rows.find(x=>x.id===req.params.id);if(!o)return json(res,404,{error:"سفارش پیدا نشد."});
+ try {
+  const result=await retryOrderStatusNotification(rows,o);
+  if(!result.ok)return json(res,409,{ok:false,error:result.error,customerNotification:o.statusNotification||null});
+  return json(res,200,{ok:true,customerNotification:o.statusNotification});
+ } catch (_) { return json(res,500,{ok:false,error:"ثبت نتیجه تلاش مجدد انجام نشد."}); }
 });
 app.get("/api/bostani/questions",requireBostani,(_req,res)=>{const rows=readQuestions().map(q=>({id:q.id,createdAt:q.createdAt,question:q.question,status:q.status||"در انتظار اتصال مشتری",firstName:q.firstName||"",lastName:q.lastName||"",telegramUsername:q.telegramUsername||"",customerLinked:Boolean(q.customerChatId),customerUsername:q.customerUsername||"",reply:q.reply||"",repliedAt:q.repliedAt||""})).reverse();return json(res,200,rows);});
 app.post("/api/bostani/questions/:id/reply",requireBostani,async(req,res)=>{

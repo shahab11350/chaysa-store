@@ -241,9 +241,18 @@ async function loadOrders(){
    const detail=document.createElement('div');detail.textContent=(o.customer?.name||'')+' '+(o.customer?.family||'')+' · '+(o.customer?.contact||'')+' · '+(o.customer?.messengerPlatform==='rubika'?'روبیکا':'تلگرام')+' · '+(o.customer?.messengerId||'')+' · '+Number(o.total||0).toLocaleString('fa-IR')+' تومان';
    const items=document.createElement('div');items.textContent=(o.items||[]).map(x=>x.name+' × '+x.qty).join('، ');
    const select=document.createElement('select');['در انتظار بررسی','در حال آماده‌سازی','ارسال‌شده','تحویل‌شده','لغوشده'].forEach(v=>{const op=document.createElement('option');op.value=v;op.textContent=v;select.append(op)});select.value=o.status;
-   select.onchange=async()=>{try{await api('orders/'+encodeURIComponent(o.id)+'/status',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:select.value})});await loadOrders()}catch(e){alert(e.message)}};
+   select.onchange=async()=>{select.disabled=true;try{await api('orders/'+encodeURIComponent(o.id)+'/status',{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:select.value})});await loadOrders()}catch(e){alert(e.message);select.disabled=false}};
    const copy=document.createElement('button');copy.className='secondary';copy.textContent='کپی شناسه';copy.onclick=async()=>{await navigator.clipboard.writeText(o.id);copy.textContent='کپی شد'};
-   box.append(title,detail,items,select,copy);host.append(box);
+   const delivery=o.statusNotification||null;
+   const notice=document.createElement('div');notice.className='muted';
+   notice.textContent=!delivery?'اطلاع‌رسانی وضعیت هنوز انجام نشده است.':delivery.status==='sent'?'پیام وضعیت برای مشتری ارسال شد.':delivery.status==='pending'?'نتیجه ارسال پیام هنوز ثبت نشده است.':(delivery.error||'ارسال پیام به مشتری ناموفق بود.');
+   box.append(title,detail,items,select,copy,notice);
+   if(delivery&&['failed','not_configured'].includes(delivery.status)){
+    const retry=document.createElement('button');retry.className='secondary';retry.textContent='تلاش مجدد ارسال پیام به مشتری';
+    retry.onclick=async()=>{retry.disabled=true;try{await api('orders/'+encodeURIComponent(o.id)+'/status-notification/retry',{method:'POST'});await loadOrders()}catch(e){alert(e.message);retry.disabled=false}};
+    box.append(retry);
+   }
+   host.append(box);
   });
  }catch(e){host.textContent=e.message}
 }
