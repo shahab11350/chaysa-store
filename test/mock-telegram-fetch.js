@@ -7,6 +7,9 @@ global.fetch = async function (input, init = {}) {
     const entry={url:String(url),method:init.method||"POST",body:typeof init.body==="string"?init.body:""};
     if(process.env.RUBIKA_MOCK_LOG)fs.appendFileSync(process.env.RUBIKA_MOCK_LOG,JSON.stringify(entry)+"\n","utf8");
     const method=String(url).split("/").pop();
+    if(method==="updateBotEndpoints"&&process.env.RUBIKA_MOCK_REGISTRATION_MODE==="api-error"){
+      return new Response(JSON.stringify({status:"ERROR",data:{status:"Rejected"},error_code:4321,error:"sensitive response text must not be logged"}),{status:200,headers:{"content-type":"application/json"}});
+    }
     const data=method==="updateBotEndpoints"?{status:"Done"}:{message_id:"rubika-test-message"};
     return new Response(JSON.stringify({status:"OK",data}),{status:200,headers:{"content-type":"application/json"}});
   }
