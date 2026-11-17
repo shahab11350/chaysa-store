@@ -468,7 +468,7 @@ test("Order is stored and Telegram delivery status is explicit when one recipien
   const payload = {
     customer: {
       name: "آزمون", family: "خریدار", contact: "09120000000",
-      messengerId: "@test_customer", province: "تهران", city: "تهران",
+      messengerPlatform: "telegram", messengerId: "123456789", province: "تهران", city: "تهران",
       address: "نشانی آزمایشی", postal: "1234567890", notes: "ندارد"
     },
     items: [{ sku: "1401008", qty: 2 }],
@@ -515,4 +515,31 @@ test("Order is stored and Telegram delivery status is explicit when one recipien
   const rows = await adminOrders.json();
   const visible = rows.find(item => item.id === result.orderId);
   assert.equal(visible.notification.status, "partial");
+});
+
+
+test("Order accepts Rubika as the selected customer messaging channel and stores it", async () => {
+  const payload = {
+    customer: {
+      name: "آزمون روبیکا", family: "خریدار", contact: "09120000001",
+      messengerPlatform: "rubika", messengerId: "rubika-test-chat-id",
+      province: "تهران", city: "تهران", address: "نشانی آزمایشی",
+      postal: "1234567890", notes: "ندارد"
+    },
+    items: [{ sku: "1401008", qty: 1 }],
+    termsAccepted: true,
+    termsAcceptedAt: new Date().toISOString()
+  };
+  const response = await fetch(baseUrl + "/api/orders", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+  const result = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(result.ok, true);
+  const saved = JSON.parse(readFileSync(path.join(dataDir, "orders.json"), "utf8"));
+  const order = saved.find(item => item.id === result.orderId);
+  assert.ok(order);
+  assert.equal(order.customer.messengerPlatform, "rubika");
+  assert.equal(order.customer.messengerId, "rubika-test-chat-id");
 });
