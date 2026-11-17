@@ -723,13 +723,14 @@ test("Storefront HTML and Iran location JSON require cache revalidation", async 
   }
 });
 
+let orderTestIp = 1;
 function validOrderPayload(platform = "telegram", messengerId = "333333") {
   return {
     customer: {
       name: "آزمون", family: "خریدار", contact: "09120000000",
       messengerPlatform: platform, messengerId,
       province: "تهران", city: "تهران", address: "نشانی آزمایشی",
-      postal: "1234567890", notes: ""
+      postal: "1234567890", notes: "بدون توضیح"
     },
     termsAccepted: true,
     termsAcceptedAt: new Date().toISOString(),
@@ -740,7 +741,7 @@ function validOrderPayload(platform = "telegram", messengerId = "333333") {
 async function postOrder(payload) {
   const response = await fetch(baseUrl + "/api/orders", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", "X-Forwarded-For": "198.51.100." + (orderTestIp++) },
     body: JSON.stringify(payload)
   });
   return { status: response.status, body: await response.json() };
