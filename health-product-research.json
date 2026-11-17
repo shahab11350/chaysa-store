@@ -1614,8 +1614,10 @@
     "iranianSourceCount": 11,
     "usagePolicy": "منابع ایرانی بر اساس نقش تفکیک شده‌اند: مؤسسه/شبکه برای شناسایی مراکز؛ پایگاه نمایه برای بازیابی؛ نشریه برای یافتن مقاله؛ مقاله داوری‌شده برای ارزیابی ادعای مشخص. مطالب سنتی و آموزشی بدون شواهد مستقل، شاهد اثربخشی یا ایمنی محسوب نمی‌شوند.",
     "bookBibliographyAddedAt": "2026-11-17",
-    "bookCount": 5,
-    "note": "کتاب‌ها به‌عنوان منابع کتاب‌شناختی معرفی شده‌اند؛ این ثبت به معنی تأیید محتوای آن‌ها نیست. اطلاعات چاپ/ISBN در صورت نبود یا اختلاف باید از نسخه واقعی کنترل شود."
+    "bookCount": 21,
+    "note": "کتاب‌ها به‌عنوان منابع کتاب‌شناختی معرفی شده‌اند؛ این ثبت به معنی تأیید محتوای آن‌ها نیست. اطلاعات چاپ/ISBN در صورت نبود یا اختلاف باید از نسخه واقعی کنترل شود.",
+    "bookBibliographyUpdatedAt": "2026-11-17",
+    "bookExpansionNote": "فهرست با کتاب‌های مرجع WHO، کتاب‌های تخصصی چای و گیاهان، فارماکوگنوزی، کیفیت و ایمنی توسعه یافت. آثار تاریخی/قدیمی با محدودیت مشخص شده‌اند. اطلاعات چاپ/ISBN نامطمئن به‌عنوان قطعی درج نشده است."
   },
   "bookBibliography": [
     {
@@ -1698,6 +1700,246 @@
       "limitations": "ویرایش چاپی 2003 است؛ ESCOP اکنون تک‌نگاشت‌های به‌روزشده را به‌صورت آنلاین نیز منتشر می‌کند و برای هر گیاه باید آخرین نسخه بررسی شود.",
       "catalogueUrl": "https://www.escop.com/escop-products/publications/",
       "recordType": "international_scientific_monograph"
+    },
+    {
+      "id": "B-WHO-V3",
+      "title": "WHO Monographs on Selected Medicinal Plants, Volume 3",
+      "author": "World Health Organization",
+      "publisher": "WHO",
+      "publicationDetails": "2007",
+      "isbn": "978-92-4-154702-4",
+      "catalogueUrl": "https://www.who.int/publications",
+      "language": "English",
+      "scope": [
+        "گیاهان دارویی منتخب، مونوگراف و مشخصات دارویی"
+      ],
+      "limitations": "منبع رسمی؛ هر مونوگراف فقط در محدوده گیاه و فرآورده تعریف‌شده قابل تفسیر است.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-WHO-V4",
+      "title": "WHO Monographs on Selected Medicinal Plants, Volume 4",
+      "author": "World Health Organization",
+      "publisher": "WHO",
+      "publicationDetails": "2009",
+      "isbn": "978-92-4-154705-5",
+      "catalogueUrl": "https://www.who.int/publications",
+      "language": "English",
+      "scope": [
+        "گیاهان دارویی منتخب، کیفیت و اطلاعات داروشناختی"
+      ],
+      "limitations": "منبع رسمی؛ برای تغییرات شواهد و مقررات جدید باید منابع تازه‌تر نیز بررسی شوند.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-WHO-QC",
+      "title": "Quality Control Methods for Herbal Materials",
+      "author": "World Health Organization",
+      "publisher": "WHO",
+      "publicationDetails": "2011",
+      "isbn": "978-92-4-150073-9",
+      "catalogueUrl": "https://www.who.int/publications/i/item/9789241500739",
+      "language": "English",
+      "scope": [
+        "کنترل کیفیت، آزمون مواد گیاهی و شناسایی"
+      ],
+      "limitations": "راهنمای فنی کنترل کیفیت است و اثربخشی درمانی را اثبات نمی‌کند.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-WHO-GACP",
+      "title": "WHO Guidelines on Good Agricultural and Collection Practices (GACP) for Medicinal Plants",
+      "author": "World Health Organization",
+      "publisher": "WHO",
+      "publicationDetails": "2003",
+      "isbn": "92-4-154627-1",
+      "catalogueUrl": "https://www.who.int/publications",
+      "language": "English",
+      "scope": [
+        "کشت، برداشت، جمع‌آوری و زنجیره تأمین گیاهان دارویی"
+      ],
+      "limitations": "راهنمای فرآیند تولید اولیه؛ جایگزین آزمون محصول نهایی نیست.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-WHO-CONTAM",
+      "title": "WHO Guidelines for Assessing Quality of Herbal Medicines with Reference to Contaminants and Residues",
+      "author": "World Health Organization",
+      "publisher": "WHO",
+      "publicationDetails": "2007",
+      "isbn": "978-92-4-159444-8",
+      "catalogueUrl": "https://www.who.int/publications",
+      "language": "English",
+      "scope": [
+        "آلاینده‌ها، باقی‌مانده‌ها و ایمنی کیفیت"
+      ],
+      "limitations": "راهنمای کیفیت و آلودگی؛ حدود و مقررات جاری کشور مقصد نیز باید بررسی شوند.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-WHO-PV",
+      "title": "WHO Guidelines on Safety Monitoring of Herbal Medicines in Pharmacovigilance Systems",
+      "author": "World Health Organization",
+      "publisher": "WHO",
+      "publicationDetails": "2004",
+      "isbn": "92-4-159221-4",
+      "catalogueUrl": "https://www.who.int/publications",
+      "language": "English",
+      "scope": [
+        "پایش ایمنی، عوارض ناخواسته و فارماکوویژیلانس"
+      ],
+      "limitations": "راهنمای پایش ایمنی؛ نبود گزارش به معنی نبود خطر نیست.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-WHO-RESEARCH",
+      "title": "General Guidelines for Methodologies on Research and Evaluation of Traditional Medicine",
+      "author": "World Health Organization",
+      "publisher": "WHO",
+      "publicationDetails": "2000",
+      "isbn": "WHO/EDM/TRM/2000.1",
+      "catalogueUrl": "https://www.who.int/publications",
+      "language": "English",
+      "scope": [
+        "روش‌شناسی پژوهش و ارزیابی طب سنتی"
+      ],
+      "limitations": "راهنمای روش‌شناسی؛ اعتبار هر ادعا به طراحی و کیفیت مطالعه وابسته است.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-TEA-CULTIVATION",
+      "title": "Tea: Cultivation to Consumption",
+      "author": "K. C. Willson; M. N. Clifford (eds.)",
+      "publisher": "Springer",
+      "publicationDetails": "1992",
+      "isbn": "978-0-412-33850-2",
+      "catalogueUrl": "https://doi.org/10.1007/978-94-011-2326-6",
+      "language": "English",
+      "scope": [
+        "گیاه چای، کشت، برداشت، فرآوری، ترکیبات و صنعت چای"
+      ],
+      "limitations": "کتاب تخصصی قدیمی؛ برای فناوری و استانداردهای جاری باید منابع جدیدتر تکمیل‌کننده باشند.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-HERBS-TEAS",
+      "title": "Herbs, Botanicals and Teas",
+      "author": "B. Dave Oomah (ed.)",
+      "publisher": "CRC Press",
+      "publicationDetails": "2000",
+      "isbn": "978-0-367-39852-1",
+      "catalogueUrl": "https://www.routledge.com/Herbs-Botanicals-and-Teas/Oomah/p/book/9780367398521",
+      "language": "English",
+      "scope": [
+        "ترکیبات، جنبه‌های بالینی و ایمنی چای و گیاهان منتخب"
+      ],
+      "limitations": "محتوا و تاریخ انتشار باید در تفسیر شواهد لحاظ شود؛ جایگزین مرور نظام‌مند جدید نیست.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-HERBS-SPICES",
+      "title": "Herbs, Spices and Medicinal Plants: Processing, Health Benefits and Safety",
+      "author": "Mohammad B. Hossain; Nigel P. Brunton; Dilip K. Rai (eds.)",
+      "publisher": "Wiley",
+      "publicationDetails": "2020",
+      "isbn": "978-1-119-03661-6",
+      "catalogueUrl": "https://doi.org/10.1002/9781119036685",
+      "language": "English",
+      "scope": [
+        "فرآوری، کیفیت، ترکیبات و ایمنی گیاهان و ادویه‌ها"
+      ],
+      "limitations": "مرجع علمی موضوعی؛ هر فصل از نظر نوع مطالعه و دامنه ادعا جداگانه ارزیابی شود.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-TREASE-EVANS",
+      "title": "Trease and Evans Pharmacognosy",
+      "author": "William C. Evans",
+      "publisher": "Elsevier",
+      "publicationDetails": "ویرایش‌های متعدد؛ ویرایش 16 در 2009",
+      "isbn": "978-0-7020-2934-9",
+      "catalogueUrl": "https://www.elsevier.com",
+      "language": "English",
+      "scope": [
+        "فارماکوگنوزی، شناسایی و ارزیابی مواد طبیعی"
+      ],
+      "limitations": "کتاب درسی مرجع؛ ویرایش و اطلاعات کتاب‌شناختی باید با نسخه مورد استفاده تطبیق داده شود.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-DUKE-HANDBOOK",
+      "title": "Handbook of Medicinal Herbs",
+      "author": "James A. Duke; Mary Jo Bogenschutz-Godwin; Peggy-Ann Duke",
+      "publisher": "CRC Press",
+      "publicationDetails": "ویرایش دوم، 2002",
+      "isbn": "978-0-8493-1284-7",
+      "catalogueUrl": "https://www.routledge.com",
+      "language": "English",
+      "scope": [
+        "مرجع گیاهان دارویی، ترکیبات و کاربردهای گزارش‌شده"
+      ],
+      "limitations": "اطلاعات کاربردی/مرجعی؛ ادعاهای بالینی نیازمند بررسی شواهد مستقل و به‌روز هستند.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-PREG-LACT",
+      "title": "Herbal Medicines in Pregnancy and Lactation: An Evidence-Based Approach",
+      "author": "Edward Mills; Jean-Jacques Dugoua; Dan Perri et al.",
+      "publisher": "CRC Press",
+      "publicationDetails": "2006",
+      "isbn": "978-0-415-37392-0",
+      "catalogueUrl": "https://www.routledge.com",
+      "language": "English",
+      "scope": [
+        "ایمنی گیاهان دارویی در بارداری و شیردهی"
+      ],
+      "limitations": "قدیمی‌تر از برخی راهنماهای فعلی؛ برای تصمیم بالینی باید منابع به‌روز بررسی شوند.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-PLANT-DRUG-ANALYSIS",
+      "title": "Plant Drug Analysis: A Thin Layer Chromatography Atlas",
+      "author": "Hildebert Wagner; Sabine Bladt",
+      "publisher": "Springer",
+      "publicationDetails": "ویرایش دوم، 1996",
+      "isbn": "978-3-642-00573-2",
+      "catalogueUrl": "https://link.springer.com",
+      "language": "English",
+      "scope": [
+        "روش‌های شناسایی و آنالیز کروماتوگرافی مواد گیاهی"
+      ],
+      "limitations": "مرجع روش آزمایشگاهی؛ روش‌ها باید با استاندارد و تجهیزات روز تطبیق داده شوند.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-HERBAL-COMMISSION-E",
+      "title": "Herbal Medicine: Expanded Commission E Monographs",
+      "author": "Mark Blumenthal (senior editor) et al.",
+      "publisher": "Integrative Medicine Communications",
+      "publicationDetails": "2000",
+      "isbn": "978-0-9670772-1-5",
+      "catalogueUrl": "https://www.ncbi.nlm.nih.gov/nlmcatalog/100931760",
+      "language": "English",
+      "scope": [
+        "مونوگراف‌های گیاهان دارویی و ارزیابی کمیسیون E آلمان"
+      ],
+      "limitations": "مبنای تاریخی ویرایش‌شده از مونوگراف‌های کمیسیون E؛ جایگزین ارزیابی مقررات جاری نیست.",
+      "recordType": "reference_book"
+    },
+    {
+      "id": "B-MAKHZAN",
+      "title": "مخزن‌الادویه",
+      "author": "محمدحسین عقیلی خراسانی",
+      "publisher": "اثر تاریخی طب سنتی؛ نسخه‌ها و چاپ‌های متعدد",
+      "publicationDetails": "تألیف حدود 1769 میلادی",
+      "isbn": "مشخصات نسخه باید با چاپ مورد استفاده تطبیق داده شود",
+      "catalogueUrl": "https://onlinelibrary.wiley.com/doi/10.1155/2020/3690781",
+      "language": "فارسی",
+      "scope": [
+        "نام‌ها، هویت تاریخی مواد دارویی و کاربردهای سنتی"
+      ],
+      "limitations": "منبع تاریخی طب سنتی است؛ مطالب آن شاهد اثربخشی یا ایمنی پزشکی مدرن محسوب نمی‌شود.",
+      "recordType": "historical_traditional_reference"
     }
   ],
   "bookBibliographyDisclaimer": "معرفی کتاب‌ها صرفاً جهت اطلاع‌رسانی است و به‌منزله تأیید یا تضمین صحت محتوای آن‌ها از سوی CHAYSA نیست.",
