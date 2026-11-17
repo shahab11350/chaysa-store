@@ -72,12 +72,15 @@
 <h2 style="margin-top:16px">نامه‌نگار چایسا</h2>
 <p class="muted">متن نامه را بنویس، پیش‌نمایش را بررسی کن و در صورت تأیید، آن را از مسیر ربات تلگرام چایسا ارسال کن. ارسال به هر دو حساب تلگرام پیوندخورده انجام می‌شود و نسخه نامه در بایگانی ثبت خواهد شد.</p>
 <div class="letter-preview" id="letterPreview"><div class="letter-brand">CHAYSA</div><div>برای ساخت پیش‌نمایش، متن نامه را وارد کن.</div></div>
-<label for="letterBody">متن نامه</label>
+<label for="letterTitle">عنوان نامه</label>
+<input id="letterTitle" maxlength="160" placeholder="عنوان نامه را وارد کن…">
+<label for="letterBody">متن نامه (برای ثبت عنوان به‌تنهایی، خالی بگذار)</label>
 <textarea id="letterBody" maxlength="3400" placeholder="متن نامه را اینجا بنویس…"></textarea>
 <p class="muted">پیوندها را به‌صورت نشانی کامل (https://…) داخل متن قرار بده؛ تلگرام آن‌ها را قابل لمس نمایش می‌دهد. این نسخه برای آزمایش نامه متنی است؛ پیوست تصویر در مرحله بعد اضافه می‌شود.</p>
 <p class="muted">برای جلوگیری از استفاده از لوگوی نادرست، فعلاً سربرگ با نشان متنی CHAYSA نمایش داده می‌شود؛ لوگوی تصویری مصوب پس از تطبیق فایل اصلی اضافه خواهد شد.</p>
 <div class="row">
 <button type="button" id="letterPreviewBtn" class="secondary">به‌روزرسانی پیش‌نمایش</button>
+<button type="button" id="letterArchiveOnlyBtn" class="secondary">ثبت در بایگانی بدون ارسال</button>
 <button type="button" id="letterSendBtn">ارسال نامه به تلگرام</button>
 </div>
 <div id="letterSendStatus" class="muted" aria-live="polite"></div>
@@ -108,6 +111,7 @@ function renderLetterPreview(){
  const lines=[
   'CHAYSA | فروشگاه اینترنتی چایسا',
   'نامه رسمی',
+  ($('letterTitle').value.trim()?'عنوان: '+$('letterTitle').value.trim():''),
   'شماره نامه: '+letterMeta.letterNumber,
   'تاریخ و ساعت: '+letterMeta.dateTime,
   '--------------------------------',
@@ -123,10 +127,11 @@ async function loadLetterArchive(){
  const host=$('letterArchive');host.textContent='در حال دریافت بایگانی…';
  try{
   const rows=await api('letters');host.replaceChildren();
-  if(!rows.length){host.textContent='هنوز نامه‌ای ارسال نشده است.';return}
+  if(!rows.length){host.textContent='هنوز نامه‌ای در بایگانی ثبت نشده است.';return}
   rows.forEach(row=>{
    const item=document.createElement('div');item.className='letter-archive-item';
-   const title=document.createElement('b');title.textContent=row.letterNumber+' · '+(row.deliveryStatus==='sent'?'ارسال به هر دو حساب':row.deliveryStatus==='partial'?'ارسال ناقص':'ارسال ناموفق')+' · '+(row.receiptStatus==='received'?'دریافت تأیید شد':'در انتظار تأیید دریافت');
+   const deliveryLabel=row.deliveryStatus==='not_sent'?'فقط در بایگانی؛ ارسال نشده':row.deliveryStatus==='sent'?'ارسال به هر دو حساب':row.deliveryStatus==='partial'?'ارسال ناقص':row.deliveryStatus==='pending'?'در انتظار نتیجه ارسال':'ارسال ناموفق';
+   const title=document.createElement('b');title.textContent=(row.title?row.title+' · ':'')+row.letterNumber+' · '+deliveryLabel+(row.receiptStatus==='received'?' · دریافت تأیید شد':row.receiptStatus==='not_applicable'?'':' · در انتظار تأیید دریافت');
    const time=document.createElement('div');time.textContent=(row.dateTime||row.createdAt||'')+(row.receivedAt?' · دریافت: '+new Date(row.receivedAt).toLocaleString('fa-IR'):'');
    const excerpt=document.createElement('div');excerpt.textContent=(row.body||'').slice(0,260);
    item.append(title,time,excerpt);host.append(item);
@@ -141,6 +146,19 @@ async function loadLetterComposer(){
   await loadLetterArchive();
  }catch(e){out.textContent=e.message}
 }
+async function archiveGeneralLetter(){
+ const button=$('letterArchiveOnlyBtn'),out=$('letterSendStatus');
+ const title=$('letterTitle').value.trim(),text=$('letterBody').value.trim();
+ if(!title){out.textContent='برای ثبت در بایگانی، عنوان نامه را وارد کن.';return}
+ if(!confirm('این نامه فقط در بایگانی داخلی چایسا ثبت شود و هیچ پیامی در تلگرام ارسال نشود؟'))return;
+ button.disabled=true;out.textContent='در حال ثبت نامه در بایگانی؛ هیچ ارسالی انجام نمی‌شود…';
+ try{
+  const result=await api('letters/archive',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title,text})});
+  out.textContent='نامه فقط در بایگانی ثبت شد و ارسال نشده است. شماره نامه: '+result.letterNumber;
+  letterMeta=await api('letters/meta');renderLetterPreview();await loadLetterArchive();
+ }catch(e){out.textContent=e.message;await loadLetterArchive()}
+ finally{button.disabled=false}
+}
 async function sendGeneralLetter(){
  const button=$('letterSendBtn'),out=$('letterSendStatus');
  const text=$('letterBody').value.trim();
@@ -148,7 +166,7 @@ async function sendGeneralLetter(){
  if(!confirm('این نامه با سربرگ و امضای چایسا به هر دو حساب تلگرام مرتبط ارسال و در بایگانی ثبت شود؟'))return;
  button.disabled=true;out.textContent='در حال ثبت نامه و ارسال به تلگرام…';
  try{
-  const result=await api('letters/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+  const result=await api('letters/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:$('letterTitle').value.trim(),text})});
   out.textContent='نامه با موفقیت به هر دو حساب تلگرام ارسال و بایگانی شد. شماره نامه: '+result.letterNumber;
   letterMeta=await api('letters/meta');
   renderLetterPreview();
@@ -286,6 +304,7 @@ $('sendHealthApproval').onclick=async()=>{
 $('saveHealthArchive').onclick=saveHealthArchive;
 $('letterPreviewBtn').onclick=renderLetterPreview;
 $('letterBody').addEventListener('input',renderLetterPreview);
+$('letterArchiveOnlyBtn').onclick=archiveGeneralLetter;
 $('letterSendBtn').onclick=sendGeneralLetter;
 $('refreshLetters').onclick=loadLetterArchive;
 $('refreshAnalytics').onclick=loadAnalytics;

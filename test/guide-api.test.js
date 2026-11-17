@@ -413,6 +413,37 @@ async function postLetterReceiptCallback(callbackData, chatId = "222222", callba
   });
 }
 
+test("archive-only letter is stored with its title and no delivery attempt", async () => {
+  const login = await fetch(baseUrl + "/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: "guide-test-only-password" })
+  });
+  assert.equal(login.status, 200);
+  const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
+  const before = telegramLog().length;
+  const response = await fetch(baseUrl + "/api/admin/letters/archive", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: JSON.stringify({ title: "عنوان آزمون بایگانی", text: "" })
+  });
+  assert.equal(response.status, 201);
+  const result = await response.json();
+  assert.equal(result.archivedOnly, true);
+  const rows = JSON.parse(readFileSync(path.join(dataDir, "letters-archive.json"), "utf8"));
+  const row = rows.find(item => item.letterNumber === result.letterNumber);
+  assert.ok(row);
+  assert.equal(row.title, "عنوان آزمون بایگانی");
+  assert.equal(row.deliveryStatus, "not_sent");
+  assert.equal(row.body, "");
+  assert.equal(telegramLog().length, before);
+  const denied = await fetch(baseUrl + "/api/admin/letters/archive", {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title: "غیرمجاز" })
+  });
+  assert.equal(denied.status, 401);
+});
+
 test("general letters use a direct Telegram inline receipt button", async () => {
   const login = await fetch(baseUrl + "/api/admin/login", {
     method: "POST",
@@ -444,29 +475,35 @@ test("general letters use a direct Telegram inline receipt button", async () => 
   const callbackData = messages[0].reply_markup.inline_keyboard[0][0].callback_data;
   const archivePath = path.join(dataDir, "letters-archive.json");
   let archive = JSON.parse(readFileSync(archivePath, "utf8"));
-  assert.equal(archive[0].receiptStatus, "pending");
+  let sentRecord = archive.find(item => item.body === "متن آزمایشی نامه برای آزمون دکمه تلگرام");
+  assert.ok(sentRecord);
+  assert.equal(sentRecord.receiptStatus, "pending");
 
   const callback = await postLetterReceiptCallback(callbackData);
   assert.equal(callback.status, 200);
   archive = JSON.parse(readFileSync(archivePath, "utf8"));
-  assert.equal(archive[0].receiptStatus, "received");
-  assert.equal(archive[0].receiptMethod, "telegram_inline_button");
-  assert.equal(archive[0].receivedByTelegramId, "222222");
-  assert.ok(archive[0].receivedAt);
+  sentRecord = archive.find(item => item.body === "متن آزمایشی نامه برای آزمون دکمه تلگرام");
+  assert.ok(sentRecord);
+  assert.equal(sentRecord.receiptStatus, "received");
+  assert.equal(sentRecord.receiptMethod, "telegram_inline_button");
+  assert.equal(sentRecord.receivedByTelegramId, "222222");
+  assert.ok(sentRecord.receivedAt);
 
   const callbackCalls = telegramLog().filter(item =>
     item.url.endsWith("/answerCallbackQuery") || item.url.endsWith("/editMessageReplyMarkup")
   );
   assert.ok(callbackCalls.some(item => item.url.endsWith("/answerCallbackQuery")));
   assert.ok(callbackCalls.some(item => item.url.endsWith("/editMessageReplyMarkup")));
-  const receivedAt = archive[0].receivedAt;
+  const receivedAt = sentRecord.receivedAt;
   await postLetterReceiptCallback(callbackData, "222222", "letter-callback-replay");
   archive = JSON.parse(readFileSync(archivePath, "utf8"));
-  assert.equal(archive[0].receivedAt, receivedAt);
+  sentRecord = archive.find(item => item.body === "متن آزمایشی نامه برای آزمون دکمه تلگرام");
+  assert.equal(sentRecord.receivedAt, receivedAt);
 
   await postLetterReceiptCallback(callbackData, "333333", "letter-callback-unauthorized");
   archive = JSON.parse(readFileSync(archivePath, "utf8"));
-  assert.equal(archive[0].receivedByTelegramId, "222222");
+  sentRecord = archive.find(item => item.body === "متن آزمایشی نامه برای آزمون دکمه تلگرام");
+  assert.equal(sentRecord.receivedByTelegramId, "222222");
 });
 
 

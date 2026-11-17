@@ -947,6 +947,52 @@ app.get("/api/admin/letters", requireAdmin, (_req, res) => {
   const rows = readLettersArchive().slice(-50).reverse().map(({ receiptTokenHash, ...row }) => row);
   return json(res, 200, rows);
 });
+app.post("/api/admin/letters/archive", requireAdmin, (req, res) => {
+  if (limited("admin-letter-archive:" + (req.ip || "unknown"), 30, 60 * 60 * 1000))
+    return json(res, 429, { error: "تعداد ثبت نامه بیش از حد مجاز است؛ کمی بعد دوباره تلاش کنید." });
+  const title = typeof (req.body && req.body.title) === "string"
+    ? req.body.title.replace(/[\u0000-\u001f\u007f]/g, "").replace(/\s+/g, " ").trim() : "";
+  const body = typeof (req.body && req.body.text) === "string" ? req.body.text.trim() : "";
+  if (!title || title.length > 160)
+    return json(res, 400, { error: "عنوان نامه الزامی است و نباید بیشتر از ۱۶۰ نویسه باشد." });
+  if (body.length > 3400)
+    return json(res, 400, { error: "متن نامه نباید بیشتر از ۳۴۰۰ نویسه باشد." });
+  const rows = readLettersArchive();
+  if (rows.length >= 500)
+    return json(res, 413, { error: "ظرفیت بایگانی نامه‌ها تکمیل است." });
+  const now = new Date();
+  const meta = getLetterDraftMeta(rows, now);
+  const record = {
+    id: crypto.randomUUID(),
+    letterNumber: meta.letterNumber,
+    dayKey: meta.dayKey,
+    createdAt: now.toISOString(),
+    dateTime: meta.dateTime,
+    title,
+    body,
+    registeredBy: "محمدرضا نظام",
+    formattedMessage: body ? formatGeneralChaysaLetter(meta, body) : "",
+    signatureName: "محمدرضا نظام",
+    signatureRole: "ناظر کیفی و ایده‌پرداز فروشگاه اینترنتی چایسا (CHAYSA)",
+    recordType: "archive_only",
+    deliveryStatus: "not_sent",
+    deliveredCount: 0,
+    sentAt: null,
+    receiptStatus: "not_applicable",
+    archivedOnly: true
+  };
+  rows.push(record);
+  try { saveLettersArchive(rows); }
+  catch (_) { return json(res, 500, { error: "ثبت نامه در بایگانی انجام نشد." }); }
+  return json(res, 201, {
+    ok: true,
+    letterNumber: record.letterNumber,
+    title: record.title,
+    dateTime: record.dateTime,
+    deliveryStatus: record.deliveryStatus,
+    archivedOnly: true
+  });
+});
 app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
   if (limited("admin-letter-send:" + (req.ip || "unknown"), 5, 60 * 60 * 1000))
     return json(res, 429, { error: "تعداد ارسال نامه بیش از حد مجاز است؛ یک ساعت بعد دوباره تلاش کنید." });
@@ -973,6 +1019,7 @@ app.post("/api/admin/letters/send", requireAdmin, async (req, res) => {
     dayKey: meta.dayKey,
     createdAt: now.toISOString(),
     dateTime: meta.dateTime,
+    title: typeof (req.body && req.body.title) === "string" ? req.body.title.trim().slice(0, 160) : "",
     body,
     formattedMessage: message,
     signatureName: "محمدرضا نظام",
