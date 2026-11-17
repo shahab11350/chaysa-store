@@ -1423,7 +1423,15 @@ app.get("/health-approval.html", (_req, res) => {
   res.set("X-Content-Type-Options", "nosniff");
   return res.sendFile(path.join(ROOT, "health-approval.html"));
 });
-app.use(express.static(ROOT, { index: "index.html", dotfiles: "ignore" }));
+app.use(express.static(ROOT, {
+  index: "index.html",
+  dotfiles: "ignore",
+  setHeaders(res, filePath) {
+    if (/\.(?:html|json)$/i.test(filePath)) {
+      res.setHeader("Cache-Control", "no-cache, must-revalidate");
+    }
+  }
+}));
 app.use((err, _req, res, _next) => {
   if (err && err.code === "LIMIT_FILE_SIZE") return json(res, 400, { error: "حجم عکس نباید بیشتر از ۵ مگابایت باشد." });
   return json(res, 500, { error: "خطای داخلی سرور." });

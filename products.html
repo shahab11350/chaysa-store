@@ -378,7 +378,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const provinceField = checkout.querySelector(".customer-province");
   const cityField = checkout.querySelector(".customer-city");
   const postalField = checkout.querySelector(".customer-postal");
-  const locationResponse = await fetch("/iran-locations.json", {cache:"force-cache"});
+  const locationResponse = await fetch("/iran-locations.json", {cache:"no-cache"});
   if (!locationResponse.ok) throw new Error("Iran location data could not be loaded");
   const iranLocations = await locationResponse.json();
   iranLocations.provinces.forEach(function(province) {
