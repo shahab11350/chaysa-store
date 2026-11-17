@@ -26,13 +26,29 @@ h1{margin:12px 0 4px;font-size:clamp(25px,5vw,40px);color:var(--green)}
 .section-note{text-align:center;color:var(--muted);font-size:12px;margin:0 0 20px}
 .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .tile{min-height:112px;padding:20px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:center;box-shadow:0 5px 18px #1c38200a}
-.tile button{width:100%;border:0;background:transparent;color:var(--green);font:700 15px Arial,sans-serif;letter-spacing:.2px;cursor:default;pointer-events:none}
+.tile button{width:100%;border:0;background:transparent;color:var(--green);font:700 15px Arial,sans-serif;letter-spacing:.2px;cursor:pointer;pointer-events:auto}.tile button:disabled{cursor:not-allowed;opacity:.65}
 .tile .fa{display:block;margin-top:5px;color:var(--muted);font-size:12px}
 .tile .soon{display:inline-block;margin-top:9px;color:#8a7541;font-size:10px}
 .notice{margin:30px 0 0;padding:17px 20px;border-radius:12px;background:var(--green-soft);color:#385342;font-size:12px}
 .notice strong{display:block;margin-bottom:5px}
 footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);text-align:center;color:var(--muted);font-size:11px}
 footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);direction:ltr;display:block}
+.health-guide{margin:28px 0;padding:22px;border:1px solid var(--line);border-radius:16px;background:#fff;box-shadow:0 5px 18px #1c38200a}
+.chaysa-guide-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:16px 0}
+.chaysa-guide-category{border:1px solid var(--gold);border-radius:9px;background:#f8f5e9;color:var(--green);padding:11px 8px;font:bold 13px Tahoma;line-height:1.8;cursor:pointer}
+.chaysa-guide-category[aria-pressed="true"]{background:var(--green);color:#fff;outline:2px solid var(--gold);outline-offset:2px}
+.chaysa-guide-prompts{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0}
+.chaysa-guide-prompt{border:1px solid #d9c99f;background:#fff;color:var(--green);border-radius:18px;padding:8px 11px;font:12px Tahoma;cursor:pointer}
+.chaysa-guide-form{display:grid;gap:8px;background:#fff;border:1px solid #e6d9b8;border-radius:13px;padding:14px;text-align:right}
+.chaysa-guide-form label{font-weight:bold;font-size:13px;color:var(--green)}
+.chaysa-guide-form select,.chaysa-guide-form input,.chaysa-guide-form textarea{width:100%;min-width:0;border:1px solid #d8d0bd;border-radius:9px;padding:11px;font:13px/1.9 Tahoma;background:#fff;color:var(--ink)}
+.chaysa-guide-form button,.chaysa-guide-answer{display:block;width:100%;border:0;border-radius:9px;background:var(--green);color:#fff;padding:12px;text-align:center;text-decoration:none;font:bold 13px Tahoma;cursor:pointer}
+.chaysa-guide-form button:disabled{opacity:.6;cursor:wait}
+.chaysa-guide-answer{background:var(--gold);margin-top:4px}
+#chaysaGuideStatus{font-size:12px;line-height:1.9;margin:2px 0;color:#a33}
+.chaysa-guide-privacy,.chaysa-guide-health{font-size:11px;line-height:1.9;color:var(--muted);margin:9px 0}
+.chaysa-guide-health{padding:10px;background:#fff8e8;border-right:3px solid var(--gold);border-radius:7px;color:#654f22}
+@media(max-width:560px){.health-guide{padding:15px}.chaysa-guide-options{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.health-shell{width:min(100% - 22px,1040px)}.hero{padding:40px 8px 28px}.tiles{gap:9px}.tile{min-height:106px;padding:17px 8px}.tile button{font-size:13px}.tile .fa{font-size:11px}.progress{padding:15px}}
 </style>
 </head>
@@ -56,10 +72,30 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
 <h2 class="section-title">Explore Health Topics</h2>
 <p class="section-note">موضوعات مشاور سلامت | دسترسی‌ها پس از تکمیل و تأیید فعال می‌شوند</p>
 <section class="tiles" aria-label="موضوعات مشاور سلامت">
-<article class="tile"><button type="button" disabled>Herbal Products</button><span class="fa">محصولات گیاهی</span><span class="soon">در حال آماده‌سازی</span></article>
-<article class="tile"><button type="button" disabled>Drug Interactions</button><span class="fa">تداخل چای و دمنوش با داروها</span><span class="soon">در حال آماده‌سازی</span></article>
-<article class="tile"><button type="button" disabled>Safety Guide</button><span class="fa">راهنمای ایمنی مصرف</span><span class="soon">در حال آماده‌سازی</span></article>
+<article class="tile"><button type="button" data-health-prompt-id="p-ingredients">Herbal Products</button><span class="fa">محصولات گیاهی</span><span class="soon">پرسش درباره محصول</span></article>
+<article class="tile"><button type="button" data-health-prompt-id="s-interaction">Drug Interactions</button><span class="fa">تداخل چای و دمنوش با داروها</span><span class="soon">آماده‌سازی جست‌وجوی منبع</span></article>
+<article class="tile"><button type="button" data-health-prompt-id="s-adverse">Safety Guide</button><span class="fa">راهنمای ایمنی مصرف</span><span class="soon">پرسش درباره احتیاط و عوارض</span></article>
 <article class="tile"><button type="button" disabled>Scientific Sources</button><span class="fa">منابع علمی و تخصصی</span><span class="soon">در حال آماده‌سازی</span></article>
+</section>
+<section id="chaysaGuide" class="health-guide" data-guide-mode="health" aria-labelledby="healthGuideTitle">
+  <h2 id="healthGuideTitle" class="section-title">پرسش درباره محصولات و ایمنی مصرف</h2>
+  <p class="section-note">محصول را انتخاب کنید و پرسش خود را درباره ترکیبات، ویژگی‌ها، عوارض احتمالی یا تداخل با دارو بنویسید.</p>
+  <div id="chaysaGuideCategories" class="chaysa-guide-options" aria-label="دسته‌بندی مشاور سلامت"></div>
+  <div id="chaysaGuidePrompts" class="chaysa-guide-prompts" aria-live="polite"></div>
+  <form id="chaysaGuideForm" class="chaysa-guide-form">
+    <label for="chaysaGuideProduct">محصول چایسا</label>
+    <select id="chaysaGuideProduct"><option value="">انتخاب محصول</option></select>
+    <label for="chaysaGuideMedicine" id="chaysaGuideMedicineLabel" hidden>نام دارو (فقط برای بررسی تداخل)</label>
+    <input id="chaysaGuideMedicine" type="text" maxlength="60" autocomplete="off" placeholder="نام ژنریک یا تجاری دارو را وارد کنید" hidden>
+    <label for="chaysaGuideQuestion">پرسش شما</label>
+    <textarea id="chaysaGuideQuestion" rows="3" maxlength="400" required placeholder="پرسش مرتبط با محصول و ایمنی مصرف را بنویسید..."></textarea>
+    <div id="chaysaGuideSuggestions" class="chaysa-guide-prompts" aria-label="پیشنهادهای جست‌وجو"></div>
+    <button id="chaysaGuidePrepare" type="submit">آماده‌سازی جست‌وجوی منابع</button>
+    <p id="chaysaGuideStatus" role="status" aria-live="polite"></p>
+    <a id="chaysaGuideAnswer" class="chaysa-guide-answer" hidden target="_blank" rel="noopener noreferrer">مشاهده نتایج منابع بیرونی</a>
+  </form>
+  <p class="chaysa-guide-privacy">پرسش شما در بانک اطلاعاتی چایسا ذخیره نمی‌شود. با انتخاب «مشاهده نتایج منابع بیرونی»، عبارت جست‌وجو شامل نام محصول و در صورت نیاز نام دارو به گوگل فرستاده می‌شود؛ اطلاعات شخصی یا شرح پرونده پزشکی را وارد نکنید.</p>
+  <p id="chaysaGuideHealthNotice" class="chaysa-guide-health" role="note" hidden></p>
 </section>
 <aside class="notice">
 <strong>نکته مهم درباره ایمنی</strong>
@@ -67,5 +103,6 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
 </aside>
 <footer><b>CHAYSA</b>دانش روشن، انتخاب آگاهانه</footer>
 </main>
+<script src="/guide.js" defer></script>
 </body>
 </html>
