@@ -7,11 +7,13 @@ on:
       - feature/health-online-approval-2026-11-16
       - feature/admin-letter-composer-2026-11-16
       - feature/telegram-inline-letter-receipt-2026-11-16
+      - feature/rubika-order-messaging-2026-11-17
   pull_request:
     branches:
       - chaysa-backup
     paths:
       - "server.js"
+      - "products.html"
       - "admin.html"
       - "health-approval.html"
       - "letter-receipt.html"

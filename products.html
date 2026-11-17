@@ -90,7 +90,7 @@ footer{background:#173b2b;color:white;text-align:center;padding:25px;line-height
 .checkout-preview h4{margin:0 0 8px;color:#173b2b}
 .checkout-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .checkout-actions button{flex:1;min-width:130px;border:0;border-radius:9px;padding:12px;font-family:inherit;cursor:pointer}
-.checkout-status{margin:14px 0 0;padding:14px;border-radius:10px;font-size:16px;line-height:2;font-weight:bold;text-align:center}.checkout-status.success{background:#edf6ee;border:1px solid #8ab493;color:#245b32}.checkout-status.error{background:#fff0ee;border:1px solid #d99a91;color:#9b3025}.checkout-send:disabled{opacity:.7;cursor:wait}
+.checkout-status{margin:14px 0 0;padding:14px;border-radius:10px;font-size:16px;line-height:2;font-weight:bold;text-align:center}.checkout-status.success{background:#edf6ee;border:1px solid #8ab493;color:#245b32}.checkout-status.warning{background:#fff8e7;border:1px solid #d9b65d;color:#765414}.checkout-status.error{background:#fff0ee;border:1px solid #d99a91;color:#9b3025}.checkout-send:disabled{opacity:.7;cursor:wait}
 .checkout-send{background:#244b37;color:white;font-weight:bold}
 .checkout-back{background:#f1eee5;color:#665a43}
 .payment-tracking-note{margin:12px 0 0;padding:12px;background:#f8f6ef;border-radius:10px;color:#665a43;font-size:12px;line-height:2}
@@ -339,7 +339,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   const checkout = document.createElement("section");
   checkout.className = "checkout-box";
   checkout.hidden = true;
-  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً تمام فیلدها را تکمیل کنید. ثبت و ارسال سفارش بدون تکمیل همه موارد امکان‌پذیر نیست.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" inputmode="tel" dir="ltr" autocomplete="tel" placeholder="شماره تماس *" required><input class="customer-id" type="text" inputmode="url" lang="en" dir="ltr" autocapitalize="none" spellcheck="false" autocomplete="off" placeholder="شناسه تلگرام یا روبیکا *" required><select class="customer-province" lang="fa" required><option value="">استان را انتخاب کنید *</option></select><select class="customer-city" lang="fa" required disabled><option value="">ابتدا استان را انتخاب کنید *</option></select><textarea class="customer-address wide" inputmode="text" lang="fa" dir="rtl" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" dir="ltr" lang="en" autocomplete="postal-code" pattern="[0-9]{10}" maxlength="10" placeholder="کد پستی (۱۰ رقم) *" required><textarea class="customer-notes wide" inputmode="text" lang="fa" dir="rtl" placeholder="توضیحات تحویل * (اگر توضیحی ندارید، بنویسید: ندارد)" required></textarea></div><label class="terms-confirm"><input class="customer-terms" type="checkbox" required> تمام اطلاعات واردشده، از جمله نام و نام خانوادگی، شماره تماس، شناسه پیام‌رسان، استان، شهر، نشانی و کد پستی را بررسی و تأیید می‌کنم. مسئولیت صحت اطلاعات و پیامدهای ناشی از اشتباه در ثبت آن‌ها بر عهده من است.</label><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div><p class="checkout-status" role="status" aria-live="polite" hidden></p><div class="issued-invoice" hidden><h4>فاکتور ثبت‌شده</h4><pre class="issued-invoice-text"></pre><button type="button" class="copy-issued-invoice">کپی فاکتور</button></div>';
+  checkout.innerHTML = '<h3>تکمیل اطلاعات و ثبت سفارش</h3><p class="customer-help">لطفاً تمام فیلدها را تکمیل کنید. ثبت و ارسال سفارش بدون تکمیل همه موارد امکان‌پذیر نیست.</p><p class="privacy-note">اطلاعات و مشخصات شما نزد ما محفوظ است و صرفاً برای ثبت، پیگیری و ارسال سفارش استفاده خواهد شد.</p><div class="checkout-fields"><input class="customer-name" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="given-name" placeholder="نام *" required><input class="customer-family" type="text" inputmode="text" lang="fa" dir="rtl" autocomplete="family-name" placeholder="نام خانوادگی *" required><input class="customer-contact" type="tel" inputmode="tel" dir="ltr" autocomplete="tel" placeholder="شماره تماس *" required><select class="customer-messenger" lang="fa" required><option value="">پیام‌رسان را انتخاب کنید *</option><option value="telegram">تلگرام</option><option value="rubika">روبیکا</option></select><input class="customer-id" type="text" inputmode="text" lang="en" dir="ltr" autocapitalize="none" spellcheck="false" autocomplete="off" placeholder="شناسه گفت‌وگو در پیام‌رسان انتخابی *" required><p class="messenger-id-help wide">برای روبیکا: <a href="https://rubika.ir/Chaysa2026bot" target="_blank" rel="noopener noreferrer">ربات چایسا را باز کنید</a> و دکمه شروع را بزنید؛ ربات شناسه گفت‌وگوی شما را می‌فرستد. همان شناسه را در این کادر وارد کنید.</p><select class="customer-province" lang="fa" required><option value="">استان را انتخاب کنید *</option></select><select class="customer-city" lang="fa" required disabled><option value="">ابتدا استان را انتخاب کنید *</option></select><textarea class="customer-address wide" inputmode="text" lang="fa" dir="rtl" placeholder="آدرس دقیق محل تحویل *" required></textarea><input class="customer-postal wide" type="text" inputmode="numeric" dir="ltr" lang="en" autocomplete="postal-code" pattern="[0-9]{10}" maxlength="10" placeholder="کد پستی (۱۰ رقم) *" required><textarea class="customer-notes wide" inputmode="text" lang="fa" dir="rtl" placeholder="توضیحات تحویل * (اگر توضیحی ندارید، بنویسید: ندارد)" required></textarea></div><label class="terms-confirm"><input class="customer-terms" type="checkbox" required> تمام اطلاعات واردشده، از جمله نام و نام خانوادگی، شماره تماس، شناسه پیام‌رسان، استان، شهر، نشانی و کد پستی را بررسی و تأیید می‌کنم. مسئولیت صحت اطلاعات و پیامدهای ناشی از اشتباه در ثبت آن‌ها بر عهده من است.</label><div class="checkout-preview"><h4>فاکتور نهایی سفارش</h4><div class="final-customer-preview"></div><div class="final-items-preview"></div><div class="invoice-summary"><span>جمع کل سفارش</span><strong class="final-total">۰ تومان</strong></div><p class="payment-tracking-note">پس از واریز مبلغ فاکتور و تأیید پرداخت، کد رهگیری سفارش برای خریدار ارسال خواهد شد.</p></div><div class="checkout-actions"><button type="button" class="checkout-send">تأیید و ارسال سفارش</button><button type="button" class="checkout-back">بازگشت به فاکتور</button></div><p class="checkout-status" role="status" aria-live="polite" hidden></p><div class="issued-invoice" hidden><h4>فاکتور ثبت‌شده</h4><pre class="issued-invoice-text"></pre><button type="button" class="copy-issued-invoice">کپی فاکتور</button></div>';
   section.appendChild(checkout);
   function checkoutValue(selector) { return checkout.querySelector(selector).value.trim(); }
   function updateFinalPreview() {
@@ -347,7 +347,8 @@ document.addEventListener("DOMContentLoaded", async function () {
       ["نام", checkoutValue(".customer-name")],
       ["نام خانوادگی", checkoutValue(".customer-family")],
       ["شماره تماس", checkoutValue(".customer-contact")],
-      ["آیدی تلگرام یا روبیکا", checkoutValue(".customer-id") || "ثبت نشده"],
+      ["پیام‌رسان انتخابی", checkoutValue(".customer-messenger")==="rubika"?"روبیکا":checkoutValue(".customer-messenger")==="telegram"?"تلگرام":"—"],
+      ["شناسه پیام‌رسان", checkoutValue(".customer-id") || "ثبت نشده"],
       ["استان", checkoutValue(".customer-province")],
       ["شهر", checkoutValue(".customer-city")],
       ["آدرس تحویل", checkoutValue(".customer-address")],
@@ -538,7 +539,7 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function buildOrderText() {
-    const lines = ["سفارش جدید چایسا", "====================", "مشخصات خریدار", "نام: " + checkoutValue(".customer-name"), "نام خانوادگی: " + checkoutValue(".customer-family"), "شماره تماس: " + checkoutValue(".customer-contact"), "آیدی تلگرام یا روبیکا: " + (checkoutValue(".customer-id") || "ثبت نشده"), "استان: " + checkoutValue(".customer-province"), "شهر: " + checkoutValue(".customer-city"), "آدرس تحویل: " + checkoutValue(".customer-address"), "کد پستی: " + checkoutValue(".customer-postal"), "توضیحات تحویل: " + (checkoutValue(".customer-notes") || "ندارد"), "--------------------", "اقلام سفارش"];
+    const lines = ["سفارش جدید چایسا", "====================", "مشخصات خریدار", "نام: " + checkoutValue(".customer-name"), "نام خانوادگی: " + checkoutValue(".customer-family"), "شماره تماس: " + checkoutValue(".customer-contact"), "پیام‌رسان انتخابی: " + (checkoutValue(".customer-messenger")==="rubika"?"روبیکا":"تلگرام"), "شناسه پیام‌رسان: " + (checkoutValue(".customer-id") || "ثبت نشده"), "استان: " + checkoutValue(".customer-province"), "شهر: " + checkoutValue(".customer-city"), "آدرس تحویل: " + checkoutValue(".customer-address"), "کد پستی: " + checkoutValue(".customer-postal"), "توضیحات تحویل: " + (checkoutValue(".customer-notes") || "ندارد"), "--------------------", "اقلام سفارش"];
     let total = 0;
     cart.forEach(function(item, code) {
       lines.push(item.name + " | شناسه: " + code + " | تعداد: " + item.qty + " | مبلغ: " + (item.price * item.qty).toLocaleString("en-US") + " تومان");
@@ -585,15 +586,26 @@ document.addEventListener("DOMContentLoaded", async function () {
     if(!terms.checked){alert("برای ثبت سفارش، تأیید اطلاعات الزامی است.");terms.focus();return;}
     updateFinalPreview();
     const button=checkout.querySelector(".checkout-send"),status=checkout.querySelector(".checkout-status");
-    const customer={name:checkoutValue(".customer-name"),family:checkoutValue(".customer-family"),contact:checkoutValue(".customer-contact"),messengerId:checkoutValue(".customer-id"),province:checkoutValue(".customer-province"),city:checkoutValue(".customer-city"),address:checkoutValue(".customer-address"),postal:checkoutValue(".customer-postal"),notes:checkoutValue(".customer-notes")};
+    const customer={name:checkoutValue(".customer-name"),family:checkoutValue(".customer-family"),contact:checkoutValue(".customer-contact"),messengerPlatform:checkoutValue(".customer-messenger"),messengerId:checkoutValue(".customer-id"),province:checkoutValue(".customer-province"),city:checkoutValue(".customer-city"),address:checkoutValue(".customer-address"),postal:checkoutValue(".customer-postal"),notes:checkoutValue(".customer-notes")};
     const items=Array.from(cart.entries()).map(([sku,item])=>({sku,qty:item.qty}));
     button.disabled=true;button.textContent="در حال ثبت سفارش...";status.hidden=true;
     try{
       const response=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,items,termsAccepted:true,termsAcceptedAt:new Date().toISOString()})});
       let result={};try{result=await response.json()}catch(_){}
       if(!response.ok||!result.ok)throw new Error(result.error||"ثبت سفارش انجام نشد.");
-      status.textContent="سفارش با شناسه "+result.orderId+" ثبت شد. فاکتور را کپی و تا زمان تحویل نگهداری کن.";
-      status.classList.add("success");status.hidden=false;
+      status.classList.remove("success","warning","error");
+      if(result.notificationStatus==="sent"&&result.notificationStatusSaved){
+        status.textContent="سفارش با شناسه "+result.orderId+" ثبت شد و پیش‌فاکتور به هر دو گیرنده ارسال شد. فاکتور را تا زمان تحویل نگهداری کن.";
+        status.classList.add("success");
+      }else{
+        const delivery=result.recipientCount>0?"ارسال موفق به "+result.delivered+" از "+result.recipientCount+" گیرنده":"گیرندگان اعلان سفارش در سامانه تنظیم نشده‌اند";
+        const persistence=result.notificationStatusSaved?"":"؛ ذخیره وضعیت ارسال نیز تأیید نشد";
+        status.textContent="سفارش با شناسه "+result.orderId+" در سامانه ثبت شد، اما دریافت پیش‌فاکتور توسط مدیران تأیید نشده است ("+delivery+persistence+"). سفارش را دوباره ثبت نکنید؛ شناسه و فاکتور را نگه دارید.";
+        status.classList.add("warning");
+      }
+      const customerDeliveryText=result.customerDeliveryStatus==="sent"?"فاکتور به پیام‌رسان انتخابی شما ارسال شد.":"ارسال فاکتور به پیام‌رسان انتخابی تأیید نشد؛ شناسه سفارش را نگه دارید و سفارش را دوباره ثبت نکنید.";
+      status.textContent += " " + customerDeliveryText;
+      status.hidden=false;
       checkout.querySelector(".issued-invoice-text").textContent=result.invoice;
       checkout.querySelector(".issued-invoice").hidden=false;
       button.textContent="سفارش ثبت شد";button.disabled=true;

@@ -343,6 +343,23 @@ function saveTelegramRecipient(chat) {
   fs.renameSync(tmp, TELEGRAM_RECIPIENTS_FILE);
 }
 
+async function sendRubikaText(chatId, text) {
+ const token=process.env.RUBIKA_BOT_TOKEN||"";
+ if(!token||typeof chatId!=="string"||!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return false;
+ try{const r=await fetch("https://botapi.rubika.ir/v3/"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:chatId,text,disable_notification:false})});const d=await r.json();return r.ok&&d.status==="OK"&&Boolean(d.data&&d.data.message_id)}catch(_){return false}
+}
+function rubikaWebhookKey(){const token=process.env.RUBIKA_BOT_TOKEN||"";return token?crypto.createHash("sha256").update("CHAYSA-RUBIKA-WEBHOOK-V1:"+token).digest("hex").slice(0,40):""}
+async function handleRubikaUpdate(update){
+ const msg=update&&(update.new_message||update.updated_message),chatId=String(update&&update.chat_id||"");
+ if(!msg||msg.sender_type!=="User"||typeof msg.text!=="string"||!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return;
+ if(["/start","شروع","/start@Chaysa2026bot"].includes(msg.text.trim()))await sendRubikaText(chatId,"به ربات چایسا خوش آمدید.\nشناسه گفت‌وگوی شما برای ثبت سفارش:\n"+chatId+"\nاین شناسه را پس از انتخاب روبیکا در فرم سفارش وارد کنید. فاکتور از همین گفت‌وگو ارسال می‌شود.");
+}
+app.post("/rubika/webhook/:key",async(req,res)=>{
+ const expected=rubikaWebhookKey(),supplied=String(req.params.key||"");
+ if(!expected||supplied.length!==expected.length||!crypto.timingSafeEqual(Buffer.from(expected),Buffer.from(supplied)))return res.sendStatus(403);
+ try{const body=req.body||{},updates=Array.isArray(body.updates)?body.updates:[body];for(const update of updates)await handleRubikaUpdate(update);return res.sendStatus(200)}catch(_){return res.sendStatus(500)}
+});
+
 async function sendTelegramText(chatId, text, replyMarkup) {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   if (!token) return false;
@@ -1313,19 +1330,35 @@ app.post("/api/questions",async(req,res)=>{
 });
 app.post("/api/orders",async(req,res)=>{
  const key="order:"+(req.ip||"unknown");if(limited(key,5,10*60*1000))return json(res,429,{error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کن."});
- const b=req.body||{},c=b.customer||{},fields=["name","family","contact","messengerId","province","city","address","postal","notes"];
+ const b=req.body||{},c=b.customer||{},fields=["name","family","contact","messengerPlatform","messengerId","province","city","address","postal","notes"];
+ if(!["telegram","rubika"].includes(String(c.messengerPlatform||"")))return json(res,400,{error:"پیام‌رسان انتخابی باید تلگرام یا روبیکا باشد."});
  if(!fields.every(k=>typeof c[k]==="string"&&c[k].trim())||b.termsAccepted!==true||typeof b.termsAcceptedAt!=="string")return json(res,400,{error:"اطلاعات خریدار و تأیید صحت آن‌ها الزامی است."});
  if(!/^\d{10}$/.test(normalizeDigits(c.postal).replace(/[^0-9]/g,"")))return json(res,400,{error:"کد پستی باید دقیقاً ۱۰ رقم باشد."});
  if(!Array.isArray(b.items)||!b.items.length||b.items.length>100)return json(res,400,{error:"سبد سفارش معتبر نیست."});
  const catalog=readProducts(),items=[];
  for(const x of b.items){const p=catalog.find(p=>String(p.sku)===String(x.sku)&&p.active!==false),qty=Number(x.qty);if(!p||!Number.isInteger(qty)||qty<1||qty>99)return json(res,400,{error:"کالا یا تعداد آن معتبر نیست؛ سبد را تازه‌سازی کنید."});items.push({sku:String(p.sku),name:String(p.name),qty,unitPrice:Number(p.price),lineTotal:Number(p.price)*qty})}
  const total=items.reduce((n,x)=>n+x.lineTotal,0),now=new Date();
- const order={id:"CH-"+now.toISOString().slice(0,10).replace(/-/g,"")+"-"+crypto.randomBytes(6).toString("hex").toUpperCase(),createdAt:now.toISOString(),status:"در انتظار بررسی",customer:Object.fromEntries(fields.map(k=>[k,String(c[k]).trim()])),termsAccepted:true,termsAcceptedAt:b.termsAcceptedAt,items,total,deliveryRule:"تحویل سفارش باید فقط به خریدار و پس از احراز هویت و تطبیق شناسه سفارش انجام شود. خریدار فاکتور و شناسه اختصاصی را تا زمان دریافت نگهداری کند."};
+ const order={id:"CH-"+now.toISOString().slice(0,10).replace(/-/g,"")+"-"+crypto.randomBytes(6).toString("hex").toUpperCase(),createdAt:now.toISOString(),status:"در انتظار بررسی",customer:Object.fromEntries(fields.map(k=>[k,String(c[k]).trim()])),termsAccepted:true,termsAcceptedAt:b.termsAcceptedAt,items,total,notification:{status:"pending",delivered:0,recipientCount:0,attemptedAt:null},deliveryRule:"تحویل سفارش باید فقط به خریدار و پس از احراز هویت و تطبیق شناسه سفارش انجام شود. خریدار فاکتور و شناسه اختصاصی را تا زمان دریافت نگهداری کند."};
  const rows=readOrders();rows.push(order);try{saveOrders(rows)}catch(_){return json(res,500,{error:"ذخیره سفارش انجام نشد؛ دوباره تلاش کنید."})}
- const invoice=["فاکتور سفارش چایسا","شناسه سفارش: "+order.id,"تاریخ: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"وضعیت: "+order.status,"مشخصات خریدار",c.name+" "+c.family,"تماس: "+c.contact,"شناسه پیام‌رسان: "+c.messengerId,"استان/شهر: "+c.province+" / "+c.city,"نشانی: "+c.address,"کد پستی: "+c.postal,"توضیحات: "+c.notes,"اقلام سفارش",...items.map(x=>x.name+" | "+x.sku+" | "+x.qty+" × "+x.unitPrice.toLocaleString("en-US")+" = "+x.lineTotal.toLocaleString("en-US")+" تومان"),"جمع کل: "+total.toLocaleString("en-US")+" تومان",order.deliveryRule].join("\n");
+ const invoice=["فاکتور سفارش چایسا","شناسه سفارش: "+order.id,"تاریخ: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"وضعیت: "+order.status,"مشخصات خریدار",c.name+" "+c.family,"تماس: "+c.contact,"پیام‌رسان انتخابی: "+(c.messengerPlatform==="rubika"?"روبیکا":"تلگرام"),"شناسه پیام‌رسان: "+c.messengerId,"استان/شهر: "+c.province+" / "+c.city,"نشانی: "+c.address,"کد پستی: "+c.postal,"توضیحات: "+c.notes,"اقلام سفارش",...items.map(x=>x.name+" | "+x.sku+" | "+x.qty+" × "+x.unitPrice.toLocaleString("en-US")+" = "+x.lineTotal.toLocaleString("en-US")+" تومان"),"جمع کل: "+total.toLocaleString("en-US")+" تومان",order.deliveryRule].join("\n");
+ const customerId=String(c.messengerId||"").trim();
+ if(c.messengerPlatform==="telegram"&&!/^-?\d{5,20}$/.test(customerId))return json(res,400,{error:"شناسه گفت‌وگوی تلگرام معتبر نیست؛ ربات را Start کنید و شناسه عددی را وارد کنید."});
+ if(c.messengerPlatform==="rubika"&&!/^[A-Za-z0-9_-]{12,80}$/.test(customerId))return json(res,400,{error:"شناسه گفت‌وگوی روبیکا معتبر نیست؛ ربات چایسا را Start کنید و شناسه ارسالی را وارد کنید."});
  const token=process.env.TELEGRAM_BOT_TOKEN||"",recipients=String(process.env.ORDER_CHAT_IDS||"").split(",").map(x=>x.trim()).filter(x=>/^-?\d+$/.test(x));
- let delivered=0;if(token&&recipients.length===2&&new Set(recipients).size===2){const rs=await Promise.all(recipients.map(async id=>{try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:id,text:invoice,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok}catch(_){return false}}));delivered=rs.filter(Boolean).length}
- return json(res,200,{ok:true,orderId:order.id,invoice,delivered});
+ const configured=Boolean(token&&recipients.length===2&&new Set(recipients).size===2);
+ let delivered=0;
+ if(configured){
+  const rs=await Promise.all(recipients.map(async id=>{try{const r=await fetch("https://api.telegram.org/bot"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:id,text:invoice,disable_web_page_preview:true})});const d=await r.json();return r.ok&&d.ok}catch(_){return false}}));
+  delivered=rs.filter(Boolean).length;
+ }
+ const notificationStatus=!configured?"not_configured":delivered===recipients.length?"sent":delivered>0?"partial":"failed";
+ order.notification={status:notificationStatus,delivered,recipientCount:configured?recipients.length:0,attemptedAt:configured?new Date().toISOString():null};
+ let notificationStatusSaved=true;
+ try{saveOrders(rows)}catch(_){notificationStatusSaved=false}
+ let customerDelivered=c.messengerPlatform==="rubika"?await sendRubikaText(customerId,invoice):await sendTelegramText(customerId,invoice);
+ order.customerDelivery={platform:c.messengerPlatform,status:customerDelivered?"sent":"failed",attemptedAt:new Date().toISOString()};
+ let customerDeliveryStatusSaved=true;try{saveOrders(rows)}catch(_){customerDeliveryStatusSaved=false}
+ return json(res,200,{ok:true,orderId:order.id,invoice,delivered,recipientCount:configured?recipients.length:0,notificationStatus,notificationStatusSaved,customerDeliveryStatus:order.customerDelivery.status,customerDeliveryStatusSaved});
 });
 // Do not expose server-side source, package metadata, or deployment configuration.
 app.use((req, res, next) => {
@@ -1376,6 +1409,8 @@ app.listen(port, "0.0.0.0", () => {
   } catch (_) {
     console.log("CHAYSA Telegram pair: sync failed");
   }
+  const rubikaToken=process.env.RUBIKA_BOT_TOKEN||"",rubikaKey=rubikaWebhookKey();
+  if(rubikaToken&&rubikaKey){const url=(process.env.RUBIKA_WEBHOOK_URL||"https://chaysa.up.railway.app/rubika/webhook/"+rubikaKey).trim();fetch("https://botapi.rubika.ir/v3/"+rubikaToken+"/updateBotEndpoints",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({url,type:"ReceiveUpdate"})}).then(async r=>{const d=await r.json();return r.ok&&d.status==="OK"&&d.data&&["Done","OK"].includes(d.data.status)}).then(ok=>console.log("Rubika webhook registration:",ok?"ok":"failed")).catch(()=>console.log("Rubika webhook registration failed"))}
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
   const webhookSecret = process.env.TELEGRAM_WEBHOOK_SECRET || "";
   if (token && webhookSecret) {
