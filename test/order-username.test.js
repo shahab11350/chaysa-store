@@ -19,6 +19,7 @@ test("checkout requires a messenger username between platform and chat ID", () =
   assert.match(field, /maxlength="65"/);
   assert.match(checkout, /آیدی تلگرام \(مثال: @chaysa\)/);
   assert.match(checkout, /آیدی روبیکا \(مثال: @chaysa\)/);
+  assert.ok(!checkout.includes("آیدی عمومی مثل @username پذیرفته نیست."));
 });
 
 test("username is previewed, submitted, validated, stored and included in invoice", () => {
