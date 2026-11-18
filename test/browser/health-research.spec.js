@@ -9,6 +9,7 @@ test("CHAYSA HEALTH research library renders correctly on a mobile viewport", as
   await page.locator('[data-health-bank-tab="sources"]').click();
   await expect(page.locator("#chaysaResearchBank")).toBeVisible();
   await expect(page.locator("[data-health-bank-summary]")).toContainText("29 منبع علمی");
+  await expect(page.locator("#healthBankSearch-sources")).toBeVisible();
   await expect(page.locator("#chaysaResearchBank")).toContainText("صحت نهایی مطالب را تضمین نمی‌کند");
 
   await page.locator('[data-health-bank-tab="products"]').click();
@@ -115,11 +116,13 @@ test("ten CHAYSA HEALTH sections navigate to the matching internal research view
   for (const [tab, title] of expected) {
     await page.locator('[data-health-bank-tab="' + tab + '"]').click();
     await expect(page.locator("#chaysaResearchBank")).toBeVisible();
-    await expect(page.locator("#healthBankTitle")).toHaveText(title);
-    await expect(page.locator("[data-health-bank-list]")).not.toBeEmpty();
+    await expect(page.locator('[data-health-section-panel="' + tab + '"] [data-health-section-title]')).toHaveText(title);
+    await expect(page.locator('[data-health-section-panel="' + tab + '"] [data-health-bank-search]')).toBeVisible();
+    await expect(page.locator('[data-health-section-panel="' + tab + '"] [data-health-bank-list]')).not.toBeEmpty();
   }
 
   await page.locator('[data-health-bank-tab="qa"]').click();
+  await expect(page.locator('#healthBankSearch-qa')).toBeVisible();
   await expect(page.locator("#chaysaGuideQuestion")).toBeFocused();
   const hasHorizontalOverflow = await page.evaluate(() =>
     document.documentElement.scrollWidth > document.documentElement.clientWidth
