@@ -79,6 +79,16 @@ footer{text-align:center;color:#777;font-size:11px;padding:0 12px 24px}
    for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>max&&line){out.push(line);line=word}else line=test}
    if(line)out.push(line);return out;
  }
+ function roundedRectPath(x,y,w,h,r){
+   const radius=Math.max(0,Math.min(r,w/2,h/2));
+   if(typeof ctx.roundRect==='function'){ctx.roundRect(x,y,w,h,radius);return}
+   ctx.moveTo(x+radius,y);
+   ctx.arcTo(x+w,y,x+w,y+h,radius);
+   ctx.arcTo(x+w,y+h,x,y+h,radius);
+   ctx.arcTo(x,y+h,x,y,radius);
+   ctx.arcTo(x,y,x+w,y,radius);
+   ctx.closePath();
+ }
  function draw(){
    const g=ctx.createLinearGradient(0,0,1080,1350);g.addColorStop(0,'#fbf7ec');g.addColorStop(.55,'#f2f0e4');g.addColorStop(1,'#e8efdf');
    ctx.clearRect(0,0,1080,1350);ctx.fillStyle=g;ctx.fillRect(0,0,1080,1350);
@@ -91,10 +101,10 @@ footer{text-align:center;color:#777;font-size:11px;padding:0 12px 24px}
    ctx.fillStyle='#244b37';ctx.font='bold 112px Tahoma';ctx.fillText('CHAYSA',540,285);
    ctx.fillStyle='#b08d43';ctx.font='bold 50px Tahoma';ctx.fillText('یک دعوتِ دل‌نشین',540,490);
    ctx.fillStyle='#426b4c';ctx.font='34px Tahoma';ctx.fillText('برای چشیدن طعم‌های تازه',540,555);
-   ctx.fillStyle='#fffdf4cc';ctx.beginPath();ctx.roundRect(115,635,850,300,42);ctx.fill();
+   ctx.fillStyle='#fffdf4cc';ctx.beginPath();roundedRectPath(115,635,850,300,42);ctx.fill();
    ctx.fillStyle='#314a35';ctx.font='42px Tahoma';const message=textEl.value.trim();const rows=lines(message,730);let y=735;
    rows.slice(0,4).forEach(row=>{ctx.fillText(row,540,y);y+=66});
-   ctx.fillStyle='#244b37';ctx.beginPath();ctx.roundRect(435,1010,210,105,28);ctx.fill();
+   ctx.fillStyle='#244b37';ctx.beginPath();roundedRectPath(435,1010,210,105,28);ctx.fill();
    ctx.strokeStyle='#244b37';ctx.lineWidth=18;ctx.beginPath();ctx.arc(650,1055,42,-Math.PI/2,Math.PI/2);ctx.stroke();
    ctx.fillStyle='#c5a45b';ctx.beginPath();ctx.ellipse(540,1010,105,19,0,0,Math.PI*2);ctx.fill();
    ctx.strokeStyle='#c5a45b';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(490,965);ctx.bezierCurveTo(450,900,530,890,500,835);ctx.moveTo(560,965);ctx.bezierCurveTo(520,900,600,880,570,830);ctx.stroke();
