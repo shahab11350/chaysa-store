@@ -9,16 +9,28 @@ const page = fs.readFileSync(path.join(root, "health-advisor.html"), "utf8");
 const script = fs.readFileSync(path.join(root, "health-bank.js"), "utf8");
 const adminPage = fs.readFileSync(path.join(root, "admin.html"), "utf8");
 const server = fs.readFileSync(path.join(root, "server.js"), "utf8");
+const queue = fs.readFileSync(path.join(root, "health-research-queue.js"), "utf8");
 
 test("CHAYSA HEALTH research inventory counts and draft status are explicit", () => {
   assert.equal(research.status, "research_draft_not_for_customer_answers");
-  assert.equal(research.products.length, 48);
-  assert.equal(research.liveInventory.totalRecords, 48);
-  assert.equal(research.liveInventory.activeRecords, 47);
+  assert.equal(research.products.length, 47);
+  assert.equal(research.liveInventory.totalRecords, 47);
+  assert.equal(research.liveInventory.activeRecords, 46);
   assert.equal(research.liveInventory.inactiveRecords, 1);
   assert.equal(research.botanicalProfiles.length, 12);
   assert.equal(research.sources.length, 29);
   assert.equal(research.bookBibliography.length, 28);
+});
+
+test("research snapshot matches the live catalog snapshot and contains no orphan SKU record", () => {
+  const skus = research.products.map(item => String(item.sku || ""));
+  assert.ok(skus.every(Boolean), "every research product must have a SKU");
+  assert.equal(new Set(skus).size, skus.length, "research product SKUs must be unique");
+  assert.deepEqual(research.liveInventory.duplicateSkuRecords, []);
+  assert.equal(research.liveInventory.byCategory["چای"].total, 24);
+  assert.equal(research.liveInventory.byCategory["دمنوش"].total, 14);
+  assert.equal(research.liveInventory.byCategory["ادویه"].total, 9);
+  assert.ok(research.liveInventory.catalogLimitations.some(item => item.includes("snapshot")));
 });
 
 test("every source has a Persian research-scope summary", () => {
@@ -99,4 +111,21 @@ test("free PubMed discovery is admin-only, rate-limited and explicitly non-publi
   assert.match(server, /healthResearchQueue\.searchPubMed/);
   assert.match(server, /health-research-suggestions:/);
   assert.match(server, /به‌صورت خودکار به پرونده افزوده یا منتشر نمی‌شوند/);
+});
+
+test("research evidence files are private, size-limited, signature-checked and admin-only", () => {
+  assert.match(server, /HEALTH_RESEARCH_EVIDENCE_DIR/);
+  assert.match(server, /healthResearchEvidenceUpload\.single\("evidence"\)/);
+  assert.match(server, /fileSize: 10 \* 1024 \* 1024/);
+  assert.match(server, /isSupportedResearchEvidence/);
+  assert.match(server, /app\.get\("\/api\/admin\/health-research\/evidence\/:id", requireAdmin/);
+  assert.match(server, /Content-Disposition", "attachment/);
+  assert.match(server, /healthResearchQueue\.addEvidence/);
+  assert.match(queue, /evidence\.some\(row => row\.type === "label" && evidenceFileExists\(row\)\)/);
+  assert.match(queue, /evidence\.some\(row => row\.type === "composition" && evidenceFileExists\(row\)\)/);
+  assert.match(queue, /evidenceFileExists/);
+  assert.match(queue, /محصول غیرفعال یا حذف‌شده وارد مراحل فعال پژوهش نمی‌شود/);
+  assert.match(queue, /SKU تکراری تا زمان رفع تعارض/);
+  assert.match(adminPage, /addEvidenceUpload\('label'/);
+  assert.match(adminPage, /addEvidenceUpload\('composition'/);
 });

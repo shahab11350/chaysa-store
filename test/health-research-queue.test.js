@@ -7,7 +7,16 @@ const { createHealthResearchQueue } = require("../health-research-queue");
 
 function fixture() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "chaysa-health-queue-"));
-  return { dir, queue: createHealthResearchQueue(dir), cleanup: () => fs.rmSync(dir, { recursive: true, force: true }) };
+  return {
+    dir,
+    queue: createHealthResearchQueue(dir),
+    writeEvidence: fileName => {
+      const evidenceDir = path.join(dir, "health-research-evidence");
+      fs.mkdirSync(evidenceDir, { recursive: true });
+      fs.writeFileSync(path.join(evidenceDir, fileName), Buffer.from("%PDF-1.4\\nfixture\\n%%EOF"));
+    },
+    cleanup: () => fs.rmSync(dir, { recursive: true, force: true })
+  };
 }
 
 test("initial active catalog enters a durable SKU research queue", () => {
@@ -56,6 +65,25 @@ test("approval requires verified label and composition, a source and a named rev
   try {
     const item = f.queue.syncCatalog([{ sku: "SKU-1", name: "چای سبز", category: "چای", active: true }]).items[0];
     assert.throws(() => f.queue.updateItem(item.id, { status: "approved" }), /تأیید پرونده نیازمند/);
+    assert.throws(() => f.queue.updateItem(item.id, {
+      labelEvidenceStatus: "checked",
+      compositionStatus: "checked",
+      reviewerName: "بازبین مسئول",
+      sources: [{ title: "منبع رسمی", url: "https://example.org/source", sourceType: "official" }],
+      status: "approved"
+    }), /فایل مدرک برچسب و ترکیبات/);
+    f.writeEvidence("11111111-1111-4111-8111-111111111111.pdf");
+    f.queue.addEvidence(item.id, {
+      type: "label", fileId: "11111111-1111-4111-8111-111111111111",
+      fileName: "11111111-1111-4111-8111-111111111111.pdf", originalName: "label.pdf",
+      mime: "application/pdf", size: 100, sha256: "a".repeat(64)
+    });
+    f.writeEvidence("22222222-2222-4222-8222-222222222222.pdf");
+    f.queue.addEvidence(item.id, {
+      type: "composition", fileId: "22222222-2222-4222-8222-222222222222",
+      fileName: "22222222-2222-4222-8222-222222222222.pdf", originalName: "composition.pdf",
+      mime: "application/pdf", size: 120, sha256: "b".repeat(64)
+    });
     const updated = f.queue.updateItem(item.id, {
       labelEvidenceStatus: "checked",
       compositionStatus: "checked",
@@ -83,13 +111,20 @@ test("queue cannot advance without a SKU or archive an active product", () => {
   try {
     const state = f.queue.syncCatalog([
       { sku: "", name: "بدون شناسه", category: "چای", active: true },
-      { sku: "SKU-2", name: "چای فعال", category: "چای", active: true }
+      { sku: "SKU-2", name: "چای فعال", category: "چای", active: true },
+      { sku: "SKU-3", name: "چای غیرفعال", category: "چای", active: false },
+      { sku: "DUP", name: "محصول تکراری اول", category: "چای", active: true },
+      { sku: "DUP", name: "محصول تکراری دوم", category: "چای", active: true }
     ]);
     const missing = state.items.find(x => !x.sku);
     const active = state.items.find(x => x.sku === "SKU-2");
+    const inactive = state.items.find(x => x.sku === "SKU-3");
+    const duplicate = state.items.find(x => x.duplicateSku);
     assert.throws(() => f.queue.updateItem(missing.id, { status: "researching" }), /تا زمان ثبت SKU معتبر/);
     assert.throws(() => f.queue.updateItem(active.id, { status: "archived" }), /محصول فعال را نمی‌توان/);
     assert.throws(() => f.queue.updateItem(active.id, { status: "needs_sku" }), /محصول SKU دارد/);
+    assert.throws(() => f.queue.updateItem(inactive.id, { status: "researching" }), /محصول غیرفعال یا حذف‌شده/);
+    assert.throws(() => f.queue.updateItem(duplicate.id, { status: "researching" }), /SKU تکراری/);
   } finally { f.cleanup(); }
 });
 
@@ -97,6 +132,18 @@ test("a changed product identity reopens an approved record for update", () => {
   const f = fixture();
   try {
     const item = f.queue.syncCatalog([{ sku: "SKU-3", name: "چای سفید", category: "چای", active: true }]).items[0];
+    f.writeEvidence("66666666-6666-4666-8666-666666666666.pdf");
+    f.queue.addEvidence(item.id, {
+      type: "label", fileId: "66666666-6666-4666-8666-666666666666",
+      fileName: "66666666-6666-4666-8666-666666666666.pdf", originalName: "label.pdf",
+      mime: "application/pdf", size: 100, sha256: "d".repeat(64)
+    });
+    f.writeEvidence("77777777-7777-4777-8777-777777777777.pdf");
+    f.queue.addEvidence(item.id, {
+      type: "composition", fileId: "77777777-7777-4777-8777-777777777777",
+      fileName: "77777777-7777-4777-8777-777777777777.pdf", originalName: "composition.pdf",
+      mime: "application/pdf", size: 100, sha256: "e".repeat(64)
+    });
     f.queue.updateItem(item.id, {
       labelEvidenceStatus: "checked",
       compositionStatus: "checked",
@@ -152,5 +199,70 @@ test("PubMed search rejects inactive, missing-SKU and duplicate-SKU products", a
     const missing = state.items.find(x => !x.sku);
     await assert.rejects(() => f.queue.searchPubMed(duplicate.id, "plant"), /فقط برای محصول فعال/);
     await assert.rejects(() => f.queue.searchPubMed(missing.id, "plant"), /فقط برای محصول فعال/);
+  } finally { f.cleanup(); }
+});
+
+test("evidence metadata is private to the queue and requires an active unique SKU", () => {
+  const f = fixture();
+  try {
+    const state = f.queue.syncCatalog([
+      { sku: "SKU-EVIDENCE", name: "چای سبز", category: "چای", active: true },
+      { sku: "SKU-INACTIVE", name: "چای غیرفعال", category: "چای", active: false }
+    ]);
+    const active = state.items.find(x => x.sku === "SKU-EVIDENCE");
+    const inactive = state.items.find(x => x.sku === "SKU-INACTIVE");
+    const meta = {
+      type: "label", fileId: "33333333-3333-4333-8333-333333333333",
+      fileName: "33333333-3333-4333-8333-333333333333.pdf", originalName: "label.pdf",
+      mime: "application/pdf", size: 512, sha256: "c".repeat(64)
+    };
+    const saved = f.queue.addEvidence(active.id, meta);
+    assert.equal(saved.evidence.length, 1);
+    assert.equal(saved.labelEvidenceStatus, "received");
+    assert.equal(f.queue.getEvidence(meta.fileId).evidence.fileName, meta.fileName);
+    assert.equal(f.queue.read().items.find(x => x.id === active.id).status, "queued");
+    assert.throws(() => f.queue.addEvidence(inactive.id, { ...meta, fileId: "44444444-4444-4444-8444-444444444444", fileName: "44444444-4444-4444-8444-444444444444.pdf" }), /فقط برای محصول فعال/);
+    assert.throws(() => f.queue.addEvidence(active.id, { ...meta, fileId: "55555555-5555-4555-8555-555555555555", fileName: "55555555-5555-4555-8555-555555555555.svg", mime: "image/svg+xml" }), /اطلاعات مدرک/);
+  } finally { f.cleanup(); }
+});
+
+test("approval is blocked if an attached evidence file is missing from private storage", () => {
+  const f = fixture();
+  try {
+    const item = f.queue.syncCatalog([{ sku: "SKU-MISSING-FILE", name: "چای سبز", category: "چای", active: true }]).items[0];
+    const labelName = "88888888-8888-4888-8888-888888888888.pdf";
+    const compositionName = "99999999-9999-4999-8999-999999999999.pdf";
+    f.writeEvidence(labelName);
+    f.writeEvidence(compositionName);
+    f.queue.addEvidence(item.id, {
+      type: "label", fileId: "88888888-8888-4888-8888-888888888888",
+      fileName: labelName, originalName: "label.pdf", mime: "application/pdf", size: 100, sha256: "f".repeat(64)
+    });
+    f.queue.addEvidence(item.id, {
+      type: "composition", fileId: "99999999-9999-4999-8999-999999999999",
+      fileName: compositionName, originalName: "composition.pdf", mime: "application/pdf", size: 100, sha256: "1".repeat(64)
+    });
+    fs.unlinkSync(path.join(f.dir, "health-research-evidence", labelName));
+    assert.throws(() => f.queue.updateItem(item.id, {
+      labelEvidenceStatus: "checked", compositionStatus: "checked",
+      reviewerName: "بازبین", sources: [{ title: "مرجع", url: "https://example.org/ref" }],
+      status: "approved"
+    }), /فایل مدرک برچسب و ترکیبات/);
+  } finally { f.cleanup(); }
+});
+
+test("legacy approved queue entries without real evidence are reopened during catalog sync", () => {
+  const f = fixture();
+  try {
+    const products = [
+      { sku: "SKU-LEGACY-ACTIVE", name: "چای فعال", category: "چای", active: true },
+      { sku: "SKU-LEGACY-INACTIVE", name: "چای غیرفعال", category: "چای", active: false }
+    ];
+    const state = f.queue.syncCatalog(products);
+    state.items.forEach(item => { item.status = "approved"; });
+    fs.writeFileSync(path.join(f.dir, "health-research-queue.json"), JSON.stringify(state), "utf8");
+    const migrated = f.queue.syncCatalog(products);
+    assert.equal(migrated.items.find(x => x.sku === "SKU-LEGACY-ACTIVE").status, "needs_update");
+    assert.equal(migrated.items.find(x => x.sku === "SKU-LEGACY-INACTIVE").status, "archived");
   } finally { f.cleanup(); }
 });

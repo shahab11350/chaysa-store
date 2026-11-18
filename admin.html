@@ -331,6 +331,24 @@ function renderHealthResearchQueue(){
   const statusSelect=document.createElement('select');healthResearchStatusOptions.forEach(([value,label])=>{const o=document.createElement('option');o.value=value;o.textContent=label;if(value==='archived'&&item.catalogActive)o.disabled=true;if(value==='needs_sku'&&item.sku)o.disabled=true;statusSelect.append(o)});statusSelect.value=item.status;field('وضعیت پرونده',statusSelect);
   const labelSelect=document.createElement('select');[['missing','دریافت نشده'],['received','دریافت شده'],['checked','بررسی شده']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;labelSelect.append(o)});labelSelect.value=item.labelEvidenceStatus||'missing';field('وضعیت مدرک برچسب',labelSelect);
   const compositionSelect=document.createElement('select');[['missing','دریافت نشده'],['received','دریافت شده'],['checked','بررسی شده']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;compositionSelect.append(o)});compositionSelect.value=item.compositionStatus||'missing';field('وضعیت مدرک ترکیبات',compositionSelect);
+  const evidenceList=document.createElement('div');evidenceList.style.margin='10px 0';
+  const evidenceHeading=document.createElement('strong');evidenceHeading.textContent='مدارک بارگذاری‌شده (فقط مدیر دسترسی دارد)';evidenceList.append(evidenceHeading);
+  (item.evidence||[]).forEach(doc=>{const row=document.createElement('p');row.className='muted';const link=document.createElement('a');link.href='/api/admin/health-research/evidence/'+encodeURIComponent(doc.id);link.target='_blank';link.rel='noopener noreferrer';link.textContent=(doc.type==='label'?'مدرک برچسب':doc.type==='composition'?'مدرک ترکیبات':'مدرک تکمیلی')+' · '+doc.originalName;row.append(link);const detail=document.createTextNode(' · '+Math.ceil(Number(doc.size||0)/1024)+' KB · '+(doc.uploadedAt||''));row.append(detail);evidenceList.append(row)});
+  if(!(item.evidence||[]).length){const empty=document.createElement('p');empty.className='muted';empty.textContent='هنوز مدرکی بارگذاری نشده است.';evidenceList.append(empty)}
+  card.append(evidenceList);
+  const addEvidenceUpload=(type,label)=>{
+   const fileInput=document.createElement('input');fileInput.type='file';fileInput.accept='image/jpeg,image/png,image/webp,application/pdf';
+   field(label+' (JPG/PNG/WebP/PDF، حداکثر ۱۰ مگابایت)',fileInput);
+   const uploadButton=document.createElement('button');uploadButton.type='button';uploadButton.className='secondary';uploadButton.textContent='بارگذاری '+label;
+   uploadButton.onclick=async()=>{if(!fileInput.files||!fileInput.files[0]){alert('ابتدا فایل را انتخاب کنید.');return}uploadButton.disabled=true;try{
+    const form=new FormData();form.append('type',type);form.append('evidence',fileInput.files[0]);
+    await api('health-research/queue/'+encodeURIComponent(item.id)+'/evidence',{method:'POST',body:form});
+    await loadHealthResearchQueue();
+   }catch(e){alert(e.message)}finally{uploadButton.disabled=false}};
+   card.append(uploadButton);
+  };
+  addEvidenceUpload('label','مدرک برچسب');
+  addEvidenceUpload('composition','مدرک ترکیبات');
   const reviewer=document.createElement('input');reviewer.maxLength=120;reviewer.value=item.reviewerName||'';reviewer.placeholder='نام بازبین';field('نام بازبین',reviewer);
   const notes=document.createElement('textarea');notes.rows=2;notes.maxLength=3000;notes.value=item.notes||'';notes.placeholder='یادداشت پژوهش / موارد موردنیاز از تأمین‌کننده';field('یادداشت‌ها',notes);
   const reviewNote=document.createElement('textarea');reviewNote.rows=2;reviewNote.maxLength=2000;reviewNote.value=item.reviewNote||'';reviewNote.placeholder='نتیجه بازبینی';field('یادداشت بازبینی',reviewNote);

@@ -42,8 +42,39 @@ test("admin can search PubMed candidates and manually save a selected source", a
 
   await card.getByRole("button", { name: "افزودن به فهرست منابع" }).click();
   await expect(card.locator("textarea").last()).toHaveValue(/PubMed candidate title for integration test/);
+  const saveResponsePromise = page.waitForResponse(response => response.url().includes("/api/admin/health-research/queue/") && response.request().method() === "PATCH");
   await card.getByRole("button", { name: "ذخیره پرونده پژوهشی" }).click();
+  const saveResponse = await saveResponsePromise;
+  expect(saveResponse.status()).toBe(200);
 
   card = page.locator("#healthResearchItems article").filter({ hasText: item.sku }).first();
   await expect(card.locator("textarea").last()).toHaveValue(/PubMed candidate title for integration test/);
+
+  const pdf = Buffer.from("%PDF-1.4\\nCHAYSA TEST EVIDENCE\\n%%EOF");
+  await expect(card.locator('input[type="file"]')).toHaveCount(2);
+  const labelInput = card.locator('input[type="file"]').nth(0);
+  await labelInput.setInputFiles({ name: "label.pdf", mimeType: "application/pdf", buffer: pdf });
+  expect(await labelInput.evaluate(input => input.files.length)).toBe(1);
+  expect(await labelInput.evaluate(input => input.files[0].name)).toBe("label.pdf");
+  const labelResponsePromise = page.waitForResponse(response => response.url().includes("/evidence") && response.request().method() === "POST");
+  await card.getByRole("button", { name: "بارگذاری مدرک برچسب" }).click();
+  const labelResponse = await labelResponsePromise;
+  const labelBody = await labelResponse.json();
+  expect(labelResponse.status(), JSON.stringify(labelBody)).toBe(201);
+  await expect(card).toContainText("مدرک برچسب · label.pdf");
+
+  await card.locator('input[type="file"]').nth(1).setInputFiles({ name: "composition.pdf", mimeType: "application/pdf", buffer: pdf });
+  const compositionResponsePromise = page.waitForResponse(response => response.url().includes("/evidence") && response.request().method() === "POST");
+  await card.getByRole("button", { name: "بارگذاری مدرک ترکیبات" }).click();
+  const compositionResponse = await compositionResponsePromise;
+  const compositionBody = await compositionResponse.json();
+  expect(compositionResponse.status(), JSON.stringify(compositionBody)).toBe(201);
+  await expect(card).toContainText("مدرک ترکیبات · composition.pdf");
+
+  await card.locator("select").nth(1).selectOption("checked");
+  await card.locator("select").nth(2).selectOption("checked");
+  await card.locator('input[placeholder="نام بازبین"]').fill("بازبین آزمون");
+  await card.locator("select").nth(0).selectOption("approved");
+  await card.getByRole("button", { name: "ذخیره پرونده پژوهشی" }).click();
+  await expect(card.locator("select").nth(0)).toHaveValue("approved");
 });

@@ -31,6 +31,13 @@ function createHealthResearchQueue(dataDir) {
     fs.writeFileSync(temp, JSON.stringify(value, null, 2), { encoding: "utf8", mode: 0o600 });
     fs.renameSync(temp, file);
   }
+  function evidenceFileExists(row) {
+    if (!row || typeof row.fileName !== "string" || !/^[0-9a-f-]{36}\.(jpg|png|webp|pdf)$/i.test(row.fileName)) return false;
+    const directory = path.resolve(dataDir, "health-research-evidence");
+    const target = path.resolve(directory, row.fileName);
+    if (!target.startsWith(directory + path.sep)) return false;
+    try { return fs.statSync(target).isFile(); } catch (_) { return false; }
+  }
   function syncCatalog(products) {
     if (!Array.isArray(products)) throw new Error("فهرست محصولات معتبر نیست.");
     const state = read();
@@ -88,6 +95,15 @@ function createHealthResearchQueue(dataDir) {
         item.status = "archived";
         item.updatedAt = now;
       }
+      if (item.status === "approved") {
+        const evidence = Array.isArray(item.evidence) ? item.evidence : [];
+        const hasLabel = evidence.some(row => row.type === "label" && evidenceFileExists(row));
+        const hasComposition = evidence.some(row => row.type === "composition" && evidenceFileExists(row));
+        if (!item.catalogActive || !item.sku || item.duplicateSku || !hasLabel || !hasComposition) {
+          item.status = item.catalogActive ? "needs_update" : "archived";
+          item.updatedAt = now;
+        }
+      }
     }
     state.syncedAt = now;
     write(state);
@@ -131,6 +147,41 @@ function createHealthResearchQueue(dataDir) {
     }).filter(candidate => candidate.title);
     return { query: term, candidates };
   }
+  function addEvidence(id, evidence) {
+    if (!evidence || typeof evidence !== "object" || Array.isArray(evidence)) throw new Error("مشخصات مدرک معتبر نیست.");
+    const state = read();
+    const item = state.items.find(row => row.id === id);
+    if (!item) throw new Error("پرونده پژوهشی پیدا نشد.");
+    if (!item.catalogActive || !item.sku || item.duplicateSku) throw new Error("ثبت مدرک فقط برای محصول فعال با SKU یکتا مجاز است.");
+    const type = ["label", "composition", "other"].includes(evidence.type) ? evidence.type : "";
+    const fileId = safeText(evidence.fileId, 36);
+    const fileName = safeText(evidence.fileName, 100);
+    const mime = safeText(evidence.mime, 80);
+    const size = Number(evidence.size);
+    const sha256 = safeText(evidence.sha256, 64);
+    const originalName = safeText(evidence.originalName, 180);
+    if (!type || !/^[0-9a-f-]{36}$/i.test(fileId) || !/^[0-9a-f-]{36}\.(jpg|png|webp|pdf)$/i.test(fileName) ||
+        !["image/jpeg", "image/png", "image/webp", "application/pdf"].includes(mime) ||
+        !Number.isInteger(size) || size < 1 || size > 10 * 1024 * 1024 || !/^[a-f0-9]{64}$/.test(sha256) || !originalName)
+      throw new Error("اطلاعات مدرک یا فرمت فایل معتبر نیست.");
+    item.evidence = Array.isArray(item.evidence) ? item.evidence : [];
+    if (item.evidence.length >= 20) throw new Error("تعداد مدارک این پرونده به سقف مجاز رسیده است.");
+    item.evidence.push({ id: fileId, type, fileName, originalName, mime, size, sha256, uploadedAt: new Date().toISOString() });
+    if (type === "label" && item.labelEvidenceStatus === "missing") item.labelEvidenceStatus = "received";
+    if (type === "composition" && item.compositionStatus === "missing") item.compositionStatus = "received";
+    if (item.status === "approved") item.status = "needs_update";
+    item.updatedAt = new Date().toISOString();
+    write(state);
+    return item;
+  }
+  function getEvidence(fileId) {
+    if (typeof fileId !== "string" || !/^[0-9a-f-]{36}$/i.test(fileId)) return null;
+    for (const item of read().items) {
+      const evidence = (item.evidence || []).find(row => row.id === fileId);
+      if (evidence) return { itemId: item.id, evidence };
+    }
+    return null;
+  }
   function updateItem(id, patch) {
     if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new Error("درخواست ویرایش معتبر نیست.");
     const state = read();
@@ -138,6 +189,8 @@ function createHealthResearchQueue(dataDir) {
     if (!item) throw new Error("پرونده پژوهشی پیدا نشد.");
     if (patch.status !== undefined && !STATUSES.has(patch.status)) throw new Error("وضعیت انتخاب‌شده معتبر نیست.");
     if (patch.status === "archived" && item.catalogActive) throw new Error("محصول فعال را نمی‌توان از چرخه پژوهش بایگانی کرد.");
+    if (patch.status && !item.catalogActive && patch.status !== "archived") throw new Error("محصول غیرفعال یا حذف‌شده وارد مراحل فعال پژوهش نمی‌شود.");
+    if (patch.status && item.duplicateSku && !["review", "archived"].includes(patch.status)) throw new Error("SKU تکراری تا زمان رفع تعارض قابل پیشرفت در چرخه پژوهش نیست.");
     if (patch.status === "needs_sku" && item.sku) throw new Error("این محصول SKU دارد؛ وضعیت نیازمند شناسه فقط برای محصول بدون SKU است.");
     if (patch.status && !item.sku && !["needs_sku", "archived"].includes(patch.status)) throw new Error("تا زمان ثبت SKU معتبر، پرونده وارد مراحل پژوهش و تأیید نمی‌شود.");
     if (patch.labelEvidenceStatus !== undefined) {
@@ -166,16 +219,18 @@ function createHealthResearchQueue(dataDir) {
         };
       });
     }
+    const evidence = Array.isArray(item.evidence) ? item.evidence : [];
     if (patch.status === "approved" && (!item.sku || item.duplicateSku || item.labelEvidenceStatus !== "checked" ||
-        item.compositionStatus !== "checked" || !item.sources.length || !item.reviewerName)) {
-      throw new Error("تأیید پرونده نیازمند SKU یکتا، بررسی برچسب و ترکیبات، دست‌کم یک منبع و نام بازبین است.");
+        item.compositionStatus !== "checked" || !evidence.some(row => row.type === "label" && evidenceFileExists(row)) ||
+        !evidence.some(row => row.type === "composition" && evidenceFileExists(row)) || !item.sources.length || !item.reviewerName)) {
+      throw new Error("تأیید پرونده نیازمند SKU یکتا، فایل مدرک برچسب و ترکیبات، بررسی هر دو مدرک، دست‌کم یک منبع و نام بازبین است.");
     }
     if (patch.status !== undefined) item.status = patch.status;
     item.updatedAt = new Date().toISOString();
     write(state);
     return item;
   }
-  return { syncCatalog, updateItem, searchPubMed, read };
+  return { syncCatalog, updateItem, addEvidence, getEvidence, searchPubMed, read };
 }
 
 module.exports = { createHealthResearchQueue, normalizeSku, stableId };
