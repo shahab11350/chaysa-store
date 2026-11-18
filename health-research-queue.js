@@ -99,7 +99,8 @@ function createHealthResearchQueue(dataDir) {
     const item = state.items.find(row => row.id === id);
     if (!item) throw new Error("پرونده پژوهشی پیدا نشد.");
     if (patch.status !== undefined && !STATUSES.has(patch.status)) throw new Error("وضعیت انتخاب‌شده معتبر نیست.");
-    if (patch.status === "archived" && item.catalogActive) throw new Error("محصول فعال را نمی‌توان از چرخه پژوهش بایگانی کرد.");\n    if (patch.status === "needs_sku" && item.sku) throw new Error("این محصول SKU دارد؛ وضعیت نیازمند شناسه فقط برای محصول بدون SKU است.");
+    if (patch.status === "archived" && item.catalogActive) throw new Error("محصول فعال را نمی‌توان از چرخه پژوهش بایگانی کرد.");
+    if (patch.status === "needs_sku" && item.sku) throw new Error("این محصول SKU دارد؛ وضعیت نیازمند شناسه فقط برای محصول بدون SKU است.");
     if (patch.status && !item.sku && !["needs_sku", "archived"].includes(patch.status)) throw new Error("تا زمان ثبت SKU معتبر، پرونده وارد مراحل پژوهش و تأیید نمی‌شود.");
     if (patch.labelEvidenceStatus !== undefined) {
       if (!EVIDENCE.has(patch.labelEvidenceStatus)) throw new Error("وضعیت مدرک برچسب معتبر نیست.");
