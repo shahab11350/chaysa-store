@@ -37,7 +37,7 @@ function createHealthResearchQueue(dataDir) {
     const now = new Date().toISOString();
     const counts = new Map();
     products.forEach(product => {
-      if (!product || product.active === false) return;
+      if (!product || product.active !== true) return;
       const sku = normalizeSku(product.sku);
       if (sku) counts.set(sku, (counts.get(sku) || 0) + 1);
     });
@@ -52,12 +52,12 @@ function createHealthResearchQueue(dataDir) {
       const id = stableId(key);
       seen.add(id);
       let item = state.items.find(row => row.id === id);
-      const active = product.active !== false;
+      const active = product.active === true;
       const duplicateSku = Boolean(sku && active && counts.get(sku) > 1);
       if (!item) {
         item = {
           id, key, sku, productName: name, category, catalogActive: active,
-          duplicateSku, status: !sku ? "needs_sku" : duplicateSku ? "review" : active ? "queued" : "archived",
+          duplicateSku, duplicateProductNames: duplicateSku ? products.filter(row => row && row.active === true && normalizeSku(row.sku) === sku).map(row => safeText(row.name, 180)) : [],\n          status: !sku ? "needs_sku" : duplicateSku ? "review" : active ? "queued" : "archived",
           labelEvidenceStatus: "missing", compositionStatus: "missing",
           sources: [], notes: "", reviewerName: "", reviewNote: "",
           createdAt: now, updatedAt: now, lastSeenAt: now
@@ -71,7 +71,7 @@ function createHealthResearchQueue(dataDir) {
       item.category = category;
       item.sku = sku;
       item.catalogActive = active;
-      item.duplicateSku = duplicateSku;
+      item.duplicateSku = duplicateSku;\n      item.duplicateProductNames = duplicateSku ? products.filter(row => row && row.active === true && normalizeSku(row.sku) === sku).map(row => safeText(row.name, 180)) : [];
       item.lastSeenAt = now;
       if (!sku) item.status = "needs_sku";
       else if (duplicateSku) item.status = "review";
@@ -97,7 +97,7 @@ function createHealthResearchQueue(dataDir) {
     const item = state.items.find(row => row.id === id);
     if (!item) throw new Error("پرونده پژوهشی پیدا نشد.");
     if (patch.status !== undefined && !STATUSES.has(patch.status)) throw new Error("وضعیت انتخاب‌شده معتبر نیست.");
-    if (patch.status === "archived" && item.catalogActive) throw new Error("محصول فعال را نمی‌توان از چرخه پژوهش بایگانی کرد.");
+    if (patch.status === "archived" && item.catalogActive) throw new Error("محصول فعال را نمی‌توان از چرخه پژوهش بایگانی کرد.");\n    if (patch.status === "needs_sku" && item.sku) throw new Error("این محصول SKU دارد؛ وضعیت نیازمند شناسه فقط برای محصول بدون SKU است.");
     if (patch.labelEvidenceStatus !== undefined) {
       if (!EVIDENCE.has(patch.labelEvidenceStatus)) throw new Error("وضعیت مدرک برچسب معتبر نیست.");
       item.labelEvidenceStatus = patch.labelEvidenceStatus;
