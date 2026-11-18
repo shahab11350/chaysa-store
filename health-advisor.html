@@ -23,6 +23,16 @@ h1{margin:12px 0 4px;font-size:clamp(25px,5vw,40px);color:var(--green)}
 .progress strong{display:block;color:#735d2b;font-size:14px;margin-bottom:5px}
 .progress p{margin:5px 0;font-size:12px;color:#625a46}
 .section-title{margin:34px 0 6px;font-size:19px;color:var(--green);text-align:center}
+.health-howto{margin:24px 0 30px;padding:20px;border:1px solid #d8c99f;border-radius:15px;background:#fffdf7}
+.health-howto h2{margin:0 0 8px;color:var(--green);font-size:18px}
+.health-howto-intro{margin:0 0 13px;color:var(--muted);font-size:12px}
+.health-howto ol{margin:0;padding-right:22px}
+.health-howto li{margin:8px 0;padding-right:3px;color:#405347;font-size:12px}
+.health-howto strong{color:var(--green)}
+.health-howto .health-howto-warning{margin:14px 0 0;padding:11px 13px;border-right:3px solid var(--gold);border-radius:7px;background:#fff4dc;color:#654f22;font-size:11px;line-height:2}
+.health-howto .health-howto-privacy{margin:9px 0 0;color:var(--muted);font-size:11px;line-height:2}
+@media(max-width:560px){.health-howto{padding:15px}.health-howto h2{font-size:16px}}
+
 .section-note{text-align:center;color:var(--muted);font-size:12px;margin:0 0 20px}
 .tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .tile{min-height:112px;padding:20px 14px;border:1px solid var(--line);border-radius:14px;background:#fff;text-align:center;box-shadow:0 5px 18px #1c38200a}
@@ -91,6 +101,19 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
 <strong>کتابخانه پژوهشی اولیه در دسترس است</strong>
 <p>اطلاعات و منابع این بخش برای تسهیل دسترسی گردآوری شده‌اند؛ ممکن است بعضی پرونده‌ها ناقص یا نیازمند بررسی بیشتر باشند.</p>
 <p>چایسا برای ارائه اطلاعات معتبر، مستند و تا حد امکان به‌روز تلاش می‌کند؛ با این حال صحت نهایی مطالب را تضمین نمی‌کند و مسئولیت صحت آن‌ها را بر عهده نمی‌گیرد. این بخش پاسخ پزشکی تأییدشده، تشخیص یا تجویز ارائه نمی‌کند.</p>
+</section>
+<section class="health-howto" aria-labelledby="healthHowtoTitle">
+  <h2 id="healthHowtoTitle">راهنمای استفاده از مشاور سلامت چایسا</h2>
+  <p class="health-howto-intro">برای پیدا کردن اطلاعات پژوهشی و آماده‌سازی جست‌وجوی منابع، مراحل زیر را دنبال کنید:</p>
+  <ol>
+    <li><strong>موضوع موردنظر را انتخاب کنید:</strong> از بخش موضوعات، «محصولات گیاهی» را برای دیدن محصولات فعال، «تداخل چای و دمنوش با داروها» را برای مرور پرونده‌های مرجع، «راهنمای ایمنی مصرف» را برای نکات احتیاطی، یا «منابع علمی و تخصصی» را برای دیدن منابع و کتاب‌ها انتخاب کنید.</li>
+    <li><strong>در کتابخانه جست‌وجو کنید:</strong> پس از بازشدن بخش انتخابی، نام محصول، گیاه، دارو یا منبع را در کادر جست‌وجو بنویسید. نتایج همان بخش فیلتر می‌شوند؛ برای دیدن همه موارد، عبارت جست‌وجو را پاک کنید.</li>
+    <li><strong>پرسش خود را آماده کنید:</strong> در قسمت «پرسش درباره محصولات و ایمنی مصرف»، یکی از دسته‌های پرسش را انتخاب کنید. برای پرسش محصول یا ایمنی، محصول چایسا را از فهرست انتخاب کنید. در دسته ایمنی، اگر پرسش درباره تداخل است، نام دارو را نیز وارد کنید.</li>
+    <li><strong>پرسش را بنویسید:</strong> سؤال را کوتاه و روشن و فقط درباره محصول و ایمنی مصرف مطرح کنید. می‌توانید از پیشنهادهای آماده بالای کادر یا پیشنهادهای مرتبط با متن خود استفاده کنید.</li>
+    <li><strong>جست‌وجو را آماده کنید:</strong> دکمه «بررسی و آماده‌سازی پرسش» را بزنید. اگر پرسش در محدوده راهنما باشد، دکمه «مشاهده نتایج منابع بیرونی» نمایش داده می‌شود؛ با انتخاب آن، صفحه نتایج جست‌وجوی گوگل در زبانه‌ای جدا باز خواهد شد. منابع را بررسی و برای تصمیم پزشکی با پزشک یا داروساز مشورت کنید.</li>
+  </ol>
+  <p class="health-howto-warning"><strong>محدودیت مهم:</strong> مشاور سلامت در وضعیت فعلی ابزار پژوهش و راهنمای جست‌وجو است، نه پزشک یا سامانه پاسخ‌گوی پزشکی. اطلاعات کتابخانه اولیه و در حال اعتبارسنجی‌اند؛ ممکن است ناقص باشند و ترکیبات اختصاصی محصولات هنوز با برچسب رسمی تأیید نشده‌اند. این بخش تشخیص، تجویز یا پاسخ پزشکی تأییدشده ارائه نمی‌کند.</p>
+  <p class="health-howto-privacy">پرسش ارسالی در بانک اطلاعاتی چایسا ذخیره نمی‌شود؛ اما پس از انتخاب دکمه نتایج بیرونی، عبارت جست‌وجو شامل اطلاعات واردشده و نام محصول/دارو به گوگل فرستاده می‌شود. نام، شماره تماس، نشانی، مدارک پزشکی یا اطلاعات هویتی را وارد نکنید. در وضعیت اضطراری یا بروز علائم شدید، منتظر جست‌وجوی اینترنتی نمانید و فوراً از خدمات درمانی کمک بگیرید. داروی تجویزشده را خودسرانه قطع یا تغییر ندهید.</p>
 </section>
 <h2 class="section-title">Explore Health Topics</h2>
 <p class="section-note">موضوعات مشاور سلامت | برای مشاهده اطلاعات پژوهشی اولیه، یکی از بخش‌ها را انتخاب کنید</p>
