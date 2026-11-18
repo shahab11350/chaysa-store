@@ -121,8 +121,8 @@ test("research evidence files are private, size-limited, signature-checked and a
   assert.match(server, /app\.get\("\/api\/admin\/health-research\/evidence\/:id", requireAdmin/);
   assert.match(server, /Content-Disposition", "attachment/);
   assert.match(server, /healthResearchQueue\.addEvidence/);
-  assert.match(queue, /evidence\.some\(row => row\.type === "label"\)/);
-  assert.match(queue, /evidence\.some\(row => row\.type === "composition"\)/);
+  assert.match(queue, /evidence\.some\(row => row\.type === "label" && evidenceFileExists\(row\)\)/);
+  assert.match(queue, /evidence\.some\(row => row\.type === "composition" && evidenceFileExists\(row\)\)/);
   assert.match(queue, /evidenceFileExists/);
   assert.match(adminPage, /addEvidenceUpload\('label'/);
   assert.match(adminPage, /addEvidenceUpload\('composition'/);
