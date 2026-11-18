@@ -59,6 +59,12 @@ before(async () => {
       BOSTANI_ACCESS_TOKEN: "order-test-bostani-token",
       TELEGRAM_BOT_TOKEN: "test-telegram-token",
       RUBIKA_BOT_TOKEN: "test-rubika-token",
+      RUBIKA_MOCK_REGISTRATION_MODE: "invalid-url",
+      RUBIKA_MOCK_UPDATES_JSON: JSON.stringify({
+        updates: [{ type: "StartedBot", chat_id: "RubikaPollingChat_12345" }],
+        next_offset_id: "rubika-offset-1"
+      }),
+      RUBIKA_POLL_INTERVAL_MS: "50",
       TELEGRAM_WEBHOOK_SECRET: "test-webhook-secret",
       TELEGRAM_WEBHOOK_URL: "https://preview.example.com/telegram/webhook",
       RUBIKA_WEBHOOK_URL: "https://preview.example.com/rubika/webhook/test",
@@ -98,6 +104,25 @@ after(async () => {
     await new Promise(resolve => { child.once("exit", resolve); setTimeout(resolve, 2000); });
   }
   if (dataDir) rmSync(dataDir, { recursive: true, force: true });
+});
+
+test("Rubika InvalidUrl webhook falls back to getUpdates and returns a real chat ID in /start welcome", async () => {
+  const deadline = Date.now() + 5000;
+  let welcome = null;
+  while (Date.now() < deadline) {
+    const entries = lines(rubikaLog);
+    const sent = entries.filter(entry => entry.url.endsWith("/sendMessage")).map(entry => JSON.parse(entry.body || "{}"));
+    welcome = sent.find(payload =>
+      payload.chat_id === "RubikaPollingChat_12345" &&
+      String(payload.text || "").includes("شناسه گفت‌وگوی شما برای ثبت سفارش")
+    );
+    if (welcome) break;
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
+  assert.ok(welcome, "Rubika polling fallback did not send the /start welcome message");
+  assert.match(welcome.text, /RubikaPollingChat_12345/);
+  assert.ok(lines(rubikaLog).some(entry => entry.url.endsWith("/getUpdates")), "getUpdates was not called");
+  assert.equal(readFileSync(path.join(dataDir, "rubika-updates-offset.txt"), "utf8"), "rubika-offset-1");
 });
 
 test("owner and Bostani status changes notify the selected customer channel, suppress duplicates and allow safe retry", async () => {
