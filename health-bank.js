@@ -228,7 +228,6 @@
     search = active.querySelector("[data-health-bank-search]");
     state.query = state.queries[tab] || "";
     search.value = state.query;
-    root.hidden = false;
   }
   function render() {
     if (!state.research) return;
@@ -258,6 +257,7 @@
     const tab = button.dataset.healthBankTab;
     state.tab = tab;
     activatePanel(tab);
+    root.hidden = false;
     render();
     root.scrollIntoView({ behavior: "smooth", block: "start" });
     if (tab === "qa") {
