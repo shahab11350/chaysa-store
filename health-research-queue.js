@@ -93,6 +93,44 @@ function createHealthResearchQueue(dataDir) {
     write(state);
     return state;
   }
+  async function searchPubMed(id, query, fetchImpl = global.fetch) {
+    const item = read().items.find(row => row.id === id);
+    if (!item) throw new Error("پرونده پژوهشی پیدا نشد.");
+    if (!item.catalogActive || !item.sku || item.duplicateSku) throw new Error("جست‌وجوی منبع فقط برای محصول فعال با SKU یکتا انجام می‌شود.");
+    const term = safeText(query, 180);
+    if (!term) throw new Error("عبارت جست‌وجو را وارد کنید.");
+    const searchUrl = new URL("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi");
+    searchUrl.search = new URLSearchParams({ db: "pubmed", retmode: "json", retmax: "8", term: term + "[Title/Abstract]" }).toString();
+    const searchResponse = await fetchImpl(searchUrl.href, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!searchResponse.ok) throw new Error("دریافت نتایج PubMed با خطا روبه‌رو شد.");
+    const searchData = await searchResponse.json();
+    const ids = (((searchData || {}).esearchresult || {}).idlist || []).filter(value => /^\\d+$/.test(String(value))).slice(0, 8);
+    if (!ids.length) return { query: term, candidates: [] };
+    const summaryUrl = new URL("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi");
+    summaryUrl.search = new URLSearchParams({ db: "pubmed", retmode: "json", id: ids.join(",") }).toString();
+    const summaryResponse = await fetchImpl(summaryUrl.href, {
+      headers: { Accept: "application/json" },
+      signal: AbortSignal.timeout(8000)
+    });
+    if (!summaryResponse.ok) throw new Error("دریافت مشخصات مقالات PubMed با خطا روبه‌رو شد.");
+    const summaryData = await summaryResponse.json();
+    const result = (summaryData || {}).result || {};
+    const candidates = ids.map(pmid => {
+      const record = result[pmid] || {};
+      return {
+        pmid,
+        title: safeText(record.title, 500),
+        journal: safeText(record.fulljournalname || record.source, 240),
+        pubDate: safeText(record.pubdate, 80),
+        authors: Array.isArray(record.authors) ? record.authors.slice(0, 4).map(author => safeText(author && author.name, 100)).filter(Boolean) : [],
+        url: "https://pubmed.ncbi.nlm.nih.gov/" + pmid + "/"
+      };
+    }).filter(candidate => candidate.title);
+    return { query: term, candidates };
+  }
   function updateItem(id, patch) {
     if (!patch || typeof patch !== "object" || Array.isArray(patch)) throw new Error("درخواست ویرایش معتبر نیست.");
     const state = read();
@@ -137,7 +175,7 @@ function createHealthResearchQueue(dataDir) {
     write(state);
     return item;
   }
-  return { syncCatalog, updateItem, read };
+  return { syncCatalog, updateItem, searchPubMed, read };
 }
 
 module.exports = { createHealthResearchQueue, normalizeSku, stableId };
