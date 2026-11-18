@@ -514,7 +514,7 @@ test("Order is stored and Telegram delivery status is explicit when one recipien
   const payload = {
     customer: {
       name: "آزمون", family: "خریدار", contact: "09120000000",
-      messengerPlatform: "telegram", messengerId: "123456789", province: "تهران", city: "تهران",
+      messengerPlatform: "telegram", messengerUsername: "@chaysa", messengerId: "123456789", province: "تهران", city: "تهران",
       address: "نشانی آزمایشی", postal: "1234567890", notes: "ندارد"
     },
     items: [{ sku: "1401008", qty: 2 }],
@@ -535,6 +535,7 @@ test("Order is stored and Telegram delivery status is explicit when one recipien
   assert.equal(result.recipientCount, 2);
   assert.equal(result.notificationStatusSaved, true);
   assert.match(result.invoice, /جمع کل:/);
+  assert.match(result.invoice, /آیدی عمومی پیام‌رسان: @chaysa/);
 
   const saved = JSON.parse(readFileSync(path.join(dataDir, "orders.json"), "utf8"));
   const order = saved.find(item => item.id === result.orderId);
@@ -568,7 +569,7 @@ test("Order accepts Rubika as the selected customer messaging channel and stores
   const payload = {
     customer: {
       name: "آزمون روبیکا", family: "خریدار", contact: "09120000001",
-      messengerPlatform: "rubika", messengerId: "u0QFtn01dd26d72abc5c77b8e116cd79",
+      messengerPlatform: "rubika", messengerUsername: "@chaysa", messengerId: "u0QFtn01dd26d72abc5c77b8e116cd79",
       province: "تهران", city: "تهران", address: "نشانی آزمایشی",
       postal: "1234567890", notes: "ندارد"
     },
@@ -588,6 +589,7 @@ test("Order accepts Rubika as the selected customer messaging channel and stores
   assert.ok(order);
   assert.equal(order.customer.messengerPlatform, "rubika");
   assert.equal(order.customer.messengerId, "u0QFtn01dd26d72abc5c77b8e116cd79");
+  assert.equal(order.customer.messengerUsername, "@chaysa");
   assert.equal(result.customerDeliveryStatus, "sent");
   assert.equal(result.customerDeliveryStatusSaved, true);
   assert.equal(order.customerDelivery.status, "sent");
@@ -731,7 +733,7 @@ function validOrderPayload(platform = "telegram", messengerId = "333333") {
   return {
     customer: {
       name: "آزمون", family: "خریدار", contact: "09120000000",
-      messengerPlatform: platform, messengerId,
+      messengerPlatform: platform, messengerUsername: "@chaysa", messengerId,
       province: "تهران", city: "تهران", address: "نشانی آزمایشی",
       postal: "1234567890", notes: "بدون توضیح"
     },
