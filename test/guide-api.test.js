@@ -211,9 +211,11 @@ test("product questions are allowed only with a known product and relevant topic
   });
   assert.equal(result.status, 200);
   assert.equal(result.body.allowed, true);
-  assert.equal(new URL(result.body.url).hostname, "www.google.com");
-  assert.equal(result.body.searchProvider, "Google");
-  assert.match(result.body.bankNotice, /پیش‌نویس و اعتبارسنجی/);
+  assert.equal(result.body.type, "internal_knowledge");
+  assert.ok(Array.isArray(result.body.sources));
+  assert.ok(result.body.sources.length > 0);
+  assert.ok(result.body.sources.every(source => source.url && source.publisher && source.id));
+  assert.equal(result.body.url, undefined);
 });
 
 test("unrelated public searches are rejected", async () => {
@@ -257,13 +259,10 @@ test("medicine interaction builds a limited-source search and safety notice", as
     medicine: "warfarin"
   });
   assert.equal(result.body.allowed, true);
-  assert.equal(result.body.type, "medical_external_search");
-  assert.equal(new URL(result.body.url).hostname, "pubmed.ncbi.nlm.nih.gov");
-  assert.equal(result.body.searchProvider, "PubMed");
-  assert.match(result.body.bankNotice, /پیش‌نویس و اعتبارسنجی/);
-  assert.match(decodeURIComponent(result.body.url), /warfarin/);
-  assert.match(result.body.notice, /تأیید پزشکی/);
-  assert.match(result.body.rule, /بی‌خطر بودن/);
+  assert.equal(result.body.type, "internal_knowledge");
+  assert.ok(Array.isArray(result.body.sources));
+  assert.equal(result.body.url, undefined);
+  assert.match(result.body.policy, /تشخیص یا تجویز/);
 });
 
 test("general safety questions do not require a medicine name", async () => {
@@ -273,7 +272,7 @@ test("general safety questions do not require a medicine name", async () => {
     question: "عوارض احتمالی این محصول چیست؟"
   });
   assert.equal(result.body.allowed, true);
-  assert.equal(result.body.type, "medical_external_search");
+  assert.equal(result.body.type, "internal_knowledge");
 });
 
 test("diagnosis and treatment requests are blocked", async () => {
@@ -292,7 +291,7 @@ test("store service questions are allowed", async () => {
     question: "چطور سفارش چایسا را ثبت کنم؟"
   });
   assert.equal(result.body.allowed, true);
-  assert.equal(result.body.type, "service_external_search");
+  assert.equal(result.body.type, "service_guidance");
 });
 
 
