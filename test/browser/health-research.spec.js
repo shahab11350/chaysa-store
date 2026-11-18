@@ -49,11 +49,19 @@ test("admin can search PubMed candidates and manually save a selected source", a
 
   const pdf = Buffer.from("%PDF-1.4\\nCHAYSA TEST EVIDENCE\\n%%EOF");
   await card.locator('input[type="file"]').nth(0).setInputFiles({ name: "label.pdf", mimeType: "application/pdf", buffer: pdf });
+  const labelResponsePromise = page.waitForResponse(response => response.url().includes("/evidence") && response.request().method() === "POST");
   await card.getByRole("button", { name: "بارگذاری مدرک برچسب" }).click();
+  const labelResponse = await labelResponsePromise;
+  const labelBody = await labelResponse.json();
+  expect(labelResponse.status(), JSON.stringify(labelBody)).toBe(201);
   await expect(card).toContainText("مدرک برچسب · label.pdf");
 
   await card.locator('input[type="file"]').nth(1).setInputFiles({ name: "composition.pdf", mimeType: "application/pdf", buffer: pdf });
+  const compositionResponsePromise = page.waitForResponse(response => response.url().includes("/evidence") && response.request().method() === "POST");
   await card.getByRole("button", { name: "بارگذاری مدرک ترکیبات" }).click();
+  const compositionResponse = await compositionResponsePromise;
+  const compositionBody = await compositionResponse.json();
+  expect(compositionResponse.status(), JSON.stringify(compositionBody)).toBe(201);
   await expect(card).toContainText("مدرک ترکیبات · composition.pdf");
 
   await card.locator("select").nth(1).selectOption("checked");
