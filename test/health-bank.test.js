@@ -64,6 +64,10 @@ test("the ten CHAYSA HEALTH sections open their matching research views", () => 
   assert.equal((page.match(/data-health-section-panel=/g) || []).length, 10);
   assert.equal((page.match(/data-health-bank-search=/g) || []).length, 10);
   assert.match(page, /src="\/health-bank\.js"/);
+  assert.match(script, /health-advisor\.html\?section=/);
+  assert.match(script, /انتخاب کلیدواژه/);
+  assert.match(script, /event\.key === "Enter"/);
+  assert.match(script, /make\("button", "", "جست‌وجو"\)/);
 });
 
 test("research browser reads the live catalogue and excludes inactive products", () => {

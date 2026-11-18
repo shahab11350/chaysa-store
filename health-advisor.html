@@ -111,13 +111,30 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
  .health-topic-grid .tile button{padding:9px 10px;font-size:12px;min-height:42px}
  .health-topic-grid .tile .fa{font-size:10px}
 }
+
+</style>
+<style id="health-section-page-ui">
+.health-section-page .hero,.health-section-page .progress,.health-section-page .health-howto-disclosure,
+.health-section-page .section-title,.health-section-page .section-note,.health-section-page .health-topic-grid{display:none!important}
+.health-section-page #chaysaResearchBank{display:block!important;margin:18px 0}
+.health-section-page .health-bank-panel[hidden]{display:none!important}
+.health-section-page .health-bank-panel:not([hidden]){display:block}
+.health-section-page .health-bank-search-tools{display:flex;gap:8px;align-items:stretch;margin-top:9px}
+.health-section-page .health-bank-search-tools>button{flex:0 0 auto;min-width:104px;border:0;border-radius:9px;padding:10px 16px;background:var(--green);color:#fff;font:bold 13px Tahoma;cursor:pointer}
+.health-section-page .health-keyword-drawer{position:relative;min-width:0}
+.health-section-page .health-keyword-drawer>summary{list-style:none;cursor:pointer;min-height:42px;padding:8px 12px;border:1px solid var(--gold);border-radius:9px;background:#fffaf0;color:var(--green);font:12px/1.9 Tahoma;white-space:nowrap}
+.health-section-page .health-keyword-drawer>summary::-webkit-details-marker{display:none}
+.health-section-page .health-keyword-options{position:absolute;z-index:5;top:calc(100% + 5px);right:0;left:0;max-height:230px;overflow:auto;padding:8px;border:1px solid var(--line);border-radius:10px;background:#fff;box-shadow:0 8px 24px #173b2b20;display:grid;grid-template-columns:1fr;gap:5px}
+.health-section-page .health-keyword-options button{border:1px solid #e5e9e1;border-radius:7px;background:#f8faf6;color:var(--green);padding:7px;text-align:right;font:12px Tahoma;cursor:pointer}
+.health-section-page .health-bank-search-tools .health-keyword-drawer{flex:0 0 auto}
+@media(max-width:560px){.health-section-page .health-bank-search-tools{display:grid;grid-template-columns:minmax(0,1fr) auto}.health-section-page .health-bank-search-tools>button{min-width:88px;padding:9px 10px}.health-section-page .health-keyword-drawer{grid-column:1/-1}.health-section-page .health-keyword-drawer>summary{text-align:center}.health-section-page .health-keyword-options{position:static;margin-top:5px;max-height:180px}}
 </style>
 </head>
 <body>
 <main class="health-shell">
 <header class="topline">
 <div class="health-brand-lockup"><img class="chaysa-brand-logo" src="chaysa-logo-option4.svg" alt="لوگوی اصلی چایسا" width="300" height="158"><div class="brand">CHAYSA HEALTH<small>مشاور سلامت چایسا</small></div></div>
-<a class="back-link" href="index.html">بازگشت به چایسا</a>
+<a class="back-link" id="healthPageBack" href="index.html">بازگشت به چایسا</a>
 </header>
 <section class="hero">
 <div class="eyebrow">KNOWLEDGE • SAFETY • TRUST</div>

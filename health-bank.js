@@ -259,27 +259,101 @@
     else if (state.tab === "products") renderProducts();
     else if (state.tab === "sources") renderSources();
   }
+  function sectionKeywords(tab) {
+    const research = state.research || {};
+    const profiles = research.botanicalProfiles || [];
+    const products = state.liveProducts.filter(item => item && item.active !== false);
+    const sources = research.sources || [];
+    const books = research.bookBibliography || [];
+    let values = [];
+    const profileNames = profiles.flatMap(item => [item.commonName, item.scientificName]);
+    const productNames = products.map(item => item.name);
+    const sourceNames = sources.map(item => item.title);
+    const bookNames = books.map(item => item.title);
+    if (tab === "botanical") values = profileNames;
+    else if (tab === "tea") values = profiles.filter(item => normalize(item.scientificName).includes("camellia")).flatMap(item => [item.commonName, item.scientificName]);
+    else if (tab === "infusions") values = profiles.filter(item => !normalize(item.scientificName).includes("camellia")).flatMap(item => [item.commonName, item.scientificName]);
+    else if (tab === "properties") values = profiles.flatMap(item => [item.commonName, item.summary, item.evidence]);
+    else if (tab === "compounds") values = sourceNames.filter(value => /ترکیب|فیتوشیمی|کافئین|پلی|chemical|constituent/i.test(value)).concat(profileNames);
+    else if (tab === "preparation" || tab === "products") values = productNames;
+    else if (tab === "safety") values = profiles.flatMap(item => [item.commonName, item.safety, item.interaction]).concat((research.generalSafetyRules || []));
+    else if (tab === "qa") values = profileNames.concat(sourceNames, bookNames);
+    else if (tab === "sources") values = sourceNames.concat(bookNames);
+    const seen = new Set();
+    return values.map(value => String(value || "").trim()).filter(value => {
+      const key = normalize(value);
+      if (!key || key.length < 2 || seen.has(key)) return false;
+      seen.add(key); return true;
+    }).slice(0, 18);
+  }
+  function addSearchTools() {
+    root.querySelectorAll("[data-health-bank-search]").forEach(input => {
+      if (input.parentElement.querySelector(".health-bank-search-tools")) return;
+      const tab = input.dataset.healthBankSearch;
+      const tools = make("div", "health-bank-search-tools");
+      const submit = make("button", "", "جست‌وجو");
+      submit.type = "button";
+      submit.addEventListener("click", () => {
+        state.queries[tab] = normalize(input.value);
+        if (state.tab === tab) { state.query = state.queries[tab]; render(); }
+      });
+      const drawer = make("details", "health-keyword-drawer");
+      const summaryNode = make("summary", "", "انتخاب کلیدواژه ▾");
+      const options = make("div", "health-keyword-options");
+      options.setAttribute("aria-label", "کلیدواژه‌های پیشنهادی");
+      drawer.append(summaryNode, options);
+      tools.append(submit, drawer);
+      input.insertAdjacentElement("afterend", tools);
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          submit.click();
+        }
+      });
+      drawer.addEventListener("toggle", () => {
+        if (!drawer.open || drawer.dataset.loaded === "true") return;
+        if (!state.research) {
+          options.replaceChildren(make("p", "", "در حال دریافت کلیدواژه‌های این بخش…"));
+          return;
+        }
+        options.replaceChildren();
+        sectionKeywords(tab).forEach(keyword => {
+          const choice = make("button", "", keyword);
+          choice.type = "button";
+          choice.addEventListener("click", () => {
+            input.value = keyword;
+            state.queries[tab] = normalize(keyword);
+            state.query = state.queries[tab];
+            drawer.open = false;
+            input.focus();
+          });
+          options.append(choice);
+        });
+        if (!options.childElementCount) options.append(make("p", "", "کلیدواژه‌ای برای این بخش ثبت نشده است."));
+        drawer.dataset.loaded = "true";
+      });
+    });
+  }
+  const requestedSection = new URLSearchParams(window.location.search).get("section");
+  const validTabs = new Set(tabButtons.map(button => button.dataset.healthBankTab));
+  const isSectionPage = validTabs.has(requestedSection);
+  if (isSectionPage) {
+    state.tab = requestedSection;
+    document.body.classList.add("health-section-page");
+    const back = document.getElementById("healthPageBack");
+    if (back) { back.href = "/health-advisor.html"; back.textContent = "بازگشت به فهرست بخش‌ها"; }
+    root.hidden = false;
+  }
   tabButtons.forEach(button => button.addEventListener("click", () => {
     const tab = button.dataset.healthBankTab;
-    state.tab = tab;
-    activatePanel(tab);
-    root.hidden = false;
-    render();
-    root.scrollIntoView({ behavior: "smooth", block: "start" });
-    if (tab === "qa") {
-      const question = document.getElementById("chaysaGuideQuestion");
-      if (question) question.focus({ preventScroll: true });
-    }
+    window.location.href = "/health-advisor.html?section=" + encodeURIComponent(tab);
   }));
   root.querySelectorAll("[data-health-bank-search]").forEach(input => input.addEventListener("input", () => {
     const tab = input.dataset.healthBankSearch;
     state.queries[tab] = normalize(input.value);
-    if (state.tab === tab) {
-      state.query = state.queries[tab];
-      render();
-    }
   }));
   activatePanel(state.tab);
+  addSearchTools();
   Promise.all([
     fetch("/data/health/health-product-research.json", { cache: "no-store", credentials: "same-origin" }).then(r => {
       if (!r.ok) throw new Error("بانک پژوهشی در دسترس نیست."); return r.json();
@@ -297,7 +371,12 @@
     const inactiveCount = products.filter(p => p && p.active === false).length;
     status.textContent = "بانک پژوهشی در وضعیت پیش‌نویس و اعتبارسنجی است؛ " + activeCount +
       " محصول فعال در فهرست زنده و " + inactiveCount + " محصول غیرفعال خارج از نمایش مشتری. این داده‌ها پاسخ پزشکی تأییدشده نیستند.";
+    addSearchTools();
     render();
+    if (state.tab === "qa" && isSectionPage) {
+      const question = document.getElementById("chaysaGuideQuestion");
+      if (question) question.focus({ preventScroll: true });
+    }
   }).catch(error => {
     status.textContent = (error && error.message) || "بارگذاری بانک پژوهشی انجام نشد.";
     summary.textContent = "اطلاعات فعلاً بارگذاری نشده است.";
