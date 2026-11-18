@@ -77,6 +77,9 @@ test("customer-facing health content states the information accuracy policy", ()
   assert.match(research.disclaimer, /مسئولیت صحت آن‌ها را بر عهده نمی‌گیرد/);
   assert.match(page, /صحت نهایی مطالب را تضمین نمی‌کند/);
   assert.match(page, /مسئولیت صحت آن‌ها را بر عهده نمی‌گیرد/);
+  assert.match(page, /کتابخانه پژوهشی اولیه در دسترس است/);
+  assert.match(page, /برای مشاهده اطلاعات پژوهشی اولیه، یکی از بخش‌ها را انتخاب کنید/);
+  assert.doesNotMatch(page, /دسترسی‌ها پس از تکمیل و تأیید فعال می‌شوند/);
 });
 
 test("admin panel exposes a protected SKU research queue without changing product business rules", () => {

@@ -3,6 +3,8 @@ const { test, expect } = require("@playwright/test");
 test("CHAYSA HEALTH research library renders correctly on a mobile viewport", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/health-advisor.html");
+  await expect(page.locator(".progress")).toContainText("کتابخانه پژوهشی اولیه در دسترس است");
+  await expect(page.locator(".progress")).toContainText("مسئولیت صحت آن‌ها را بر عهده نمی‌گیرد");
 
   await page.locator('[data-health-bank-tab="sources"]').click();
   await expect(page.locator("#chaysaResearchBank")).toBeVisible();
