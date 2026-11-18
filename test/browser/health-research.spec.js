@@ -78,3 +78,23 @@ test("admin can search PubMed candidates and manually save a selected source", a
   await card.getByRole("button", { name: "ذخیره پرونده پژوهشی" }).click();
   await expect(card.locator("select").nth(0)).toHaveValue("approved");
 });
+
+
+test("health safety search opens PubMed in the same tab and explains the research-bank status", async ({ page }) => {
+  await page.route("https://pubmed.ncbi.nlm.nih.gov/**", route =>
+    route.fulfill({ status: 200, contentType: "text/html", body: "<title>PubMed test</title>" })
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/health-advisor.html");
+  await page.locator('#chaysaGuideCategories button[data-category="safety"]').click();
+  await page.locator("#chaysaGuideProduct").selectOption("1401008");
+  await page.locator("#chaysaGuideQuestion").fill("عوارض احتمالی این محصول چیست؟");
+  await page.locator("#chaysaGuidePrepare").click();
+  const resultLink = page.locator("#chaysaGuideAnswer");
+  await expect(resultLink).toBeVisible();
+  await expect(resultLink).toHaveAttribute("href", /^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/\?term=/);
+  await expect(resultLink).not.toHaveAttribute("target", "_blank");
+  await expect(page.locator("#chaysaGuideHealthNotice")).toContainText("پیش‌نویس و اعتبارسنجی");
+  await resultLink.click();
+  await expect(page).toHaveURL(/^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/\?term=/);
+});

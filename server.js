@@ -130,6 +130,19 @@ app.get("/api/admin/analytics", requireAdmin, (_req, res) => {
 });
 
 
+function guideHealthBankNotice() {
+  const file = path.join(ROOT, "data", "health", "health-product-research.json");
+  try {
+    const bank = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (bank.status === "research_draft_not_for_customer_answers") {
+      return "وضعیت بانک علمی چایسا: نسخه موجود هنوز در مرحله پیش‌نویس و اعتبارسنجی است؛ بنابراین برای این پرسش پاسخ تأییدشده‌ای از بانک ارائه نمی‌شود.";
+    }
+    return "وضعیت بانک علمی چایسا برای پاسخ‌گویی به این پرسش تأیید نشده است؛ این جست‌وجو پاسخ پزشکی یا توصیه درمانی چایسا محسوب نمی‌شود.";
+  } catch (_) {
+    return "بانک علمی چایسا در دسترس نیست؛ بنابراین پاسخ تأییدشده‌ای از بانک ارائه نمی‌شود.";
+  }
+}
+
 const GUIDE_BANK_FILE = path.join(ROOT, "guide-bank.json");
 function readGuideBank() {
   try { return JSON.parse(fs.readFileSync(GUIDE_BANK_FILE, "utf8")); }
@@ -223,9 +236,9 @@ app.post("/api/guide/resolve", (req, res) => {
       if (!safetyHits.length) return json(res, 200, { ok: false, allowed: false, reason: "needs_safety_context", message: "پرسش را درباره عوارض احتمالی، احتیاط، حساسیت، بارداری، شیردهی یا ایمنی مصرف محصول روشن‌تر کنید." });
       q = '"' + product.name + '" ' + safetyHits.join(" ") + " ایمنی مصرف safety شواهد علمی ";
     }
-    q += "(" + (bank.healthPolicy.sourceDomains || []).map(d => "site:" + d).join(" OR ") + ")";
-    const url = "https://www.google.com/search?q=" + encodeURIComponent(q);
+    const url = "https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURIComponent(q.trim());
     return json(res, 200, { ok: true, allowed: true, type: "medical_external_search", url,
+      searchProvider: "PubMed", bankNotice: guideHealthBankNotice(),
       notice: bank.healthPolicy.notice || "", rule: bank.healthPolicy.rule || "" });
   }
   if (category === "products") {
@@ -234,6 +247,7 @@ app.post("/api/guide/resolve", (req, res) => {
     const q = '"' + product.name + '" ' + topics + " اطلاعات رسمی";
     return json(res, 200, { ok: true, allowed: true, type: "product_external_search",
       url: "https://www.google.com/search?q=" + encodeURIComponent(q),
+      searchProvider: "Google", bankNotice: guideHealthBankNotice(),
       notice: "اطلاعات ترکیبات و ویژگی‌ها باید با برچسب رسمی محصول تطبیق داده شود." });
   }
   if (category === "services" || (category === "custom" && serviceQuestion)) {
@@ -242,6 +256,7 @@ app.post("/api/guide/resolve", (req, res) => {
     const q = "چایسا فروشگاه " + serviceHits.join(" ");
     return json(res, 200, { ok: true, allowed: true, type: "service_external_search",
       url: "https://www.google.com/search?q=" + encodeURIComponent(q),
+      searchProvider: "Google",
       notice: "برای اطلاعات قطعی سفارش، فقط اطلاعیه‌ها و پیام‌های رسمی چایسا را ملاک قرار دهید." });
   }
   if (category === "custom" && product) {

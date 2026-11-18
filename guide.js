@@ -204,14 +204,25 @@
         return;
       }
       const target = new URL(result.url);
-      if (target.protocol !== "https:" || target.hostname !== "www.google.com" || target.pathname !== "/search") {
+      const allowedSearchTargets = {
+        medical_external_search: { hostname: "pubmed.ncbi.nlm.nih.gov", pathname: "/" },
+        product_external_search: { hostname: "www.google.com", pathname: "/search" },
+        service_external_search: { hostname: "www.google.com", pathname: "/search" }
+      };
+      const expectedTarget = allowedSearchTargets[result.type];
+      if (!expectedTarget || target.protocol !== "https:" ||
+          target.hostname !== expectedTarget.hostname || target.pathname !== expectedTarget.pathname) {
         throw new Error("نشانی جست‌وجو معتبر نیست.");
       }
       answer.href = target.toString();
+      answer.textContent = result.searchProvider ? "مشاهده نتایج در " + result.searchProvider : "مشاهده نتایج بیرونی";
       answer.hidden = false;
-      if (result.notice && notice) {
-        notice.textContent = result.notice + (mode === "health" && result.rule ? " " + result.rule : "");
-        notice.hidden = false;
+      if (notice) {
+        const noticeParts = [result.bankNotice, result.notice, mode === "health" ? result.rule : ""].filter(Boolean);
+        if (noticeParts.length) {
+          notice.textContent = noticeParts.join(" ");
+          notice.hidden = false;
+        }
       }
       status.style.color = "#24613d";
       status.textContent = "پرسش در محدوده راهنمای چایساست. برای مشاهده نتایج، دکمه زیر را بزنید.";
