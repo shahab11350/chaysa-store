@@ -25,11 +25,11 @@ test("username is previewed, submitted, validated, stored and included in invoic
   assert.match(checkout, /messengerUsername:checkoutValue\("\.customer-messenger-username"\)/);
   assert.match(checkout, /\["آیدی عمومی پیام‌رسان", checkoutValue\("\.customer-messenger-username"\)/);
   assert.match(server, /"messengerUsername","messengerId"/);
-  assert.match(server, /\^@[A-Za-z0-9_\]\{3,64\}\$/);
+  assert.ok(server.includes("if(!/^@[A-Za-z0-9_]{3,64}$/.test(customerUsername))"));
   assert.match(server, /آیدی عمومی پیام‌رسان: "\+c\.messengerUsername/);
 });
 
 test("username is not used as the message delivery destination", () => {
-  assert.match(server, /const chatId=String\(customer\.messengerId\|\|"\)\.trim\(\)/);
+  assert.ok(server.includes('const chatId = String(customer.messengerId || "").trim();'));
   assert.match(server, /customer\.messengerPlatform/);
 });
