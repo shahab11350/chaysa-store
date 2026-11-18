@@ -68,3 +68,11 @@ test("the customer-facing research view does not expose internal research gaps",
   assert.match(script, /bookBibliographyDisclaimer/);
   assert.match(script, /disclaimer/);
 });
+
+test("customer-facing health content states the information accuracy policy", () => {
+  assert.match(research.disclaimer, /تا حد امکان به‌روز/);
+  assert.match(research.disclaimer, /صحت نهایی مطالب را تضمین نمی‌کند/);
+  assert.match(research.disclaimer, /مسئولیت صحت آن‌ها را بر عهده نمی‌گیرد/);
+  assert.match(page, /صحت نهایی مطالب را تضمین نمی‌کند/);
+  assert.match(page, /مسئولیت صحت آن‌ها را بر عهده نمی‌گیرد/);
+});
