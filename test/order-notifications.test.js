@@ -29,7 +29,7 @@ async function createOrder(platform, messengerId, name) {
     body: JSON.stringify({
       customer: {
         name, family: "آزمایشی", contact: "0000000000", messengerPlatform: platform,
-        messengerId, province: "آزمایش", city: "آزمایش", address: "نشانی آزمایشی",
+        messengerUsername: "@chaysa", messengerId, province: "آزمایش", city: "آزمایش", address: "نشانی آزمایشی",
         postal: "1234567890", notes: "داده آزمایشی"
       },
       termsAccepted: true, termsAcceptedAt: new Date().toISOString(),
