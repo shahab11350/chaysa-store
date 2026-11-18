@@ -54,12 +54,15 @@ test("all public research links use HTTPS", () => {
   }
 });
 
-test("the four existing CHAYSA HEALTH tiles open their matching research sections", () => {
-  for (const id of ["products", "interactions", "safety", "sources"]) {
+test("the ten CHAYSA HEALTH sections open their matching research views", () => {
+  for (const id of ["botanical", "tea", "infusions", "properties", "compounds", "preparation", "safety", "products", "qa", "sources"]) {
     assert.match(page, new RegExp('data-health-bank-tab="' + id + '"'));
   }
-  assert.doesNotMatch(page, /<button[^>]*disabled[^>]*>Scientific Sources/);
+  assert.equal((page.match(/data-health-bank-tab=/g) || []).length, 10);
+  assert.match(page, /class="tiles health-topic-grid"/);
   assert.match(page, /id="chaysaResearchBank"/);
+  assert.equal((page.match(/data-health-section-panel=/g) || []).length, 10);
+  assert.equal((page.match(/data-health-bank-search=/g) || []).length, 10);
   assert.match(page, /src="\/health-bank\.js"/);
 });
 

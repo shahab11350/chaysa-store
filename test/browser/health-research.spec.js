@@ -8,11 +8,12 @@ test("CHAYSA HEALTH research library renders correctly on a mobile viewport", as
 
   await page.locator('[data-health-bank-tab="sources"]').click();
   await expect(page.locator("#chaysaResearchBank")).toBeVisible();
-  await expect(page.locator("[data-health-bank-summary]")).toContainText("29 منبع علمی");
+  await expect(page.locator('[data-health-section-panel="sources"] [data-health-bank-summary]')).toContainText("29 منبع علمی");
+  await expect(page.locator("#healthBankSearch-sources")).toBeVisible();
   await expect(page.locator("#chaysaResearchBank")).toContainText("صحت نهایی مطالب را تضمین نمی‌کند");
 
   await page.locator('[data-health-bank-tab="products"]').click();
-  await expect(page.locator("[data-health-bank-summary]")).toContainText("محصول فعال");
+  await expect(page.locator('[data-health-section-panel="products"] [data-health-bank-summary]')).toContainText("محصول فعال");
   const hasHorizontalOverflow = await page.evaluate(() =>
     document.documentElement.scrollWidth > document.documentElement.clientWidth
   );
@@ -83,6 +84,7 @@ test("admin can search PubMed candidates and manually save a selected source", a
 test("health safety questions show matched internal sources and no external-results button", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/health-advisor.html");
+  await page.locator('[data-health-bank-tab="qa"]').click();
   await page.locator('#chaysaGuideCategories button[data-category="safety"]').click();
   await page.locator("#chaysaGuideProduct").selectOption("1401008");
   await page.locator("#chaysaGuideQuestion").fill("عوارض احتمالی این محصول چیست؟");
@@ -93,4 +95,38 @@ test("health safety questions show matched internal sources and no external-resu
   await expect(results).toContainText("منبع اصلی:");
   await expect(page.locator("#chaysaGuideAnswer")).toHaveCount(0);
   await expect(results).toContainText("تشخیص یا تجویز");
+});
+
+
+test("ten CHAYSA HEALTH sections navigate to the matching internal research views", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/health-advisor.html");
+  await expect(page.locator('[data-health-bank-tab]')).toHaveCount(10);
+
+  const expected = [
+    ["botanical", "دانشنامه گیاهان دارویی"],
+    ["tea", "دنیای چای"],
+    ["infusions", "دنیای دمنوش‌ها"],
+    ["properties", "خواص و کاربردها"],
+    ["compounds", "ترکیبات و مواد مؤثره"],
+    ["preparation", "روش مصرف و آماده‌سازی"],
+    ["safety", "موارد احتیاط و ایمنی"],
+    ["products", "راهنمای انتخاب محصولات چایسا"],
+    ["sources", "کتابخانه منابع و مقالات"]
+  ];
+  for (const [tab, title] of expected) {
+    await page.locator('[data-health-bank-tab="' + tab + '"]').click();
+    await expect(page.locator("#chaysaResearchBank")).toBeVisible();
+    await expect(page.locator('[data-health-section-panel="' + tab + '"] [data-health-section-title]')).toHaveText(title);
+    await expect(page.locator('[data-health-section-panel="' + tab + '"] [data-health-bank-search]')).toBeVisible();
+    await expect(page.locator('[data-health-section-panel="' + tab + '"] [data-health-bank-list]')).not.toBeEmpty();
+  }
+
+  await page.locator('[data-health-bank-tab="qa"]').click();
+  await expect(page.locator('#healthBankSearch-qa')).toBeVisible();
+  await expect(page.locator("#chaysaGuideQuestion")).toBeFocused();
+  const hasHorizontalOverflow = await page.evaluate(() =>
+    document.documentElement.scrollWidth > document.documentElement.clientWidth
+  );
+  expect(hasHorizontalOverflow).toBe(false);
 });
