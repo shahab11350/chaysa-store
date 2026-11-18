@@ -861,6 +861,23 @@ app.get("/api/admin/health-research/queue", requireAdmin, (_req, res) => {
     return json(res, 200, queue);
   } catch (_) { return json(res, 500, { error: "دریافت صف پژوهش انجام نشد." }); }
 });
+app.post("/api/admin/health-research/queue/:id/suggestions", requireAdmin, async (req, res) => {
+  if (limited("health-research-suggestions:" + (req.ip || "unknown"), 8, 60 * 1000))
+    return json(res, 429, { error: "تعداد جست‌وجوهای پژوهشی زیاد است؛ کمی بعد دوباره تلاش کنید." });
+  const query = typeof (req.body && req.body.query) === "string" ? req.body.query.trim().slice(0, 180) : "";
+  if (!query) return json(res, 400, { error: "عبارت جست‌وجو الزامی است." });
+  try {
+    const result = await healthResearchQueue.searchPubMed(req.params.id, query);
+    return json(res, 200, {
+      ...result,
+      notice: "این نتایج فقط سرنخ جست‌وجوی اولیه‌اند؛ ارتباط با ترکیبات و ویژگی‌های محصول باید جداگانه بررسی شود. نتایج به‌صورت خودکار به پرونده افزوده یا منتشر نمی‌شوند."
+    });
+  } catch (error) {
+    const message = error && error.message ? error.message : "";
+    const status = /پیدا نشد/.test(message) ? 404 : /فقط برای محصول فعال/.test(message) ? 409 : /عبارت جست‌وجو/.test(message) ? 400 : 502;
+    return json(res, status, { error: status === 502 ? "جست‌وجوی رایگان PubMed موقتاً در دسترس نیست." : message });
+  }
+});
 app.patch("/api/admin/health-research/queue/:id", requireAdmin, (req, res) => {
   try {
     const item = healthResearchQueue.updateItem(req.params.id, req.body || {});
