@@ -98,11 +98,10 @@ test("health safety questions show matched internal sources and no external-resu
 });
 
 
-test("ten CHAYSA HEALTH sections navigate to the matching internal research views", async ({ page }) => {
+test("ten CHAYSA HEALTH sections open standalone pages with keyword search controls", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/health-advisor.html");
   await expect(page.locator('[data-health-bank-tab]')).toHaveCount(10);
-
   const expected = [
     ["botanical", "دانشنامه گیاهان دارویی"],
     ["tea", "دنیای چای"],
@@ -112,19 +111,35 @@ test("ten CHAYSA HEALTH sections navigate to the matching internal research view
     ["preparation", "روش مصرف و آماده‌سازی"],
     ["safety", "موارد احتیاط و ایمنی"],
     ["products", "راهنمای انتخاب محصولات چایسا"],
+    ["qa", "پرسش و پاسخ سلامت"],
     ["sources", "کتابخانه منابع و مقالات"]
   ];
   for (const [tab, title] of expected) {
-    await page.locator('[data-health-bank-tab="' + tab + '"]').click();
-    await expect(page.locator("#chaysaResearchBank")).toBeVisible();
-    await expect(page.locator('[data-health-section-panel="' + tab + '"] [data-health-section-title]')).toHaveText(title);
-    await expect(page.locator('[data-health-section-panel="' + tab + '"] [data-health-bank-search]')).toBeVisible();
-    await expect(page.locator('[data-health-section-panel="' + tab + '"] [data-health-bank-list]')).not.toBeEmpty();
+    await page.goto("/health-advisor.html?section=" + tab);
+    await expect(page.locator("body")).toHaveClass(/health-section-page/);
+    await expect(page.locator(".health-topic-grid")).toBeHidden();
+    const panel = page.locator('[data-health-section-panel="' + tab + '"]');
+    await expect(panel).toBeVisible();
+    await expect(panel.locator("[data-health-section-title]")).toHaveText(title);
+    const input = panel.locator("[data-health-bank-search]");
+    await expect(input).toBeVisible();
+    await expect(panel.getByRole("button", { name: "جست‌وجو" })).toBeVisible();
+    const drawer = panel.locator(".health-keyword-drawer");
+    await expect(drawer).toBeVisible();
+    await drawer.locator("summary").click();
+    await expect(drawer.locator(".health-keyword-options button").first()).toBeVisible();
+    const keyword = await drawer.locator(".health-keyword-options button").first().textContent();
+    await drawer.locator(".health-keyword-options button").first().click();
+    await expect(input).toHaveValue(keyword);
+    await panel.getByRole("button", { name: "جست‌وجو" }).click();
+    await expect(panel.locator("[data-health-bank-list]")).not.toBeEmpty();
+    await expect(page.locator("#healthPageBack")).toHaveAttribute("href", "/health-advisor.html");
   }
-
-  await page.locator('[data-health-bank-tab="qa"]').click();
-  await expect(page.locator('#healthBankSearch-qa')).toBeVisible();
-  await expect(page.locator("#chaysaGuideQuestion")).toBeFocused();
+  await page.goto("/health-advisor.html?section=tea");
+  const input = page.locator("#healthBankSearch-tea");
+  await input.fill("Camellia");
+  await input.press("Enter");
+  await expect(page.locator('[data-health-section-panel="tea"] [data-health-bank-list]')).not.toBeEmpty();
   const hasHorizontalOverflow = await page.evaluate(() =>
     document.documentElement.scrollWidth > document.documentElement.clientWidth
   );
