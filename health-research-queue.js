@@ -96,15 +96,8 @@ function createHealthResearchQueue(dataDir) {
     const state = read();
     const item = state.items.find(row => row.id === id);
     if (!item) throw new Error("پرونده پژوهشی پیدا نشد.");
-    if (patch.status !== undefined) {
-      if (!STATUSES.has(patch.status)) throw new Error("وضعیت انتخاب‌شده معتبر نیست.");
-      if (patch.status === "archived" && item.catalogActive) throw new Error("محصول فعال را نمی‌توان از چرخه پژوهش بایگانی کرد.");
-      if (patch.status === "approved" && (!item.sku || item.duplicateSku || item.labelEvidenceStatus !== "checked" ||
-          item.compositionStatus !== "checked" || !item.sources.length || !item.reviewerName)) {
-        throw new Error("تأیید پرونده نیازمند SKU یکتا، بررسی برچسب و ترکیبات، دست‌کم یک منبع و نام بازبین است.");
-      }
-      item.status = patch.status;
-    }
+    if (patch.status !== undefined && !STATUSES.has(patch.status)) throw new Error("وضعیت انتخاب‌شده معتبر نیست.");
+    if (patch.status === "archived" && item.catalogActive) throw new Error("محصول فعال را نمی‌توان از چرخه پژوهش بایگانی کرد.");
     if (patch.labelEvidenceStatus !== undefined) {
       if (!EVIDENCE.has(patch.labelEvidenceStatus)) throw new Error("وضعیت مدرک برچسب معتبر نیست.");
       item.labelEvidenceStatus = patch.labelEvidenceStatus;
@@ -131,6 +124,11 @@ function createHealthResearchQueue(dataDir) {
         };
       });
     }
+    if (patch.status === "approved" && (!item.sku || item.duplicateSku || item.labelEvidenceStatus !== "checked" ||
+        item.compositionStatus !== "checked" || !item.sources.length || !item.reviewerName)) {
+      throw new Error("تأیید پرونده نیازمند SKU یکتا، بررسی برچسب و ترکیبات، دست‌کم یک منبع و نام بازبین است.");
+    }
+    if (patch.status !== undefined) item.status = patch.status;
     item.updatedAt = new Date().toISOString();
     write(state);
     return item;
