@@ -111,13 +111,20 @@ test("queue cannot advance without a SKU or archive an active product", () => {
   try {
     const state = f.queue.syncCatalog([
       { sku: "", name: "بدون شناسه", category: "چای", active: true },
-      { sku: "SKU-2", name: "چای فعال", category: "چای", active: true }
+      { sku: "SKU-2", name: "چای فعال", category: "چای", active: true },
+      { sku: "SKU-3", name: "چای غیرفعال", category: "چای", active: false },
+      { sku: "DUP", name: "محصول تکراری اول", category: "چای", active: true },
+      { sku: "DUP", name: "محصول تکراری دوم", category: "چای", active: true }
     ]);
     const missing = state.items.find(x => !x.sku);
     const active = state.items.find(x => x.sku === "SKU-2");
+    const inactive = state.items.find(x => x.sku === "SKU-3");
+    const duplicate = state.items.find(x => x.duplicateSku);
     assert.throws(() => f.queue.updateItem(missing.id, { status: "researching" }), /تا زمان ثبت SKU معتبر/);
     assert.throws(() => f.queue.updateItem(active.id, { status: "archived" }), /محصول فعال را نمی‌توان/);
     assert.throws(() => f.queue.updateItem(active.id, { status: "needs_sku" }), /محصول SKU دارد/);
+    assert.throws(() => f.queue.updateItem(inactive.id, { status: "researching" }), /محصول غیرفعال یا حذف‌شده/);
+    assert.throws(() => f.queue.updateItem(duplicate.id, { status: "researching" }), /SKU تکراری/);
   } finally { f.cleanup(); }
 });
 
@@ -241,5 +248,21 @@ test("approval is blocked if an attached evidence file is missing from private s
       reviewerName: "بازبین", sources: [{ title: "مرجع", url: "https://example.org/ref" }],
       status: "approved"
     }), /فایل مدرک برچسب و ترکیبات/);
+  } finally { f.cleanup(); }
+});
+
+test("legacy approved queue entries without real evidence are reopened during catalog sync", () => {
+  const f = fixture();
+  try {
+    const products = [
+      { sku: "SKU-LEGACY-ACTIVE", name: "چای فعال", category: "چای", active: true },
+      { sku: "SKU-LEGACY-INACTIVE", name: "چای غیرفعال", category: "چای", active: false }
+    ];
+    const state = f.queue.syncCatalog(products);
+    state.items.forEach(item => { item.status = "approved"; });
+    fs.writeFileSync(path.join(f.dir, "health-research-queue.json"), JSON.stringify(state), "utf8");
+    const migrated = f.queue.syncCatalog(products);
+    assert.equal(migrated.items.find(x => x.sku === "SKU-LEGACY-ACTIVE").status, "needs_update");
+    assert.equal(migrated.items.find(x => x.sku === "SKU-LEGACY-INACTIVE").status, "archived");
   } finally { f.cleanup(); }
 });
