@@ -88,3 +88,12 @@ test("admin panel exposes a protected SKU research queue without changing produc
   assert.match(server, /healthResearchQueue\.syncCatalog\(req\.body\)/);
   assert.match(server, /saveProducts\(req\.body\)/);
 });
+
+test("free PubMed discovery is admin-only, rate-limited and explicitly non-publishing", () => {
+  assert.match(adminPage, /جست‌وجوی رایگان در PubMed/);
+  assert.match(adminPage, /افزودن به فهرست منابع/);
+  assert.match(server, /app\.post\("\/api\/admin\/health-research\/queue\/:id\/suggestions", requireAdmin/);
+  assert.match(server, /healthResearchQueue\.searchPubMed/);
+  assert.match(server, /health-research-suggestions:/);
+  assert.match(server, /به‌صورت خودکار به پرونده افزوده یا منتشر نمی‌شوند/);
+});
