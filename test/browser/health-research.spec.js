@@ -94,3 +94,35 @@ test("health safety questions show matched internal sources and no external-resu
   await expect(page.locator("#chaysaGuideAnswer")).toHaveCount(0);
   await expect(results).toContainText("تشخیص یا تجویز");
 });
+
+
+test("ten CHAYSA HEALTH sections navigate to the matching internal research views", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/health-advisor.html");
+  await expect(page.locator('[data-health-bank-tab]')).toHaveCount(10);
+
+  const expected = [
+    ["botanical", "دانشنامه گیاهان دارویی"],
+    ["tea", "دنیای چای"],
+    ["infusions", "دنیای دمنوش‌ها"],
+    ["properties", "خواص و کاربردها"],
+    ["compounds", "ترکیبات و مواد مؤثره"],
+    ["preparation", "روش مصرف و آماده‌سازی"],
+    ["safety", "موارد احتیاط و ایمنی"],
+    ["products", "راهنمای انتخاب محصولات چایسا"],
+    ["sources", "کتابخانه منابع و مقالات"]
+  ];
+  for (const [tab, title] of expected) {
+    await page.locator('[data-health-bank-tab="' + tab + '"]').click();
+    await expect(page.locator("#chaysaResearchBank")).toBeVisible();
+    await expect(page.locator("#healthBankTitle")).toHaveText(title);
+    await expect(page.locator("[data-health-bank-list]")).not.toBeEmpty();
+  }
+
+  await page.locator('[data-health-bank-tab="qa"]').click();
+  await expect(page.locator("#chaysaGuideQuestion")).toBeFocused();
+  const hasHorizontalOverflow = await page.evaluate(() =>
+    document.documentElement.scrollWidth > document.documentElement.clientWidth
+  );
+  expect(hasHorizontalOverflow).toBe(false);
+});
