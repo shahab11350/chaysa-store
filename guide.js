@@ -225,7 +225,7 @@
             title.textContent = source.title || "منبع ترجمه‌شده";
             article.appendChild(title);
             const meta = document.createElement("p");
-            meta.textContent = [source.publisher, source.originalTitle, source.id].filter(Boolean).join(" | ");
+            meta.textContent = [source.publisher, source.originalTitle, source.id, source.citation].filter(Boolean).join(" | ");
             article.appendChild(meta);
             const relevance = document.createElement("p");
             relevance.textContent = source.relevance || "";
