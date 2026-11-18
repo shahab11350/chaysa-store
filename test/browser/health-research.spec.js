@@ -80,21 +80,17 @@ test("admin can search PubMed candidates and manually save a selected source", a
 });
 
 
-test("health safety search opens PubMed in the same tab and explains the research-bank status", async ({ page }) => {
-  await page.route("https://pubmed.ncbi.nlm.nih.gov/**", route =>
-    route.fulfill({ status: 200, contentType: "text/html", body: "<title>PubMed test</title>" })
-  );
+test("health safety questions show matched internal sources and no external-results button", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/health-advisor.html");
   await page.locator('#chaysaGuideCategories button[data-category="safety"]').click();
   await page.locator("#chaysaGuideProduct").selectOption("1401008");
   await page.locator("#chaysaGuideQuestion").fill("عوارض احتمالی این محصول چیست؟");
   await page.locator("#chaysaGuidePrepare").click();
-  const resultLink = page.locator("#chaysaGuideAnswer");
-  await expect(resultLink).toBeVisible();
-  await expect(resultLink).toHaveAttribute("href", /^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/\?term=/);
-  await expect(resultLink).not.toHaveAttribute("target", "_blank");
-  await expect(page.locator("#chaysaGuideHealthNotice")).toContainText("پیش‌نویس و اعتبارسنجی");
-  await resultLink.click();
-  await expect(page).toHaveURL(/^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/\?term=/);
+  const results = page.locator("#chaysaGuideResults");
+  await expect(results).toBeVisible();
+  await expect(results).toContainText("مطالب مرتبط از بانک داخلی چایسا");
+  await expect(results).toContainText("منبع اصلی:");
+  await expect(page.locator("#chaysaGuideAnswer")).toHaveCount(0);
+  await expect(results).toContainText("تشخیص یا تجویز");
 });

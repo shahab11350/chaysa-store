@@ -10,7 +10,7 @@
   const medicineLabel = document.getElementById("chaysaGuideMedicineLabel");
   const question = document.getElementById("chaysaGuideQuestion");
   const status = document.getElementById("chaysaGuideStatus");
-  const answer = document.getElementById("chaysaGuideAnswer");
+  const resultsBox = document.getElementById("chaysaGuideResults");
   const healthNotice = document.getElementById("chaysaGuideHealthNotice");
   const notice = root.querySelector("#chaysaGuideNotice") || healthNotice;
   const prepare = document.getElementById("chaysaGuidePrepare");
@@ -23,48 +23,15 @@
     return String(value || "").toLowerCase().replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/[\u200c\u200f\u200e]/g, " ").replace(/\s+/g, " ").trim();
   }
   function clearResult() {
-    if (answer) {
-      answer.hidden = true;
-      answer.removeAttribute("href");
+    if (resultsBox) {
+      resultsBox.hidden = true;
+      resultsBox.replaceChildren();
     }
     if (notice) notice.hidden = true;
     status.textContent = "";
     status.style.color = "#a33";
   }
 
-  // Force same-tab navigation for the validated external-results link.
-  if (answer) {
-    answer.addEventListener("click", function (event) {
-      const href = answer.getAttribute("href");
-      if (answer.hidden || !href) {
-        event.preventDefault();
-        return;
-      }
-      let target;
-      try {
-        target = new URL(href, window.location.href);
-      } catch (_) {
-        event.preventDefault();
-        status.textContent = "نشانی نتایج معتبر نیست.";
-        return;
-      }
-      const allowedHosts = [
-        { hostname: "pubmed.ncbi.nlm.nih.gov", pathname: "/" },
-        { hostname: "www.google.com", pathname: "/search" }
-      ];
-      const valid = target.protocol === "https:" &&
-        allowedHosts.some(function (item) {
-          return target.hostname === item.hostname && target.pathname === item.pathname;
-        });
-      if (!valid) {
-        event.preventDefault();
-        status.textContent = "نشانی نتایج معتبر نیست.";
-        return;
-      }
-      event.preventDefault();
-      window.location.assign(target.toString());
-    });
-  }
   function selectCategory(id) {
     if (!allowedCategories.includes(id)) return;
     if (category !== id && medicine) medicine.value = "";
@@ -237,35 +204,59 @@
         status.textContent = result.message || "این پرسش در محدوده راهنمای چایسا نیست.";
         return;
       }
-      const target = new URL(result.url);
-      const allowedSearchTargets = {
-        medical_external_search: { hostname: "pubmed.ncbi.nlm.nih.gov", pathname: "/" },
-        product_external_search: { hostname: "www.google.com", pathname: "/search" },
-        service_external_search: { hostname: "www.google.com", pathname: "/search" }
-      };
-      const expectedTarget = allowedSearchTargets[result.type];
-      if (!expectedTarget || target.protocol !== "https:" ||
-          target.hostname !== expectedTarget.hostname || target.pathname !== expectedTarget.pathname) {
-        throw new Error("نشانی جست‌وجو معتبر نیست.");
-      }
-      answer.href = target.toString();
-      answer.textContent = result.searchProvider ? "مشاهده نتایج در " + result.searchProvider : "مشاهده نتایج بیرونی";
-      answer.hidden = false;
-      if (notice) {
-        const noticeParts = [result.bankNotice, result.notice, mode === "health" ? result.rule : ""].filter(Boolean);
-        if (noticeParts.length) {
-          notice.textContent = noticeParts.join(" ");
-          notice.hidden = false;
+      if (result.type === "internal_knowledge") {
+        if (!resultsBox) throw new Error("بخش نمایش نتایج بانک داخلی در صفحه موجود نیست.");
+        const heading = document.createElement("h3");
+        heading.textContent = "مطالب مرتبط از بانک داخلی چایسا";
+        resultsBox.appendChild(heading);
+        const policy = document.createElement("p");
+        policy.className = "chaysa-guide-result-policy";
+        policy.textContent = result.policy || "";
+        resultsBox.appendChild(policy);
+        if (!Array.isArray(result.sources) || !result.sources.length) {
+          const empty = document.createElement("p");
+          empty.textContent = result.message || "مطلب مرتبطی پیدا نشد.";
+          resultsBox.appendChild(empty);
+        } else {
+          result.sources.forEach(function (source) {
+            const article = document.createElement("article");
+            article.className = "chaysa-guide-source";
+            const title = document.createElement("h4");
+            title.textContent = source.title || "منبع ترجمه‌شده";
+            article.appendChild(title);
+            const meta = document.createElement("p");
+            meta.textContent = [source.publisher, source.originalTitle, source.id, source.citation].filter(Boolean).join(" | ");
+            article.appendChild(meta);
+            const relevance = document.createElement("p");
+            relevance.textContent = source.relevance || "";
+            article.appendChild(relevance);
+            (source.excerpts || []).forEach(function (excerpt) {
+              const paragraph = document.createElement("p");
+              paragraph.textContent = excerpt;
+              article.appendChild(paragraph);
+            });
+            const citation = document.createElement("p");
+            citation.className = "chaysa-guide-citation";
+            citation.textContent = "منبع اصلی: " + (source.url || "");
+            article.appendChild(citation);
+            resultsBox.appendChild(article);
+          });
         }
+        resultsBox.hidden = false;
+        resultsBox.scrollIntoView({behavior:"smooth",block:"start"});
+      } else if (result.type === "service_guidance") {
+        if (notice) { notice.textContent = result.message || ""; notice.hidden = false; }
+      } else {
+        throw new Error(result.message || "پاسخی از بانک داخلی دریافت نشد.");
       }
       status.style.color = "#24613d";
-      status.textContent = "پرسش در محدوده راهنمای چایساست. برای مشاهده نتایج، دکمه زیر را بزنید.";
+      status.textContent = result.message || "نتایج بانک داخلی آماده شد.";
     } catch (error) {
       status.style.color = "#a33";
       status.textContent = error && error.message ? error.message : "ارتباط با راهنما برقرار نشد.";
     } finally {
       prepare.disabled = false;
-      prepare.textContent = "بررسی و آماده‌سازی پرسش";
+      prepare.textContent = "آماده‌سازی جست‌وجوی منابع";
     }
   });
 })();
