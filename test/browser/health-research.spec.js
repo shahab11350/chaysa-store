@@ -12,7 +12,7 @@ test("CHAYSA HEALTH research library renders correctly on a mobile viewport", as
   await expect(page.locator("#healthBankSearch-sources")).toBeVisible();
   await expect(page.locator("#chaysaResearchBank")).toContainText("صحت نهایی مطالب را تضمین نمی‌کند");
 
-  await page.locator('[data-health-bank-tab="products"]').click();
+  await page.goto("/health-advisor.html?section=products");
   await expect(page.locator('[data-health-section-panel="products"] [data-health-bank-summary]')).toContainText("محصول فعال");
   const hasHorizontalOverflow = await page.evaluate(() =>
     document.documentElement.scrollWidth > document.documentElement.clientWidth
@@ -123,7 +123,7 @@ test("ten CHAYSA HEALTH sections open standalone pages with keyword search contr
     await expect(panel.locator("[data-health-section-title]")).toHaveText(title);
     const input = panel.locator("[data-health-bank-search]");
     await expect(input).toBeVisible();
-    await expect(panel.getByRole("button", { name: "جست‌وجو" })).toBeVisible();
+    await expect(panel.getByRole("button", { name: "جست‌وجو", exact: true })).toBeVisible();
     const drawer = panel.locator(".health-keyword-drawer");
     await expect(drawer).toBeVisible();
     await drawer.locator("summary").click();
