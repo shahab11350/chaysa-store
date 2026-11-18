@@ -114,6 +114,16 @@ test("a changed product identity reopens an approved record for update", () => {
   const f = fixture();
   try {
     const item = f.queue.syncCatalog([{ sku: "SKU-3", name: "چای سفید", category: "چای", active: true }]).items[0];
+    f.queue.addEvidence(item.id, {
+      type: "label", fileId: "66666666-6666-4666-8666-666666666666",
+      fileName: "66666666-6666-4666-8666-666666666666.pdf", originalName: "label.pdf",
+      mime: "application/pdf", size: 100, sha256: "d".repeat(64)
+    });
+    f.queue.addEvidence(item.id, {
+      type: "composition", fileId: "77777777-7777-4777-8777-777777777777",
+      fileName: "77777777-7777-4777-8777-777777777777.pdf", originalName: "composition.pdf",
+      mime: "application/pdf", size: 100, sha256: "e".repeat(64)
+    });
     f.queue.updateItem(item.id, {
       labelEvidenceStatus: "checked",
       compositionStatus: "checked",
