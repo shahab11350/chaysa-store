@@ -61,6 +61,8 @@ test("the ten CHAYSA HEALTH sections open their matching research views", () => 
   assert.equal((page.match(/data-health-bank-tab=/g) || []).length, 10);
   assert.match(page, /class="tiles health-topic-grid"/);
   assert.match(page, /id="chaysaResearchBank"/);
+  assert.equal((page.match(/data-health-section-panel=/g) || []).length, 10);
+  assert.equal((page.match(/data-health-bank-search=/g) || []).length, 10);
   assert.match(page, /src="\/health-bank\.js"/);
 });
 
