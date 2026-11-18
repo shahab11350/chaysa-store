@@ -72,7 +72,8 @@ function createHealthResearchQueue(dataDir) {
       item.category = category;
       item.sku = sku;
       item.catalogActive = active;
-      item.duplicateSku = duplicateSku;\n      item.duplicateProductNames = duplicateSku ? products.filter(row => row && row.active === true && normalizeSku(row.sku) === sku).map(row => safeText(row.name, 180)) : [];
+      item.duplicateSku = duplicateSku;
+      item.duplicateProductNames = duplicateSku ? products.filter(row => row && row.active === true && normalizeSku(row.sku) === sku).map(row => safeText(row.name, 180)) : [];
       item.lastSeenAt = now;
       if (!sku) item.status = "needs_sku";
       else if (duplicateSku) item.status = "review";
