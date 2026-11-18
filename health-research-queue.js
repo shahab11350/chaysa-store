@@ -107,7 +107,7 @@ function createHealthResearchQueue(dataDir) {
     });
     if (!searchResponse.ok) throw new Error("دریافت نتایج PubMed با خطا روبه‌رو شد.");
     const searchData = await searchResponse.json();
-    const ids = (((searchData || {}).esearchresult || {}).idlist || []).filter(value => /^\\d+$/.test(String(value))).slice(0, 8);
+    const ids = (((searchData || {}).esearchresult || {}).idlist || []).filter(value => /^\d+$/.test(String(value))).slice(0, 8);
     if (!ids.length) return { query: term, candidates: [] };
     const summaryUrl = new URL("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi");
     summaryUrl.search = new URLSearchParams({ db: "pubmed", retmode: "json", id: ids.join(",") }).toString();
