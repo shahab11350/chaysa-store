@@ -758,6 +758,23 @@ function orderRows() {
   catch (_) { return []; }
 }
 
+test("missing or malformed messenger username is rejected before an order is persisted", async () => {
+  const beforeOrders = orderRows().length;
+  const missing = validOrderPayload();
+  delete missing.customer.messengerUsername;
+  const missingResult = await postOrder(missing);
+  assert.equal(missingResult.status, 400);
+  assert.match(missingResult.body.error, /آیدی عمومی پیام‌رسان/);
+  assert.equal(orderRows().length, beforeOrders);
+
+  const malformed = validOrderPayload();
+  malformed.customer.messengerUsername = "chaysa";
+  const malformedResult = await postOrder(malformed);
+  assert.equal(malformedResult.status, 400);
+  assert.match(malformedResult.body.error, /آیدی عمومی پیام‌رسان/);
+  assert.equal(orderRows().length, beforeOrders);
+});
+
 test("invalid Telegram chat ID is rejected before any order is persisted or invoice is sent", async () => {
   const beforeOrders = orderRows().length;
   const beforeMessages = telegramLog().filter(item => {
