@@ -1773,13 +1773,13 @@ app.post("/api/orders",async(req,res)=>{
  const key="order:"+(req.ip||"unknown");if(limited(key,5,10*60*1000))return json(res,429,{error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کن."});
  const b=req.body||{},c=b.customer||{},fields=["name","family","contact","messengerPlatform","messengerUsername","messengerId","province","city","address","postal","notes"];
  if(!["telegram","rubika"].includes(String(c.messengerPlatform||"")))return json(res,400,{error:"پیام‌رسان انتخابی باید تلگرام یا روبیکا باشد."});
+ const customerUsername=String(c.messengerUsername||"").trim();
+ if(!/^@[A-Za-z0-9_]{3,64}$/.test(customerUsername))return json(res,400,{error:"آیدی عمومی پیام‌رسان اجباری است و باید با @ و فقط شامل حروف انگلیسی، عدد یا زیرخط باشد؛ نمونه: @chaysa"});
  if(!fields.every(k=>typeof c[k]==="string"&&c[k].trim())||b.termsAccepted!==true||typeof b.termsAcceptedAt!=="string")return json(res,400,{error:"اطلاعات خریدار و تأیید صحت آن‌ها الزامی است."});
  if(!/^\d{10}$/.test(normalizeDigits(c.postal).replace(/[^0-9]/g,"")))return json(res,400,{error:"کد پستی باید دقیقاً ۱۰ رقم باشد."});
  if(!Array.isArray(b.items)||!b.items.length||b.items.length>100)return json(res,400,{error:"سبد سفارش معتبر نیست."});
  const catalog=readProducts(),items=[];
  for(const x of b.items){const p=catalog.find(p=>String(p.sku)===String(x.sku)&&p.active!==false),qty=Number(x.qty);if(!p||!Number.isInteger(qty)||qty<1||qty>99)return json(res,400,{error:"کالا یا تعداد آن معتبر نیست؛ سبد را تازه‌سازی کنید."});items.push({sku:String(p.sku),name:String(p.name),qty,unitPrice:Number(p.price),lineTotal:Number(p.price)*qty})}
- const customerUsername=String(c.messengerUsername||"").trim();
- if(!/^@[A-Za-z0-9_]{3,64}$/.test(customerUsername))return json(res,400,{error:"آیدی عمومی پیام‌رسان باید با @ و فقط شامل حروف انگلیسی، عدد یا زیرخط باشد؛ نمونه: @chaysa"});
  const customerId=String(c.messengerId||"").trim();
  if(c.messengerPlatform==="telegram"&&!/^-?\d{5,20}$/.test(customerId))return json(res,400,{error:"شناسه گفت‌وگوی تلگرام معتبر نیست؛ ربات را Start کنید و شناسه عددی را وارد کنید."});
  if(c.messengerPlatform==="rubika"&&!/^[A-Za-z0-9_-]{12,80}$/.test(customerId))return json(res,400,{error:"شناسه گفت‌وگوی روبیکا معتبر نیست؛ ربات چایسا را Start کنید و شناسه ارسالی را وارد کنید."});
