@@ -127,6 +127,11 @@ test("Rubika InvalidUrl webhook falls back to getUpdates and returns a real chat
 
 test("owner and Bostani status changes notify the selected customer channel, suppress duplicates and allow safe retry", async () => {
   const telegramOrder = await createOrder("telegram", "333333", "مشتری تلگرام");
+  const orderInvoice = lines(telegramLog).map(entry => JSON.parse(entry.body || "{}")).find(payload =>
+    String(payload.text || "").startsWith("فاکتور سفارش چایسا") && String(payload.text).includes(telegramOrder)
+  );
+  assert.ok(orderInvoice, "the admin invoice should be sent");
+  assert.match(orderInvoice.text, /آیدی عمومی پیام‌رسان: @chaysa/);
   const ownerUpdate = await request("/api/admin/orders/" + encodeURIComponent(telegramOrder) + "/status", {
     method: "PATCH", headers: { "Content-Type": "application/json", Cookie: adminCookie },
     body: JSON.stringify({ status: "در حال آماده‌سازی" })
