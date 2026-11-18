@@ -46,4 +46,20 @@ test("admin can search PubMed candidates and manually save a selected source", a
 
   card = page.locator("#healthResearchItems article").filter({ hasText: item.sku }).first();
   await expect(card.locator("textarea").last()).toHaveValue(/PubMed candidate title for integration test/);
+
+  const pdf = Buffer.from("%PDF-1.4\\nCHAYSA TEST EVIDENCE\\n%%EOF");
+  await card.locator('input[type="file"]').nth(0).setInputFiles({ name: "label.pdf", mimeType: "application/pdf", buffer: pdf });
+  await card.getByRole("button", { name: "بارگذاری مدرک برچسب" }).click();
+  await expect(card).toContainText("مدرک برچسب · label.pdf");
+
+  await card.locator('input[type="file"]').nth(1).setInputFiles({ name: "composition.pdf", mimeType: "application/pdf", buffer: pdf });
+  await card.getByRole("button", { name: "بارگذاری مدرک ترکیبات" }).click();
+  await expect(card).toContainText("مدرک ترکیبات · composition.pdf");
+
+  await card.locator("select").nth(1).selectOption("checked");
+  await card.locator("select").nth(2).selectOption("checked");
+  await card.locator('input[placeholder="نام بازبین"]').fill("بازبین آزمون");
+  await card.locator("select").nth(0).selectOption("approved");
+  await card.getByRole("button", { name: "ذخیره پرونده پژوهشی" }).click();
+  await expect(card.locator("select").nth(0)).toHaveValue("approved");
 });
