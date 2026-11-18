@@ -798,3 +798,62 @@ test("valid order still persists and sends the invoice through the selected mess
   assert.equal(savedOrder.customerDelivery.status, "sent");
   assert.equal(result.body.customerDeliveryStatus, "sent");
 });
+
+
+test("health research queue is admin-only and follows catalog additions and deactivation", async () => {
+  const unauthorized = await fetch(baseUrl + "/api/admin/health-research/queue");
+  assert.equal(unauthorized.status, 401);
+
+  const login = await fetch(baseUrl + "/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: "guide-test-only-password" })
+  });
+  assert.equal(login.status, 200);
+  const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
+
+  const initial = await fetch(baseUrl + "/api/admin/health-research/queue", { headers: { Cookie: cookie } });
+  assert.equal(initial.status, 200);
+  const initialQueue = await initial.json();
+  assert.ok(initialQueue.items.length > 0);
+
+  const catalogResponse = await fetch(baseUrl + "/api/admin/products", { headers: { Cookie: cookie } });
+  assert.equal(catalogResponse.status, 200);
+  const catalog = await catalogResponse.json();
+  const testProduct = { sku: "TEST-HEALTH-QUEUE-01", name: "محصول آزمایشی صف پژوهش", category: "چای", price: 1000, active: true };
+  const saved = await fetch(baseUrl + "/api/admin/products", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: JSON.stringify([...catalog, testProduct])
+  });
+  assert.equal(saved.status, 200);
+  const savedResult = await saved.json();
+  assert.equal(savedResult.researchQueue.active, catalog.filter(item => item.active !== false).length + 1);
+
+  const queuedResponse = await fetch(baseUrl + "/api/admin/health-research/queue", { headers: { Cookie: cookie } });
+  const queued = await queuedResponse.json();
+  const item = queued.items.find(row => row.sku === testProduct.sku);
+  assert.ok(item);
+  assert.equal(item.status, "queued");
+
+  const updated = await fetch(baseUrl + "/api/admin/health-research/queue/" + encodeURIComponent(item.id), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: JSON.stringify({ status: "researching", notes: "آزمون اتصال صف به کاتالوگ" })
+  });
+  assert.equal(updated.status, 200);
+  assert.equal((await updated.json()).item.status, "researching");
+
+  const removedFromCatalog = await fetch(baseUrl + "/api/admin/products", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: JSON.stringify(catalog)
+  });
+  assert.equal(removedFromCatalog.status, 200);
+  const archivedResponse = await fetch(baseUrl + "/api/admin/health-research/queue", { headers: { Cookie: cookie } });
+  const archived = await archivedResponse.json();
+  const archivedItem = archived.items.find(row => row.sku === testProduct.sku);
+  assert.ok(archivedItem);
+  assert.equal(archivedItem.catalogActive, false);
+  assert.equal(archivedItem.status, "archived");
+});
