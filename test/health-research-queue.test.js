@@ -7,7 +7,16 @@ const { createHealthResearchQueue } = require("../health-research-queue");
 
 function fixture() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "chaysa-health-queue-"));
-  return { dir, queue: createHealthResearchQueue(dir), cleanup: () => fs.rmSync(dir, { recursive: true, force: true }) };
+  return {
+    dir,
+    queue: createHealthResearchQueue(dir),
+    writeEvidence: fileName => {
+      const evidenceDir = path.join(dir, "health-research-evidence");
+      fs.mkdirSync(evidenceDir, { recursive: true });
+      fs.writeFileSync(path.join(evidenceDir, fileName), Buffer.from("%PDF-1.4\\nfixture\\n%%EOF"));
+    },
+    cleanup: () => fs.rmSync(dir, { recursive: true, force: true })
+  };
 }
 
 test("initial active catalog enters a durable SKU research queue", () => {
@@ -63,11 +72,13 @@ test("approval requires verified label and composition, a source and a named rev
       sources: [{ title: "منبع رسمی", url: "https://example.org/source", sourceType: "official" }],
       status: "approved"
     }), /فایل مدرک برچسب و ترکیبات/);
+    f.writeEvidence("11111111-1111-4111-8111-111111111111.pdf");
     f.queue.addEvidence(item.id, {
       type: "label", fileId: "11111111-1111-4111-8111-111111111111",
       fileName: "11111111-1111-4111-8111-111111111111.pdf", originalName: "label.pdf",
       mime: "application/pdf", size: 100, sha256: "a".repeat(64)
     });
+    f.writeEvidence("22222222-2222-4222-8222-222222222222.pdf");
     f.queue.addEvidence(item.id, {
       type: "composition", fileId: "22222222-2222-4222-8222-222222222222",
       fileName: "22222222-2222-4222-8222-222222222222.pdf", originalName: "composition.pdf",
@@ -114,11 +125,13 @@ test("a changed product identity reopens an approved record for update", () => {
   const f = fixture();
   try {
     const item = f.queue.syncCatalog([{ sku: "SKU-3", name: "چای سفید", category: "چای", active: true }]).items[0];
+    f.writeEvidence("66666666-6666-4666-8666-666666666666.pdf");
     f.queue.addEvidence(item.id, {
       type: "label", fileId: "66666666-6666-4666-8666-666666666666",
       fileName: "66666666-6666-4666-8666-666666666666.pdf", originalName: "label.pdf",
       mime: "application/pdf", size: 100, sha256: "d".repeat(64)
     });
+    f.writeEvidence("77777777-7777-4777-8777-777777777777.pdf");
     f.queue.addEvidence(item.id, {
       type: "composition", fileId: "77777777-7777-4777-8777-777777777777",
       fileName: "77777777-7777-4777-8777-777777777777.pdf", originalName: "composition.pdf",
