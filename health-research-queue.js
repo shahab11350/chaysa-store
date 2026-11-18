@@ -31,6 +31,13 @@ function createHealthResearchQueue(dataDir) {
     fs.writeFileSync(temp, JSON.stringify(value, null, 2), { encoding: "utf8", mode: 0o600 });
     fs.renameSync(temp, file);
   }
+  function evidenceFileExists(row) {
+    if (!row || typeof row.fileName !== "string" || !/^[0-9a-f-]{36}\.(jpg|png|webp|pdf)$/i.test(row.fileName)) return false;
+    const directory = path.resolve(dataDir, "health-research-evidence");
+    const target = path.resolve(directory, row.fileName);
+    if (!target.startsWith(directory + path.sep)) return false;
+    try { return fs.statSync(target).isFile(); } catch (_) { return false; }
+  }
   function syncCatalog(products) {
     if (!Array.isArray(products)) throw new Error("فهرست محصولات معتبر نیست.");
     const state = read();
@@ -203,8 +210,8 @@ function createHealthResearchQueue(dataDir) {
     }
     const evidence = Array.isArray(item.evidence) ? item.evidence : [];
     if (patch.status === "approved" && (!item.sku || item.duplicateSku || item.labelEvidenceStatus !== "checked" ||
-        item.compositionStatus !== "checked" || !evidence.some(row => row.type === "label") ||
-        !evidence.some(row => row.type === "composition") || !item.sources.length || !item.reviewerName)) {
+        item.compositionStatus !== "checked" || !evidence.some(row => row.type === "label" && evidenceFileExists(row)) ||
+        !evidence.some(row => row.type === "composition" && evidenceFileExists(row)) || !item.sources.length || !item.reviewerName)) {
       throw new Error("تأیید پرونده نیازمند SKU یکتا، فایل مدرک برچسب و ترکیبات، بررسی هر دو مدرک، دست‌کم یک منبع و نام بازبین است.");
     }
     if (patch.status !== undefined) item.status = patch.status;
