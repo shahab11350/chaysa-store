@@ -322,9 +322,13 @@ function renderHealthResearchQueue(){
  rows.forEach(item=>{
   const card=document.createElement('article');card.className='panel';card.style.margin='12px 0';
   const title=document.createElement('h3');title.textContent=item.productName+' · '+(item.sku||'بدون SKU');card.append(title);
-  const meta=document.createElement('p');meta.className='muted';meta.textContent=(item.category||'بدون دسته')+' · '+(item.catalogActive?'فعال در کاتالوگ':'غیرفعال/حذف‌شده')+(item.duplicateSku?' · هشدار: SKU تکراری':'');card.append(meta);
+  const meta=document.createElement('p');meta.className='muted';meta.textContent=(item.category||'بدون دسته')+' · '+(item.catalogActive?'فعال در کاتالوگ':'غیرفعال/حذف‌شده')+(item.duplicateSku?' · هشدار: SKU تکراری ('+(item.duplicateProductNames||[]).join('، ')+')':'');card.append(meta);
+  const searchLinks=document.createElement('p');searchLinks.className='muted';
+  const query=encodeURIComponent(item.productName||'');
+  [['جست‌وجو در PubMed','https://pubmed.ncbi.nlm.nih.gov/?term='+query],['جست‌وجو در Google Scholar','https://scholar.google.com/scholar?q='+query]].forEach(([label,url],index)=>{if(index)searchLinks.append(document.createTextNode(' · '));const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=label;searchLinks.append(a)});
+  card.append(searchLinks);
   const field=(label,control)=>{const wrap=document.createElement('div');wrap.style.margin='9px 0';const l=document.createElement('label');l.textContent=label;wrap.append(l,control);card.append(wrap)};
-  const statusSelect=document.createElement('select');healthResearchStatusOptions.forEach(([value,label])=>{const o=document.createElement('option');o.value=value;o.textContent=label;statusSelect.append(o)});statusSelect.value=item.status;field('وضعیت پرونده',statusSelect);
+  const statusSelect=document.createElement('select');healthResearchStatusOptions.forEach(([value,label])=>{const o=document.createElement('option');o.value=value;o.textContent=label;if(value==='archived'&&item.catalogActive)o.disabled=true;if(value==='needs_sku'&&item.sku)o.disabled=true;statusSelect.append(o)});statusSelect.value=item.status;field('وضعیت پرونده',statusSelect);
   const labelSelect=document.createElement('select');[['missing','دریافت نشده'],['received','دریافت شده'],['checked','بررسی شده']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;labelSelect.append(o)});labelSelect.value=item.labelEvidenceStatus||'missing';field('وضعیت مدرک برچسب',labelSelect);
   const compositionSelect=document.createElement('select');[['missing','دریافت نشده'],['received','دریافت شده'],['checked','بررسی شده']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;compositionSelect.append(o)});compositionSelect.value=item.compositionStatus||'missing';field('وضعیت مدرک ترکیبات',compositionSelect);
   const reviewer=document.createElement('input');reviewer.maxLength=120;reviewer.value=item.reviewerName||'';reviewer.placeholder='نام بازبین';field('نام بازبین',reviewer);
