@@ -57,7 +57,8 @@ function createHealthResearchQueue(dataDir) {
       if (!item) {
         item = {
           id, key, sku, productName: name, category, catalogActive: active,
-          duplicateSku, duplicateProductNames: duplicateSku ? products.filter(row => row && row.active === true && normalizeSku(row.sku) === sku).map(row => safeText(row.name, 180)) : [],\n          status: !sku ? "needs_sku" : duplicateSku ? "review" : active ? "queued" : "archived",
+          duplicateSku, duplicateProductNames: duplicateSku ? products.filter(row => row && row.active === true && normalizeSku(row.sku) === sku).map(row => safeText(row.name, 180)) : [],
+          status: !sku ? "needs_sku" : duplicateSku ? "review" : active ? "queued" : "archived",
           labelEvidenceStatus: "missing", compositionStatus: "missing",
           sources: [], notes: "", reviewerName: "", reviewNote: "",
           createdAt: now, updatedAt: now, lastSeenAt: now
