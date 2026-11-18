@@ -311,7 +311,12 @@
         }
       });
       drawer.addEventListener("toggle", () => {
-        if (!drawer.open || options.childElementCount) return;
+        if (!drawer.open || drawer.dataset.loaded === "true") return;
+        if (!state.research) {
+          options.replaceChildren(make("p", "", "در حال دریافت کلیدواژه‌های این بخش…"));
+          return;
+        }
+        options.replaceChildren();
         sectionKeywords(tab).forEach(keyword => {
           const choice = make("button", "", keyword);
           choice.type = "button";
@@ -321,11 +326,11 @@
             state.query = state.queries[tab];
             drawer.open = false;
             input.focus();
-            if (state.tab === tab) render();
           });
           options.append(choice);
         });
         if (!options.childElementCount) options.append(make("p", "", "کلیدواژه‌ای برای این بخش ثبت نشده است."));
+        drawer.dataset.loaded = "true";
       });
     });
   }
