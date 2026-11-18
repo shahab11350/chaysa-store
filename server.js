@@ -197,6 +197,52 @@ app.get("/api/guide/bootstrap", (_req, res) => {
     healthRule: bank.healthPolicy && bank.healthPolicy.rule || ""
   });
 });
+function readTranslatedHealthSources() {
+  try {
+    const file = path.join(ROOT, "data", "health", "translated-sources.json");
+    const value = JSON.parse(fs.readFileSync(file, "utf8"));
+    return value && Array.isArray(value.sources) ? value.sources : [];
+  } catch (_) { return []; }
+}
+function guideSourceTokens(value) {
+  return guideNormalize(value).split(/\\s+/).filter(word => word.length > 2 &&
+    !["برای","درباره","این","آن","است","شود","چگونه","چیست","آیا","مقدار","مصرف","محصول","چایسا","دارم","دارد","می‌شود","میشه","کنم","کنید"].includes(word));
+}
+function guideFindInternalSources(question, product) {
+  const sources = readTranslatedHealthSources();
+  const healthFile = path.join(ROOT, "data", "health", "health-product-research.json");
+  let productTerms = [product && product.name || ""];
+  try {
+    const data = JSON.parse(fs.readFileSync(healthFile, "utf8"));
+    const records = Array.isArray(data.products) ? data.products : (Array.isArray(data.items) ? data.items : []);
+    const record = records.find(item => String(item.sku) === String(product && product.sku));
+    if (record) productTerms = productTerms.concat(record.nameMentionedIngredients || []);
+  } catch (_) {}
+  const pTerms = [...new Set(productTerms.flatMap(guideSourceTokens))];
+  const qTerms = [...new Set(guideSourceTokens(question))];
+  const scored = sources.map(source => {
+    const body = guideNormalize(source.content);
+    const botanicalHits = pTerms.filter(term => body.includes(term));
+    const questionHits = qTerms.filter(term => body.includes(term));
+    const paragraphs = source.content.split(/\\n\\s*\\n/).map(x => x.trim())
+      .filter(x => x.length > 45 && !/^##|^\\*\\*شناسه/.test(x));
+    const ranked = paragraphs.map(text => {
+      const normalized = guideNormalize(text);
+      const hits = qTerms.filter(term => normalized.includes(term)).length;
+      const plant = pTerms.filter(term => normalized.includes(term)).length;
+      return {text,score:hits*2+plant};
+    }).filter(x => x.score > 0).sort((a,b)=>b.score-a.score).slice(0,3);
+    return {source, botanicalHits, questionHits, ranked,
+      score: botanicalHits.length*5 + questionHits.length*2 + ranked.reduce((n,x)=>n+x.score,0)};
+  }).filter(x => x.score > 0);
+  scored.sort((a,b)=>b.score-a.score);
+  return scored.slice(0,4).map(x=>({
+    id:x.source.id,title:x.source.title,originalTitle:x.source.originalTitle,
+    publisher:x.source.publisher,url:x.source.url,
+    relevance:x.botanicalHits.length ? "مرتبط با نام گیاه یا مادهٔ ذکرشده در نام محصول؛ ترکیب واقعی محصول تأیید نشده است." : "منبع عمومی مرتبط با موضوع پرسش",
+    excerpts:x.ranked.length ? x.ranked.map(p=>p.text) : [x.source.content.slice(0,850)]
+  }));
+}
 app.post("/api/guide/resolve", (req, res) => {
   const key = "guide-resolve:" + (req.ip || "unknown");
   if (limited(key, 12, 60 * 1000)) return json(res, 429, { ok: false, error: "درخواست‌های زیادی ثبت شده است؛ کمی بعد دوباره تلاش کنید." });
@@ -215,7 +261,7 @@ app.post("/api/guide/resolve", (req, res) => {
   if (guideContainsAny(normalized, rules.deniedTerms))
     return json(res, 200, { ok: false, allowed: false, reason: "outside_scope", message: "این راهنما فقط برای پاسخ‌گویی به پرسش‌های مرتبط با محصولات و خدمات چایسا طراحی شده است." });
   if (guideContainsAny(normalized, rules.unsafeIntentTerms))
-    return json(res, 200, { ok: false, allowed: false, reason: "unsafe_medical_request", message: "راهنمای چایسا برای تشخیص، درمان یا تغییر دارو طراحی نشده است. برای تصمیم درمانی با پزشک یا داروساز مشورت کنید." });
+    return json(res, 200, { ok: false, allowed: false, reason: "unsafe_medical_request", message: "چایسا تشخیص، درمان یا تجویز انجام نمی‌دهد. برای تصمیم درمانی با پزشک یا داروساز مشورت کنید." });
   const products = readProducts().filter(p => p && p.active !== false);
   const product = guideFindProduct(products, productSku, question);
   const serviceQuestion = guideContainsAny(normalized, rules.serviceTerms);
@@ -224,47 +270,28 @@ app.post("/api/guide/resolve", (req, res) => {
     return json(res, 200, { ok: false, allowed: false, reason: "needs_service_context", message: "لطفاً پرسش را به خرید، سفارش، پرداخت، ارسال یا پیگیری خدمات چایسا مرتبط کنید." });
   if (category === "products" && (!product || !productQuestion))
     return json(res, 200, { ok: false, allowed: false, reason: "needs_product", message: "برای ادامه، محصول موردنظر را از فهرست انتخاب کنید و پرسش را درباره همان محصول بنویسید." });
-  if (category === "safety") {
-    if (!product) return json(res, 200, { ok: false, allowed: false, reason: "needs_product", message: "ابتدا محصول چایسا را انتخاب کنید." });
-    const interactionQuestion = guideContainsAny(normalized, ["تداخل", "دارو", "همزمان", "هم زمان"]);
-    let q = "";
-    if (interactionQuestion) {
-      if (!medicine) return json(res, 200, { ok: false, allowed: false, reason: "needs_medicine", message: "برای بررسی تداخل، نام دارو را در فیلد جداگانه وارد کنید؛ اطلاعات شخصی یا شرح پرونده پزشکی را ننویسید." });
-      q = '"' + product.name + '" "' + medicine + '" تداخل مصرف هم‌زمان interaction safety شواهد علمی ';
-    } else {
-      const safetyHits = (rules.safetyTopics || []).filter(t => normalized.includes(guideNormalize(t)));
-      if (!safetyHits.length) return json(res, 200, { ok: false, allowed: false, reason: "needs_safety_context", message: "پرسش را درباره عوارض احتمالی، احتیاط، حساسیت، بارداری، شیردهی یا ایمنی مصرف محصول روشن‌تر کنید." });
-      q = '"' + product.name + '" ' + safetyHits.join(" ") + " ایمنی مصرف safety شواهد علمی ";
-    }
-    const url = "https://pubmed.ncbi.nlm.nih.gov/?term=" + encodeURIComponent(q.trim());
-    return json(res, 200, { ok: true, allowed: true, type: "medical_external_search", url,
-      searchProvider: "PubMed", bankNotice: guideHealthBankNotice(),
-      notice: bank.healthPolicy.notice || "", rule: bank.healthPolicy.rule || "" });
-  }
-  if (category === "products") {
-    const topicHits = (rules.productTopics || []).filter(t => normalized.includes(guideNormalize(t)));
-    const topics = topicHits.length ? topicHits.join(" ") : "اطلاعات محصول";
-    const q = '"' + product.name + '" ' + topics + " اطلاعات رسمی";
-    return json(res, 200, { ok: true, allowed: true, type: "product_external_search",
-      url: "https://www.google.com/search?q=" + encodeURIComponent(q),
-      searchProvider: "Google", bankNotice: guideHealthBankNotice(),
-      notice: "اطلاعات ترکیبات و ویژگی‌ها باید با برچسب رسمی محصول تطبیق داده شود." });
+  if (category === "safety" && !product)
+    return json(res, 200, { ok: false, allowed: false, reason: "needs_product", message: "ابتدا محصول چایسا را انتخاب کنید." });
+  if (category === "safety" && guideContainsAny(normalized, ["تداخل","دارو","همزمان","هم زمان"]) && !medicine)
+    return json(res, 200, { ok: false, allowed: false, reason: "needs_medicine", message: "برای مرتب‌سازی منابع، نام دارو را جداگانه وارد کنید؛ این بخش تداخل را تشخیص یا تأیید نمی‌کند." });
+  if (category === "products" || category === "safety" || (category === "custom" && product)) {
+    const translatedSources = readTranslatedHealthSources();
+    if (!translatedSources.length)
+      return json(res, 503, { ok:false, allowed:false, message:"بانک منابع داخلی موقتاً در دسترس نیست." });
+    const matches = guideFindInternalSources(question + " " + medicine, product);
+    return json(res, 200, {
+      ok:true, allowed:true, type:"internal_knowledge",
+      productName:product ? product.name : "",
+      sources:matches,
+      message:matches.length ? "مطالب مرتبط از بانک داخلی چایسا پیدا شد." : "برای این پرسش، مطلب مرتبط و قابل نمایش در بانک داخلی پیدا نشد.",
+      policy:"این صفحه راهنمای عمومی است، نه تشخیص یا تجویز. منابع درباره گیاه یا فرآورده‌های بررسی‌شده‌اند و ترکیبات یا ویژگی‌های محصول انتخابی را ثابت نمی‌کنند. اطلاعات اختصاصی محصول فقط با برچسب رسمی قابل تأیید است."
+    });
   }
   if (category === "services" || (category === "custom" && serviceQuestion)) {
     const serviceHits = (rules.serviceTerms || []).filter(t => normalized.includes(guideNormalize(t)));
     if (!serviceHits.length) return json(res, 200, { ok: false, allowed: false, reason: "outside_scope", message: "این راهنما فقط برای پرسش‌های مرتبط با محصولات و خدمات چایسا طراحی شده است." });
-    const q = "چایسا فروشگاه " + serviceHits.join(" ");
-    return json(res, 200, { ok: true, allowed: true, type: "service_external_search",
-      url: "https://www.google.com/search?q=" + encodeURIComponent(q),
-      searchProvider: "Google",
-      notice: "برای اطلاعات قطعی سفارش، فقط اطلاعیه‌ها و پیام‌های رسمی چایسا را ملاک قرار دهید." });
-  }
-  if (category === "custom" && product) {
-    const topics = (rules.productTopics || []).filter(t => normalized.includes(guideNormalize(t)));
-    const q = '"' + product.name + '" ' + (topics.length ? topics.join(" ") : "اطلاعات محصول");
-    return json(res, 200, { ok: true, allowed: true, type: "product_external_search",
-      url: "https://www.google.com/search?q=" + encodeURIComponent(q),
-      notice: "اطلاعات محصول را با برچسب رسمی همان محصول تطبیق دهید." });
+    return json(res, 200, { ok: true, allowed: true, type: "service_guidance",
+      message:"برای اطلاعات قطعی سفارش، اطلاعیه‌ها و پیام‌های رسمی چایسا را ملاک قرار دهید." });
   }
   return json(res, 200, { ok: false, allowed: false, reason: "outside_scope", message: "این راهنما فقط برای پرسش‌های مرتبط با محصولات و خدمات چایسا طراحی شده است." });
 });
@@ -1705,7 +1732,7 @@ app.post("/api/orders",async(req,res)=>{
 });
 // Do not expose server-side source, package metadata, or deployment configuration.
 app.use((req, res, next) => {
-  const blocked = new Set(["server.js", "package.json", "package-lock.json", "worker.js", "wrangler.toml", "CLOUDFLARE-SETUP.md", "guide-bank.json", "BACKUP-STATUS.md", "DEVELOPMENT-CHECKPOINT.md"]);
+  const blocked = new Set(["server.js", "package.json", "package-lock.json", "worker.js", "wrangler.toml", "CLOUDFLARE-SETUP.md", "guide-bank.json", "translated-sources.json", "BACKUP-STATUS.md", "DEVELOPMENT-CHECKPOINT.md"]);
   const name = decodeURIComponent((req.path || "").split("/").pop() || "");
   if (blocked.has(name) || name.startsWith(".")) return res.sendStatus(404);
   next();
