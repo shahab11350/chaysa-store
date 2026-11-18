@@ -9,6 +9,7 @@ const page = fs.readFileSync(path.join(root, "health-advisor.html"), "utf8");
 const script = fs.readFileSync(path.join(root, "health-bank.js"), "utf8");
 const adminPage = fs.readFileSync(path.join(root, "admin.html"), "utf8");
 const server = fs.readFileSync(path.join(root, "server.js"), "utf8");
+const queue = fs.readFileSync(path.join(root, "health-research-queue.js"), "utf8");
 
 test("CHAYSA HEALTH research inventory counts and draft status are explicit", () => {
   assert.equal(research.status, "research_draft_not_for_customer_answers");
@@ -110,4 +111,18 @@ test("free PubMed discovery is admin-only, rate-limited and explicitly non-publi
   assert.match(server, /healthResearchQueue\.searchPubMed/);
   assert.match(server, /health-research-suggestions:/);
   assert.match(server, /به‌صورت خودکار به پرونده افزوده یا منتشر نمی‌شوند/);
+});
+
+test("research evidence files are private, size-limited, signature-checked and admin-only", () => {
+  assert.match(server, /HEALTH_RESEARCH_EVIDENCE_DIR/);
+  assert.match(server, /healthResearchEvidenceUpload\.single\("evidence"\)/);
+  assert.match(server, /fileSize: 10 \* 1024 \* 1024/);
+  assert.match(server, /isSupportedResearchEvidence/);
+  assert.match(server, /app\.get\("\/api\/admin\/health-research\/evidence\/:id", requireAdmin/);
+  assert.match(server, /Content-Disposition", "attachment/);
+  assert.match(server, /healthResearchQueue\.addEvidence/);
+  assert.match(queue, /evidence\.some\(row => row\.type === "label"\)/);
+  assert.match(queue, /evidence\.some\(row => row\.type === "composition"\)/);
+  assert.match(adminPage, /addEvidenceUpload\('label'/);
+  assert.match(adminPage, /addEvidenceUpload\('composition'/);
 });
