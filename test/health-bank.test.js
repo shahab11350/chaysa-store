@@ -12,13 +12,24 @@ const server = fs.readFileSync(path.join(root, "server.js"), "utf8");
 
 test("CHAYSA HEALTH research inventory counts and draft status are explicit", () => {
   assert.equal(research.status, "research_draft_not_for_customer_answers");
-  assert.equal(research.products.length, 48);
-  assert.equal(research.liveInventory.totalRecords, 48);
-  assert.equal(research.liveInventory.activeRecords, 47);
+  assert.equal(research.products.length, 47);
+  assert.equal(research.liveInventory.totalRecords, 47);
+  assert.equal(research.liveInventory.activeRecords, 46);
   assert.equal(research.liveInventory.inactiveRecords, 1);
   assert.equal(research.botanicalProfiles.length, 12);
   assert.equal(research.sources.length, 29);
   assert.equal(research.bookBibliography.length, 28);
+});
+
+test("research snapshot matches the live catalog snapshot and contains no orphan SKU record", () => {
+  const skus = research.products.map(item => String(item.sku || ""));
+  assert.ok(skus.every(Boolean), "every research product must have a SKU");
+  assert.equal(new Set(skus).size, skus.length, "research product SKUs must be unique");
+  assert.deepEqual(research.liveInventory.duplicateSkuRecords, []);
+  assert.equal(research.liveInventory.byCategory["چای"].total, 24);
+  assert.equal(research.liveInventory.byCategory["دمنوش"].total, 14);
+  assert.equal(research.liveInventory.byCategory["ادویه"].total, 9);
+  assert.ok(research.liveInventory.catalogLimitations.some(item => item.includes("snapshot")));
 });
 
 test("every source has a Persian research-scope summary", () => {
