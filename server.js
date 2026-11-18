@@ -906,7 +906,15 @@ function isSupportedResearchEvidence(file) {
   if (file.mimetype === "application/pdf") return head.toString("ascii",0,5) === "%PDF-";
   return false;
 }
-app.post("/api/admin/health-research/queue/:id/evidence", requireAdmin, healthResearchEvidenceUpload.single("evidence"), (req, res) => {
+app.post("/api/admin/health-research/queue/:id/evidence", requireAdmin, (req, res, next) => {
+  if (limited("health-research-evidence-upload:" + (req.ip || "unknown"), 30, 60 * 60 * 1000))
+    return json(res, 429, { error: "سقف بارگذاری مدارک پژوهشی در این ساعت تکمیل شده است." });
+  return healthResearchEvidenceUpload.single("evidence")(req, res, error => {
+    if (!error) return next();
+    const status = error.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+    return json(res, status, { error: status === 413 ? "حجم فایل از ۱۰ مگابایت بیشتر است." : "فایل ارسالی معتبر نیست." });
+  });
+}, (req, res) => {
   const file = req.file;
   const cleanup = () => { if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path); };
   if (!file) return json(res, 400, { error: "یک فایل JPG، PNG، WebP یا PDF تا ۱۰ مگابایت انتخاب کنید." });
