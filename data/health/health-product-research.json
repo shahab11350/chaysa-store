@@ -1271,6 +1271,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Camellia sinensis species and tea categories; broad tea constituents; limits of evidence for health claims."
+      ],
+      "supportsFa": [
+        "گونه گیاه چای (Camellia sinensis)، دسته‌بندی‌های اصلی چای، ترکیبات عمومی و محدودیت شواهد برای ادعاهای سلامت."
       ]
     },
     {
@@ -1282,6 +1285,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Evidence limitations for green tea; beverage versus extract distinction; caffeine; reported interactions with nadolol, atorvastatin and raloxifene; pregnancy and breastfeeding cautions."
+      ],
+      "supportsFa": [
+        "محدودیت شواهد درباره فواید چای سبز؛ تفاوت نوشیدنی چای با عصاره غلیظ؛ کافئین؛ تداخل‌های گزارش‌شده با نادولول، آتورواستاتین و رالوکسیفن؛ ملاحظات بارداری و شیردهی."
       ]
     },
     {
@@ -1293,6 +1299,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Evidence and safety overview for ginger supplements; gastrointestinal adverse effects; medication-interaction caution."
+      ],
+      "supportsFa": [
+        "مرور شواهد و ایمنی مکمل‌های زنجبیل؛ عوارض گوارشی گزارش‌شده و لزوم احتیاط در مصرف هم‌زمان با داروها."
       ]
     },
     {
@@ -1304,6 +1313,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Insufficient evidence for most claimed uses; allergy risk; reported/theoretical interactions including warfarin and sedatives; pregnancy/breastfeeding uncertainty."
+      ],
+      "supportsFa": [
+        "ناکافی‌بودن شواهد برای بسیاری از کاربردهای ادعاشده؛ احتمال حساسیت؛ گزارش یا احتمال تداخل با وارفارین و داروهای آرام‌بخش؛ ابهام ایمنی در بارداری و شیردهی."
       ]
     },
     {
@@ -1315,6 +1327,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "No conclusive efficacy for studied conditions; adverse effects; possible bleeding interaction with anticoagulants; pregnancy cautions."
+      ],
+      "supportsFa": [
+        "نبود شواهد قطعی برای اثربخشی در وضعیت‌های بررسی‌شده؛ عوارض احتمالی؛ احتمال افزایش خونریزی همراه داروهای ضدانعقاد و ملاحظات بارداری."
       ]
     },
     {
@@ -1326,6 +1341,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Botanical identity of thyme medicinal herb as Thymus vulgaris L. and Thymus zygis L.; EMA monograph scope and preparations."
+      ],
+      "supportsFa": [
+        "هویت گیاه دارویی آویشن با نام‌های Thymus vulgaris و Thymus zygis؛ دامنه مونوگراف EMA و شکل‌های دارویی تعریف‌شده."
       ]
     },
     {
@@ -1337,6 +1355,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Botanical identity of ginger as Zingiber officinale Roscoe; current EMA herbal monograph revision."
+      ],
+      "supportsFa": [
+        "هویت گیاه زنجبیل با نام علمی Zingiber officinale و اطلاعات مونوگراف رسمی EMA."
       ]
     },
     {
@@ -1348,6 +1369,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Botanical identity of sweet fennel; EMA monograph reference, not product composition."
+      ],
+      "supportsFa": [
+        "مرجع شناسایی رازیانه شیرین و مونوگراف EMA؛ این سند به‌تنهایی ترکیب هیچ محصول چایسا را اثبات نمی‌کند."
       ]
     },
     {
@@ -1359,6 +1383,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Evidence for recurrent UTI risk reduction only in certain populations; not treatment for active UTI; warfarin interaction evidence conflicting."
+      ],
+      "supportsFa": [
+        "شواهد محدود به برخی فرآورده‌ها و گروه‌های خاص برای کاهش خطر عفونت ادراری عودکننده؛ کرن‌بری درمان عفونت فعال نیست؛ شواهد تداخل با وارفارین متناقض است."
       ]
     },
     {
@@ -1370,6 +1397,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Distinction between peppermint leaf tea and concentrated peppermint oil; limited long-term evidence for large amounts of leaf; oil-specific safety cautions."
+      ],
+      "supportsFa": [
+        "تفاوت چای برگ نعناع‌فلفلی با روغن غلیظ آن؛ محدودیت اطلاعات درباره مصرف طولانی‌مدت مقادیر زیاد برگ؛ هشدارهای اختصاصی روغن."
       ]
     },
     {
@@ -1381,6 +1411,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Interaction evidence is often hypothetical or indirect; special caution for narrow-therapeutic-index medicines."
+      ],
+      "supportsFa": [
+        "تداخل‌های گیاه و دارو گاهی فرضی یا مبتنی بر شواهد غیرمستقیم‌اند؛ در داروهای با دامنه درمانی باریک احتیاط ویژه لازم است."
       ]
     },
     {
@@ -1392,6 +1425,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Safety depends on chemical composition, preparation and dose; tea, tincture and extracts are not interchangeable; natural does not mean safe."
+      ],
+      "supportsFa": [
+        "ایمنی به ترکیب شیمیایی، روش آماده‌سازی و مقدار وابسته است؛ چای، تنتور و عصاره قابل جایگزینی نیستند؛ طبیعی‌بودن به معنی بی‌خطر بودن نیست."
       ]
     },
     {
@@ -1403,6 +1439,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Herbal product labels and quality/ingredient claims can be unreliable; consult clinicians about interactions and treatment."
+      ],
+      "supportsFa": [
+        "محدودیت اعتماد به برچسب و ادعاهای ترکیبات فرآورده‌های گیاهی؛ ضرورت مشورت با متخصص درباره تداخل‌ها و درمان."
       ]
     },
     {
@@ -1414,6 +1453,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Botanical reference for lime/linden flowers; historical and traditional use discussion, not proof of clinical efficacy for Chaysa product."
+      ],
+      "supportsFa": [
+        "مرجع گیاه‌شناسی گل گونه‌های مشخص زیرفون؛ گزارش شامل کاربردهای سنتی است و به‌تنهایی اثربخشی بالینی محصول چایسا را اثبات نمی‌کند."
       ]
     },
     {
@@ -1425,6 +1467,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Cranberry evidence and limitations; food and supplement forms differ."
+      ],
+      "supportsFa": [
+        "خلاصه شواهد و محدودیت‌های پژوهشی کرن‌بری؛ تفاوت شکل غذایی با مکمل و فرآورده‌های استاندارد."
       ]
     },
     {
@@ -1436,6 +1481,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Botanical identity of rosemary leaf as Rosmarinus officinalis L.; traditional-use conclusions for defined medicinal preparations and explicit scope exclusions for foods/supplements."
+      ],
+      "supportsFa": [
+        "هویت برگ رزماری و نتیجه‌گیری‌های کاربرد سنتی EMA برای فرآورده‌های دارویی مشخص؛ این ارزیابی به همه غذاها و مکمل‌ها قابل تعمیم نیست."
       ]
     },
     {
@@ -1447,6 +1495,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Nettle evidence limitations; reported adverse-event case reports; potential drug interactions largely based on animal/theoretical evidence and clinical relevance uncertainty."
+      ],
+      "supportsFa": [
+        "محدودیت شواهد درباره گزنه؛ گزارش عوارض موردی؛ تداخل‌های احتمالی عمدتاً مبتنی بر داده‌های حیوانی یا نظری و با اهمیت بالینی نامشخص."
       ]
     },
     {
@@ -1459,6 +1510,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "Review of human, preclinical and interaction studies for Hibiscus sabdariffa; authors report mostly mild GI adverse events in trials but note limitations in trial reporting, possible drug concentration changes and insufficient long-term safety evidence."
+      ],
+      "supportsFa": [
+        "مرور مطالعات انسانی، پیش‌بالینی و تداخل‌های دارویی Hibiscus sabdariffa؛ بیشتر عوارض کارآزمایی‌ها خفیف و گوارشی گزارش شده‌اند، اما کیفیت گزارش‌دهی و شواهد ایمنی بلندمدت محدود است؛ تغییر غلظت برخی داروها در مطالعات به معنی تداخل قطعی با هر نوع نوشیدنی نیست."
       ]
     },
     {
@@ -1469,6 +1523,9 @@
       "sourceType": "iranian_research_institute",
       "accessedAt": "2026-11-17",
       "supports": [
+        "پژوهش‌های نهادی در حوزه گیاهان دارویی، فارماکوگنوزی، کشت و فرآوری؛ برای داده‌های علمی باید به مقاله یا گزارش مشخص این مرکز ارجاع داده شود."
+      ],
+      "supportsFa": [
         "پژوهش‌های نهادی در حوزه گیاهان دارویی، فارماکوگنوزی، کشت و فرآوری؛ برای داده‌های علمی باید به مقاله یا گزارش مشخص این مرکز ارجاع داده شود."
       ]
     },
@@ -1481,6 +1538,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "پژوهش‌های گیاه‌شناسی، شناسایی، کشت، فیتوشیمی و گیاهان دارویی ایران؛ هر مقاله باید جداگانه از نظر روش و نوع مطالعه ارزیابی شود."
+      ],
+      "supportsFa": [
+        "پژوهش‌های گیاه‌شناسی، شناسایی، کشت، فیتوشیمی و گیاهان دارویی ایران؛ هر مقاله باید جداگانه از نظر روش و نوع مطالعه ارزیابی شود."
       ]
     },
     {
@@ -1491,6 +1551,9 @@
       "sourceType": "iranian_peer_reviewed_journal",
       "accessedAt": "2026-11-17",
       "supports": [
+        "مقالات پژوهشی و مروری درباره گیاهان دارویی؛ یافته‌های آزمایشگاهی، حیوانی و انسانی باید از یکدیگر تفکیک شوند و ادعای درمانی صرفاً از عنوان مقاله استخراج نشود."
+      ],
+      "supportsFa": [
         "مقالات پژوهشی و مروری درباره گیاهان دارویی؛ یافته‌های آزمایشگاهی، حیوانی و انسانی باید از یکدیگر تفکیک شوند و ادعای درمانی صرفاً از عنوان مقاله استخراج نشود."
       ]
     },
@@ -1503,6 +1566,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "پژوهش‌های فارماکوگنوزی، شناسایی مواد مؤثره، کنترل کیفیت و مطالعات مرتبط با فرآورده‌های طبیعی؛ ارزیابی باید در سطح مقاله انجام شود."
+      ],
+      "supportsFa": [
+        "پژوهش‌های فارماکوگنوزی، شناسایی مواد مؤثره، کنترل کیفیت و مطالعات مرتبط با فرآورده‌های طبیعی؛ ارزیابی باید در سطح مقاله انجام شود."
       ]
     },
     {
@@ -1513,6 +1579,9 @@
       "sourceType": "iranian_peer_reviewed_journal_index_record",
       "accessedAt": "2026-11-17",
       "supports": [
+        "ردیابی مقالات فناوری، تولید، فرآوری و زنجیره تأمین گیاهان دارویی؛ صفحه نمایه برای شناسایی نشریه است و جایگزین متن کامل مقاله نیست."
+      ],
+      "supportsFa": [
         "ردیابی مقالات فناوری، تولید، فرآوری و زنجیره تأمین گیاهان دارویی؛ صفحه نمایه برای شناسایی نشریه است و جایگزین متن کامل مقاله نیست."
       ]
     },
@@ -1525,6 +1594,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "جست‌وجو و بازیابی مقالات علمی فارسی و انگلیسی منتشرشده در ایران؛ اعتبار هر مقاله باید بر اساس نشریه، داوری، روش و متن کامل سنجیده شود."
+      ],
+      "supportsFa": [
+        "جست‌وجو و بازیابی مقالات علمی فارسی و انگلیسی منتشرشده در ایران؛ اعتبار هر مقاله باید بر اساس نشریه، داوری، روش و متن کامل سنجیده شود."
       ]
     },
     {
@@ -1535,6 +1607,9 @@
       "sourceType": "journal_metadata_index",
       "accessedAt": "2026-11-17",
       "supports": [
+        "تأیید اطلاعات کتاب‌شناختی و ناشر نشریه؛ برای نتیجه علمی باید به مقاله اصلی ارجاع شود."
+      ],
+      "supportsFa": [
         "تأیید اطلاعات کتاب‌شناختی و ناشر نشریه؛ برای نتیجه علمی باید به مقاله اصلی ارجاع شود."
       ]
     },
@@ -1547,6 +1622,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "شناسایی مراکز، گروه‌ها و ظرفیت‌های پژوهشی حوزه گیاهان دارویی در ایران؛ منبع فهرست مراکز است و به‌تنهایی مرجع اثربخشی یا ایمنی نیست."
+      ],
+      "supportsFa": [
+        "شناسایی مراکز، گروه‌ها و ظرفیت‌های پژوهشی حوزه گیاهان دارویی در ایران؛ منبع فهرست مراکز است و به‌تنهایی مرجع اثربخشی یا ایمنی نیست."
       ]
     },
     {
@@ -1557,6 +1635,9 @@
       "sourceType": "iranian_professional_association_secondary",
       "accessedAt": "2026-11-17",
       "supports": [
+        "منبع تکمیلی برای آشنایی عمومی و ردیابی مطالب/نشریات مرتبط؛ محتوای آموزشی یا سنتی آن بدون تأیید مستقل وارد بخش شواهد بالینی نمی‌شود."
+      ],
+      "supportsFa": [
         "منبع تکمیلی برای آشنایی عمومی و ردیابی مطالب/نشریات مرتبط؛ محتوای آموزشی یا سنتی آن بدون تأیید مستقل وارد بخش شواهد بالینی نمی‌شود."
       ]
     },
@@ -1569,6 +1650,9 @@
       "accessedAt": "2026-11-17",
       "supports": [
         "نمونه مشخصی از پژوهش اصالت‌سنجی ریخت‌سنجی و فیتوشیمیایی گیاهان عرضه‌شده با نام استوخودوس در ایران؛ یافته‌ها فقط به نمونه‌ها و دامنه همان مقاله مربوط‌اند، نه همه محصولات بازار."
+      ],
+      "supportsFa": [
+        "نمونه مشخصی از پژوهش اصالت‌سنجی ریخت‌سنجی و فیتوشیمیایی گیاهان عرضه‌شده با نام استوخودوس در ایران؛ یافته‌ها فقط به نمونه‌ها و دامنه همان مقاله مربوط‌اند، نه همه محصولات بازار."
       ]
     },
     {
@@ -1579,6 +1663,9 @@
       "sourceType": "peer_reviewed_observational_population_study",
       "accessedAt": "2026-11-17",
       "supports": [
+        "الگوی خوداظهاری مصرف گیاهان دارویی در جمعیت مورد مطالعه فسا؛ مطالعه مقطعی درباره شیوع و الگوی مصرف است و اثربخشی یا ایمنی درمانی گیاهان را اثبات نمی‌کند."
+      ],
+      "supportsFa": [
         "الگوی خوداظهاری مصرف گیاهان دارویی در جمعیت مورد مطالعه فسا؛ مطالعه مقطعی درباره شیوع و الگوی مصرف است و اثربخشی یا ایمنی درمانی گیاهان را اثبات نمی‌کند."
       ]
     }
