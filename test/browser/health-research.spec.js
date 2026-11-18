@@ -131,7 +131,7 @@ test("ten CHAYSA HEALTH sections open standalone pages with keyword search contr
     const keyword = await drawer.locator(".health-keyword-options button").first().textContent();
     await drawer.locator(".health-keyword-options button").first().click();
     await expect(input).toHaveValue(keyword);
-    await panel.getByRole("button", { name: "جست‌وجو" }).click();
+    await panel.getByRole("button", { name: "جست‌وجو", exact: true }).click();
     await expect(panel.locator("[data-health-bank-list]")).not.toBeEmpty();
     await expect(page.locator("#healthPageBack")).toHaveAttribute("href", "/health-advisor.html");
   }
