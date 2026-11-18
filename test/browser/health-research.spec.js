@@ -42,7 +42,10 @@ test("admin can search PubMed candidates and manually save a selected source", a
 
   await card.getByRole("button", { name: "افزودن به فهرست منابع" }).click();
   await expect(card.locator("textarea").last()).toHaveValue(/PubMed candidate title for integration test/);
+  const saveResponsePromise = page.waitForResponse(response => response.url().includes("/api/admin/health-research/queue/") && response.request().method() === "PATCH");
   await card.getByRole("button", { name: "ذخیره پرونده پژوهشی" }).click();
+  const saveResponse = await saveResponsePromise;
+  expect(saveResponse.status()).toBe(200);
 
   card = page.locator("#healthResearchItems article").filter({ hasText: item.sku }).first();
   await expect(card.locator("textarea").last()).toHaveValue(/PubMed candidate title for integration test/);
