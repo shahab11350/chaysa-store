@@ -95,6 +95,15 @@ function createHealthResearchQueue(dataDir) {
         item.status = "archived";
         item.updatedAt = now;
       }
+      if (item.status === "approved") {
+        const evidence = Array.isArray(item.evidence) ? item.evidence : [];
+        const hasLabel = evidence.some(row => row.type === "label" && evidenceFileExists(row));
+        const hasComposition = evidence.some(row => row.type === "composition" && evidenceFileExists(row));
+        if (!item.catalogActive || !item.sku || item.duplicateSku || !hasLabel || !hasComposition) {
+          item.status = item.catalogActive ? "needs_update" : "archived";
+          item.updatedAt = now;
+        }
+      }
     }
     state.syncedAt = now;
     write(state);
@@ -180,6 +189,8 @@ function createHealthResearchQueue(dataDir) {
     if (!item) throw new Error("پرونده پژوهشی پیدا نشد.");
     if (patch.status !== undefined && !STATUSES.has(patch.status)) throw new Error("وضعیت انتخاب‌شده معتبر نیست.");
     if (patch.status === "archived" && item.catalogActive) throw new Error("محصول فعال را نمی‌توان از چرخه پژوهش بایگانی کرد.");
+    if (patch.status && !item.catalogActive && patch.status !== "archived") throw new Error("محصول غیرفعال یا حذف‌شده وارد مراحل فعال پژوهش نمی‌شود.");
+    if (patch.status && item.duplicateSku && !["review", "archived"].includes(patch.status)) throw new Error("SKU تکراری تا زمان رفع تعارض قابل پیشرفت در چرخه پژوهش نیست.");
     if (patch.status === "needs_sku" && item.sku) throw new Error("این محصول SKU دارد؛ وضعیت نیازمند شناسه فقط برای محصول بدون SKU است.");
     if (patch.status && !item.sku && !["needs_sku", "archived"].includes(patch.status)) throw new Error("تا زمان ثبت SKU معتبر، پرونده وارد مراحل پژوهش و تأیید نمی‌شود.");
     if (patch.labelEvidenceStatus !== undefined) {
