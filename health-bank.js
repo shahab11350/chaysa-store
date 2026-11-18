@@ -279,6 +279,7 @@
       render();
     }
   }));
+  activatePanel(state.tab);
   Promise.all([
     fetch("/data/health/health-product-research.json", { cache: "no-store", credentials: "same-origin" }).then(r => {
       if (!r.ok) throw new Error("بانک پژوهشی در دسترس نیست."); return r.json();
