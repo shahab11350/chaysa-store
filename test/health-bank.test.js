@@ -63,7 +63,7 @@ test("the ten CHAYSA HEALTH sections open their matching research views", () => 
   assert.match(page, /id="chaysaResearchBank"/);
   assert.equal((page.match(/data-health-section-panel=/g) || []).length, 10);
   assert.equal((page.match(/data-health-bank-search=/g) || []).length, 10);
-  assert.match(page, /src="\/health-bank\.js"/);
+  assert.match(page, /src="\/health-bank\.js"/);\n  assert.match(script, /section=\\" \+ encodeURIComponent\(tab\)/);\n  assert.match(script, /انتخاب کلیدواژه/);\n  assert.match(script, /event\.key === "Enter"/);\n  assert.match(script, /make\("button", "", "جست‌وجو"\)/);
 });
 
 test("research browser reads the live catalogue and excludes inactive products", () => {
