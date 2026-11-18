@@ -11,8 +11,9 @@ const script = fs.readFileSync(path.join(root, "health-bank.js"), "utf8");
 test("CHAYSA HEALTH research inventory counts and draft status are explicit", () => {
   assert.equal(research.status, "research_draft_not_for_customer_answers");
   assert.equal(research.products.length, 48);
-  assert.equal(research.products.filter(item => item.active !== false).length, 47);
-  assert.equal(research.products.filter(item => item.active === false).length, 1);
+  assert.equal(research.liveInventory.totalRecords, 48);
+  assert.equal(research.liveInventory.activeRecords, 47);
+  assert.equal(research.liveInventory.inactiveRecords, 1);
   assert.equal(research.botanicalProfiles.length, 12);
   assert.equal(research.sources.length, 29);
   assert.equal(research.bookBibliography.length, 28);
