@@ -7,6 +7,8 @@ const root = path.join(__dirname, "..");
 const research = JSON.parse(fs.readFileSync(path.join(root, "data/health/health-product-research.json"), "utf8"));
 const page = fs.readFileSync(path.join(root, "health-advisor.html"), "utf8");
 const script = fs.readFileSync(path.join(root, "health-bank.js"), "utf8");
+const adminPage = fs.readFileSync(path.join(root, "admin.html"), "utf8");
+const server = fs.readFileSync(path.join(root, "server.js"), "utf8");
 
 test("CHAYSA HEALTH research inventory counts and draft status are explicit", () => {
   assert.equal(research.status, "research_draft_not_for_customer_answers");
@@ -75,4 +77,14 @@ test("customer-facing health content states the information accuracy policy", ()
   assert.match(research.disclaimer, /مسئولیت صحت آن‌ها را بر عهده نمی‌گیرد/);
   assert.match(page, /صحت نهایی مطالب را تضمین نمی‌کند/);
   assert.match(page, /مسئولیت صحت آن‌ها را بر عهده نمی‌گیرد/);
+});
+
+test("admin panel exposes a protected SKU research queue without changing product business rules", () => {
+  assert.match(adminPage, /data-view="healthResearchView"/);
+  assert.match(adminPage, /function loadHealthResearchQueue/);
+  assert.match(adminPage, /api\('health-research\/queue'/);
+  assert.match(server, /app\.get\("\/api\/admin\/health-research\/queue", requireAdmin/);
+  assert.match(server, /app\.patch\("\/api\/admin\/health-research\/queue\/:id", requireAdmin/);
+  assert.match(server, /healthResearchQueue\.syncCatalog\(req\.body\)/);
+  assert.match(server, /saveProducts\(req\.body\)/);
 });
