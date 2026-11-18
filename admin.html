@@ -19,6 +19,7 @@
 <button type="button" data-view="ordersView">سفارش‌ها</button>
 <button type="button" data-view="questionsView">پرسش و پاسخ</button>
 <button type="button" data-view="analyticsView">آمار سایت و اپ</button>
+<button type="button" data-view="healthResearchView">صف پژوهش محصولات</button>
 <button type="button" data-view="healthArchiveView">بایگانی تأییدیه‌ها</button>
 <button type="button" data-view="letterComposerView">نامه‌نگار چایسا</button>
 <button type="button" data-view="telegramView">اتصال تلگرام</button>
@@ -26,6 +27,16 @@
 </section>
 <section id="productsView" class="admin-view hidden">
 <div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">مدیریت محصولات</h2><div id="items"></div></div>
+</section>
+<section id="healthResearchView" class="admin-view hidden">
+<div class="panel">
+<button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button>
+<h2 style="margin-top:16px">صف پژوهش و مستندات محصولات</h2>
+<p class="muted">محصولات فعال کاتالوگ بر اساس SKU در این صف نگهداری می‌شوند. محصول جدید خودکار به صف اضافه می‌شود؛ محصول غیرفعال بایگانی می‌شود. تأیید پرونده فقط پس از ثبت مدرک برچسب، مدرک ترکیبات، منبع HTTPS و نام بازبین ممکن است. این وضعیت به‌تنهایی به معنی انتشار پاسخ پزشکی نیست.</p>
+<button id="refreshHealthResearch" class="secondary" type="button">به‌روزرسانی صف</button>
+<p id="healthResearchStatus" class="muted" role="status" aria-live="polite">برای دریافت وضعیت، صف را به‌روزرسانی کنید.</p>
+<div id="healthResearchItems"></div>
+</div>
 </section>
 <section id="addProductView" class="admin-view hidden">
 <div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 id="formTitle" style="margin-top:16px">افزودن محصول</h2><input id="editIndex" type="hidden"><label>نام محصول</label><input id="name" placeholder="نام محصول"><div class="row"><div><label>شناسه کالا</label><input id="sku" placeholder="مثلاً 1401001"></div><div><label>قیمت (تومان)</label><input id="price" inputmode="numeric" placeholder="مثلاً ۴۷۹۰۰۰"></div></div><label>دسته‌بندی</label><select id="category"><option>چای</option><option>دمنوش</option><option>ادویه</option><option>عسل</option><option>سایر</option></select><label>عکس محصول</label><input id="photo" type="file" accept="image/*"><p class="muted">فقط عکس را انتخاب کن؛ چایسا اندازه و حجم آن را خودکار بهینه و به WebP تبدیل می‌کند.</p><div class="row"><button id="save">ذخیره محصول</button><button id="clear" class="secondary">پاک‌کردن فرم</button></div></div>
@@ -285,7 +296,7 @@ async function loadQuestions(){
   });
  }catch(e){host.textContent=e.message}
 }
-async function saveAll(){try{await api('products',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(products)});render();status('تغییرات با موفقیت ذخیره شد.')}catch(e){status(e.message)}}
+async function saveAll(){try{const result=await api('products',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(products)});render();status(result.researchQueue?'تغییرات ذخیره شد و صف پژوهش همگام شد.':'تغییرات ذخیره شد.')}catch(e){status(e.message)}}
 $('loginBtn').onclick=async()=>{try{await api('login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:$('password').value})});$('login').classList.add('hidden');$('app').classList.remove('hidden');showDashboard();await load();await loadOrders();await loadQuestions();await loadAnalytics()}catch(e){alert(e.message)}};
 let adminViewHistory=[];
 let currentAdminView='adminHome';
@@ -299,8 +310,60 @@ function goBackAdminView(){
  const previousView=adminViewHistory.pop()||'adminHome';
  showAdminView(previousView,{remember:false});
 }
-document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.view==='addProductView')$('clear').click();showAdminView(button.dataset.view);if(button.dataset.view==='healthArchiveView')loadHealthArchive();if(button.dataset.view==='letterComposerView')loadLetterComposer()}));
+document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>{if(button.dataset.view==='addProductView')$('clear').click();showAdminView(button.dataset.view);if(button.dataset.view==='healthResearchView')loadHealthResearchQueue();if(button.dataset.view==='healthArchiveView')loadHealthArchive();if(button.dataset.view==='letterComposerView')loadLetterComposer()}));
 document.querySelectorAll('[data-back]').forEach(button=>button.addEventListener('click',goBackAdminView));
+let healthResearchRows=[];
+const healthResearchStatusOptions=[
+ ['queued','در صف پژوهش'],['researching','در حال پژوهش'],['review','نیازمند بازبینی'],['approved','تأیید داخلی'],['needs_update','نیازمند به‌روزرسانی'],['needs_sku','شناسه کالا لازم است'],['archived','بایگانی‌شده']
+];
+function renderHealthResearchQueue(){
+ const host=$('healthResearchItems');host.replaceChildren();
+ const rows=[...healthResearchRows].sort((a,b)=>(a.catalogActive===b.catalogActive?0:a.catalogActive?-1:1)||String(a.productName).localeCompare(String(b.productName),'fa'));
+ rows.forEach(item=>{
+  const card=document.createElement('article');card.className='panel';card.style.margin='12px 0';
+  const title=document.createElement('h3');title.textContent=item.productName+' · '+(item.sku||'بدون SKU');card.append(title);
+  const meta=document.createElement('p');meta.className='muted';meta.textContent=(item.category||'بدون دسته')+' · '+(item.catalogActive?'فعال در کاتالوگ':'غیرفعال/حذف‌شده')+(item.duplicateSku?' · هشدار: SKU تکراری ('+(item.duplicateProductNames||[]).join('، ')+')':'');card.append(meta);
+  const searchLinks=document.createElement('p');searchLinks.className='muted';
+  const query=encodeURIComponent(item.productName||'');
+  [['جست‌وجو در PubMed','https://pubmed.ncbi.nlm.nih.gov/?term='+query],['جست‌وجو در Google Scholar','https://scholar.google.com/scholar?q='+query]].forEach(([label,url],index)=>{if(index)searchLinks.append(document.createTextNode(' · '));const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=label;searchLinks.append(a)});
+  card.append(searchLinks);
+  const field=(label,control)=>{const wrap=document.createElement('div');wrap.style.margin='9px 0';const l=document.createElement('label');l.textContent=label;wrap.append(l,control);card.append(wrap)};
+  const statusSelect=document.createElement('select');healthResearchStatusOptions.forEach(([value,label])=>{const o=document.createElement('option');o.value=value;o.textContent=label;if(value==='archived'&&item.catalogActive)o.disabled=true;if(value==='needs_sku'&&item.sku)o.disabled=true;statusSelect.append(o)});statusSelect.value=item.status;field('وضعیت پرونده',statusSelect);
+  const labelSelect=document.createElement('select');[['missing','دریافت نشده'],['received','دریافت شده'],['checked','بررسی شده']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;labelSelect.append(o)});labelSelect.value=item.labelEvidenceStatus||'missing';field('وضعیت مدرک برچسب',labelSelect);
+  const compositionSelect=document.createElement('select');[['missing','دریافت نشده'],['received','دریافت شده'],['checked','بررسی شده']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;compositionSelect.append(o)});compositionSelect.value=item.compositionStatus||'missing';field('وضعیت مدرک ترکیبات',compositionSelect);
+  const reviewer=document.createElement('input');reviewer.maxLength=120;reviewer.value=item.reviewerName||'';reviewer.placeholder='نام بازبین';field('نام بازبین',reviewer);
+  const notes=document.createElement('textarea');notes.rows=2;notes.maxLength=3000;notes.value=item.notes||'';notes.placeholder='یادداشت پژوهش / موارد موردنیاز از تأمین‌کننده';field('یادداشت‌ها',notes);
+  const reviewNote=document.createElement('textarea');reviewNote.rows=2;reviewNote.maxLength=2000;reviewNote.value=item.reviewNote||'';reviewNote.placeholder='نتیجه بازبینی';field('یادداشت بازبینی',reviewNote);
+  const searchQuery=document.createElement('input');searchQuery.maxLength=180;searchQuery.value=item.productName||'';field('عبارت جست‌وجوی اولیه (در صورت نیاز نام علمیِ تأییدشده را وارد کنید)',searchQuery);
+  const searchButton=document.createElement('button');searchButton.type='button';searchButton.className='secondary';searchButton.textContent='جست‌وجوی رایگان در PubMed';
+  const searchResults=document.createElement('div');searchResults.style.margin='10px 0';
+  searchButton.onclick=async()=>{searchButton.disabled=true;searchResults.replaceChildren();const loading=document.createElement('p');loading.className='muted';loading.textContent='در حال جست‌وجو در PubMed…';searchResults.append(loading);try{
+   const result=await api('health-research/queue/'+encodeURIComponent(item.id)+'/suggestions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:searchQuery.value})});
+   searchResults.replaceChildren();const notice=document.createElement('p');notice.className='muted';notice.textContent=result.notice||'';searchResults.append(notice);
+   if(!result.candidates||!result.candidates.length){const empty=document.createElement('p');empty.textContent='نتیجه‌ای برای این عبارت پیدا نشد.';searchResults.append(empty)}
+   (result.candidates||[]).forEach(candidate=>{const row=document.createElement('div');row.style.cssText='border:1px solid #e8dfca;border-radius:8px;padding:10px;margin:8px 0';
+    const link=document.createElement('a');link.href=candidate.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=candidate.title;row.append(link);
+    const details=document.createElement('p');details.className='muted';details.textContent=[candidate.journal,candidate.pubDate,(candidate.authors||[]).join('، ')].filter(Boolean).join(' · ');row.append(details);
+    const add=document.createElement('button');add.type='button';add.className='secondary';add.textContent='افزودن به فهرست منابع';add.onclick=()=>{const line=candidate.title+' | '+candidate.url;const lines=sources.value.split(/\r?\n/).map(x=>x.trim());if(!lines.includes(line))sources.value=sources.value.trim()?(sources.value.trim()+'\n'+line):line;add.disabled=true;add.textContent='به فهرست افزوده شد'};row.append(add);searchResults.append(row);
+   });
+  }catch(e){searchResults.replaceChildren();const error=document.createElement('p');error.textContent=e.message;searchResults.append(error)}finally{searchButton.disabled=false}};
+  card.append(searchButton,searchResults);
+  const sources=document.createElement('textarea');sources.rows=3;sources.placeholder='هر منبع در یک خط: عنوان منبع | https://...';sources.value=(item.sources||[]).map(s=>s.title+' | '+s.url).join('\n');field('منابع مستند (هر خط یک منبع با پیوند HTTPS)',sources);
+  const save=document.createElement('button');save.type='button';save.textContent='ذخیره پرونده پژوهشی';save.onclick=async()=>{save.disabled=true;try{
+   const parsed=sources.value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{const index=line.indexOf('|');if(index<1)throw Error('قالب منبع باید «عنوان | پیوند HTTPS» باشد.');return {title:line.slice(0,index).trim(),url:line.slice(index+1).trim(),sourceType:'reference'}});
+   await api('health-research/queue/'+encodeURIComponent(item.id),{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:statusSelect.value,labelEvidenceStatus:labelSelect.value,compositionStatus:compositionSelect.value,reviewerName:reviewer.value,notes:notes.value,reviewNote:reviewNote.value,sources:parsed})});
+   await loadHealthResearchQueue();
+  }catch(e){alert(e.message)}finally{save.disabled=false}};
+  card.append(save);host.append(card);
+ });
+ if(!rows.length){const empty=document.createElement('p');empty.className='muted';empty.textContent='هنوز پرونده‌ای در صف وجود ندارد.';host.append(empty)}
+}
+async function loadHealthResearchQueue(){
+ const status=$('healthResearchStatus');status.textContent='در حال همگام‌سازی کاتالوگ و دریافت صف…';
+ try{const data=await api('health-research/queue');healthResearchRows=Array.isArray(data.items)?data.items:[];renderHealthResearchQueue();const active=healthResearchRows.filter(x=>x.catalogActive).length;const queued=healthResearchRows.filter(x=>x.catalogActive&&x.status!=='approved').length;status.textContent=healthResearchRows.length+' پرونده ثبت‌شده · '+active+' محصول فعال · '+queued+' پرونده فعالِ نیازمند پیگیری.'}
+ catch(e){status.textContent=e.message}
+}
+$('refreshHealthResearch').onclick=loadHealthResearchQueue;
 $('refreshOrders').onclick=loadOrders;
 $('refreshHealthArchive').onclick=loadHealthArchive;
 $('sendHealthApproval').onclick=async()=>{

@@ -13,6 +13,11 @@ on:
       - chaysa-backup
     paths:
       - "server.js"
+      - "health-advisor.html"
+      - "health-bank.js"
+      - "health-research-queue.js"
+      - "data/health/**"
+      - "content/**"
       - "products.html"
       - "admin.html"
       - "health-approval.html"
@@ -23,6 +28,7 @@ on:
       - "guide-bank.json"
       - "test/**"
       - "package.json"
+      - "playwright.config.js"
       - ".github/workflows/guide-check.yml"
 
 jobs:
@@ -39,6 +45,8 @@ jobs:
         run: npm install --ignore-scripts
       - name: Check server JavaScript syntax
         run: node --check server.js
+      - name: Check health research queue JavaScript syntax
+        run: node --check health-research-queue.js
       - name: Check admin inline JavaScript syntax
         run: |
           python - <<'PY'
@@ -74,3 +82,9 @@ jobs:
           node --check /tmp/chaysa-health-approval.js
       - name: Run guide API tests
         run: npm run test:guide
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser UI tests
+        run: npx playwright test --config=playwright.config.js

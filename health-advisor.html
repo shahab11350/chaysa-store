@@ -50,6 +50,29 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
 .chaysa-guide-health{padding:10px;background:#fff8e8;border-right:3px solid var(--gold);border-radius:7px;color:#654f22}
 @media(max-width:560px){.health-guide{padding:15px}.chaysa-guide-options{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.health-shell{width:min(100% - 22px,1040px)}.hero{padding:40px 8px 28px}.tiles{gap:9px}.tile{min-height:106px;padding:17px 8px}.tile button{font-size:13px}.tile .fa{font-size:11px}.progress{padding:15px}}
+
+.health-bank{margin:24px 0;padding:20px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.health-bank[hidden]{display:none}
+.health-bank-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.health-bank-head h2{margin:0;color:var(--green);font-size:18px}
+.health-bank-status{margin:9px 0;padding:10px 12px;border-right:3px solid var(--gold);border-radius:7px;background:#fff8e8;color:#654f22;font-size:11px;line-height:1.9}
+.health-bank-search{width:100%;padding:11px;border:1px solid #d8d0bd;border-radius:9px;font:13px Tahoma}
+.health-bank-summary{margin:10px 0;color:var(--muted);font-size:11px}
+.health-bank-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.health-bank-card{min-width:0;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.health-bank-card h3{margin:0 0 7px;color:var(--green);font-size:14px;line-height:1.8}
+.health-bank-tag{display:inline-block;margin:0 0 8px;padding:2px 8px;border-radius:20px;background:var(--green-soft);color:var(--green);font-size:10px}
+.health-bank-line{margin:5px 0;color:#4d5c51;font-size:11px;line-height:1.9;overflow-wrap:anywhere}
+.health-bank-line strong,.health-bank-detail strong,.health-bank-refs strong{color:var(--green)}
+.health-bank-detail,.health-bank-refs{margin-top:8px;padding-top:7px;border-top:1px solid #edf0e9;font-size:11px}
+.health-bank-detail ul{margin:4px 0;padding-right:19px}
+.health-bank-detail li{margin:3px 0;color:#4d5c51}
+.health-bank-link{display:block;margin-top:6px;color:#315b42;font-size:11px;overflow-wrap:anywhere}
+.health-bank-group-title{grid-column:1/-1;margin:15px 0 0;color:var(--green);font-size:14px}
+.health-bank-empty{grid-column:1/-1;padding:18px;text-align:center;color:var(--muted);font-size:12px}
+.health-bank-inline-note{grid-column:1/-1;padding:10px;background:#f7f6ef;border-radius:8px;color:#655a40;font-size:11px;line-height:1.9}
+@media(max-width:650px){.health-bank{padding:14px}.health-bank-list{grid-template-columns:1fr}}
+
 </style>
 <style id="chaysa-brand-refresh">.topline{flex-wrap:wrap}.health-brand-lockup{display:flex;align-items:center;gap:12px;min-width:0}.health-brand-lockup .chaysa-brand-logo{display:block;width:128px;height:auto;max-height:68px;object-fit:contain}.health-brand-lockup .brand{font-size:16px}@media(max-width:560px){.topline{align-items:flex-start}.health-brand-lockup{gap:8px}.health-brand-lockup .chaysa-brand-logo{width:92px;max-height:50px}.health-brand-lockup .brand{font-size:13px}.back-link{font-size:11px;padding:7px 10px}}</style></head>
 <body>
@@ -72,10 +95,19 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
 <h2 class="section-title">Explore Health Topics</h2>
 <p class="section-note">موضوعات مشاور سلامت | دسترسی‌ها پس از تکمیل و تأیید فعال می‌شوند</p>
 <section class="tiles" aria-label="موضوعات مشاور سلامت">
-<article class="tile"><button type="button" data-health-prompt-id="p-ingredients">Herbal Products</button><span class="fa">محصولات گیاهی</span><span class="soon">پرسش درباره محصول</span></article>
-<article class="tile"><button type="button" data-health-prompt-id="s-interaction">Drug Interactions</button><span class="fa">تداخل چای و دمنوش با داروها</span><span class="soon">آماده‌سازی جست‌وجوی منبع</span></article>
-<article class="tile"><button type="button" data-health-prompt-id="s-adverse">Safety Guide</button><span class="fa">راهنمای ایمنی مصرف</span><span class="soon">پرسش درباره احتیاط و عوارض</span></article>
-<article class="tile"><button type="button" disabled>Scientific Sources</button><span class="fa">منابع علمی و تخصصی</span><span class="soon">در حال آماده‌سازی</span></article>
+<article class="tile"><button type="button" data-health-bank-tab="products" data-health-prompt-id="p-ingredients">Herbal Products</button><span class="fa">محصولات گیاهی</span><span class="soon">پرسش درباره محصول</span></article>
+<article class="tile"><button type="button" data-health-bank-tab="interactions" data-health-prompt-id="s-interaction">Drug Interactions</button><span class="fa">تداخل چای و دمنوش با داروها</span><span class="soon">آماده‌سازی جست‌وجوی منبع</span></article>
+<article class="tile"><button type="button" data-health-bank-tab="safety" data-health-prompt-id="s-adverse">Safety Guide</button><span class="fa">راهنمای ایمنی مصرف</span><span class="soon">پرسش درباره احتیاط و عوارض</span></article>
+<article class="tile"><button type="button" data-health-bank-tab="sources">Scientific Sources</button><span class="fa">منابع علمی و تخصصی</span><span class="soon">در حال آماده‌سازی</span></article>
+</section>
+<section id="chaysaResearchBank" class="health-bank" aria-labelledby="healthBankTitle" hidden>
+  <div class="health-bank-head"><h2 id="healthBankTitle">کتابخانه علمی و پژوهشی CHAYSA HEALTH</h2></div>
+  <p class="health-bank-status" data-health-bank-status role="status" aria-live="polite">در حال دریافت بانک پژوهشی و فهرست زنده محصولات…</p>
+  <p class="health-bank-inline-note" role="note">چایسا برای تسهیل دسترسی، تلاش می‌کند اطلاعات معتبر، مستند و تا حد امکان به‌روز ارائه کند. معرفی یا ارائه اطلاعات به معنی تأیید مستقل صحت یا کامل‌بودن آن نیست؛ چایسا صحت نهایی مطالب را تضمین نمی‌کند و مسئولیت صحت آن‌ها را بر عهده نمی‌گیرد. برای تصمیم‌های تخصصی، منبع اصلی و نظر متخصص ذی‌صلاح را بررسی کنید.</p>
+  <label for="healthBankSearch" class="section-note">جست‌وجو در بخش انتخاب‌شده</label>
+  <input id="healthBankSearch" class="health-bank-search" data-health-bank-search type="search" placeholder="نام محصول، گیاه، دارو، منبع یا کتاب…">
+  <p class="health-bank-summary" data-health-bank-summary></p>
+  <div class="health-bank-list" data-health-bank-list aria-live="polite"></div>
 </section>
 <section id="chaysaGuide" class="health-guide" data-guide-mode="health" aria-labelledby="healthGuideTitle">
   <h2 id="healthGuideTitle" class="section-title">پرسش درباره محصولات و ایمنی مصرف</h2>
@@ -104,5 +136,6 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
 <footer><b>CHAYSA</b>دانش روشن، انتخاب آگاهانه</footer>
 </main>
 <script src="/guide.js" defer></script>
+<script src="/health-bank.js" defer></script>
 </body>
 </html>
