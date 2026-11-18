@@ -212,6 +212,8 @@ test("product questions are allowed only with a known product and relevant topic
   assert.equal(result.status, 200);
   assert.equal(result.body.allowed, true);
   assert.equal(new URL(result.body.url).hostname, "www.google.com");
+  assert.equal(result.body.searchProvider, "Google");
+  assert.match(result.body.bankNotice, /پیش‌نویس و اعتبارسنجی/);
 });
 
 test("unrelated public searches are rejected", async () => {
@@ -256,8 +258,10 @@ test("medicine interaction builds a limited-source search and safety notice", as
   });
   assert.equal(result.body.allowed, true);
   assert.equal(result.body.type, "medical_external_search");
-  assert.match(result.body.url, /^https:\/\/www\.google\.com\/search\?/);
-  assert.match(decodeURIComponent(result.body.url), /nhs\.uk/);
+  assert.equal(new URL(result.body.url).hostname, "pubmed.ncbi.nlm.nih.gov");
+  assert.equal(result.body.searchProvider, "PubMed");
+  assert.match(result.body.bankNotice, /پیش‌نویس و اعتبارسنجی/);
+  assert.match(decodeURIComponent(result.body.url), /warfarin/);
   assert.match(result.body.notice, /تأیید پزشکی/);
   assert.match(result.body.rule, /بی‌خطر بودن/);
 });
