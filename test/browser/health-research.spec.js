@@ -94,7 +94,7 @@ test("health safety search opens PubMed in the same tab and explains the researc
   await expect(resultLink).toBeVisible();
   await expect(resultLink).toHaveAttribute("href", /^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/\?term=/);
   await expect(resultLink).not.toHaveAttribute("target", "_blank");
-  await expect(page.locator("#chaysaGuideNotice")).toContainText("پیش‌نویس و اعتبارسنجی");
+  await expect(page.locator("#chaysaGuideHealthNotice")).toContainText("پیش‌نویس و اعتبارسنجی");
   await resultLink.click();
   await expect(page).toHaveURL(/^https:\/\/pubmed\.ncbi\.nlm\.nih\.gov\/\?term=/);
 });
