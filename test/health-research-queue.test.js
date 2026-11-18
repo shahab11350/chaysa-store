@@ -56,6 +56,23 @@ test("approval requires verified label and composition, a source and a named rev
   try {
     const item = f.queue.syncCatalog([{ sku: "SKU-1", name: "چای سبز", category: "چای", active: true }]).items[0];
     assert.throws(() => f.queue.updateItem(item.id, { status: "approved" }), /تأیید پرونده نیازمند/);
+    assert.throws(() => f.queue.updateItem(item.id, {
+      labelEvidenceStatus: "checked",
+      compositionStatus: "checked",
+      reviewerName: "بازبین مسئول",
+      sources: [{ title: "منبع رسمی", url: "https://example.org/source", sourceType: "official" }],
+      status: "approved"
+    }), /فایل مدرک برچسب و ترکیبات/);
+    f.queue.addEvidence(item.id, {
+      type: "label", fileId: "11111111-1111-4111-8111-111111111111",
+      fileName: "11111111-1111-4111-8111-111111111111.pdf", originalName: "label.pdf",
+      mime: "application/pdf", size: 100, sha256: "a".repeat(64)
+    });
+    f.queue.addEvidence(item.id, {
+      type: "composition", fileId: "22222222-2222-4222-8222-222222222222",
+      fileName: "22222222-2222-4222-8222-222222222222.pdf", originalName: "composition.pdf",
+      mime: "application/pdf", size: 120, sha256: "b".repeat(64)
+    });
     const updated = f.queue.updateItem(item.id, {
       labelEvidenceStatus: "checked",
       compositionStatus: "checked",
@@ -152,5 +169,29 @@ test("PubMed search rejects inactive, missing-SKU and duplicate-SKU products", a
     const missing = state.items.find(x => !x.sku);
     await assert.rejects(() => f.queue.searchPubMed(duplicate.id, "plant"), /فقط برای محصول فعال/);
     await assert.rejects(() => f.queue.searchPubMed(missing.id, "plant"), /فقط برای محصول فعال/);
+  } finally { f.cleanup(); }
+});
+
+test("evidence metadata is private to the queue and requires an active unique SKU", () => {
+  const f = fixture();
+  try {
+    const state = f.queue.syncCatalog([
+      { sku: "SKU-EVIDENCE", name: "چای سبز", category: "چای", active: true },
+      { sku: "SKU-INACTIVE", name: "چای غیرفعال", category: "چای", active: false }
+    ]);
+    const active = state.items.find(x => x.sku === "SKU-EVIDENCE");
+    const inactive = state.items.find(x => x.sku === "SKU-INACTIVE");
+    const meta = {
+      type: "label", fileId: "33333333-3333-4333-8333-333333333333",
+      fileName: "33333333-3333-4333-8333-333333333333.pdf", originalName: "label.pdf",
+      mime: "application/pdf", size: 512, sha256: "c".repeat(64)
+    };
+    const saved = f.queue.addEvidence(active.id, meta);
+    assert.equal(saved.evidence.length, 1);
+    assert.equal(saved.labelEvidenceStatus, "received");
+    assert.equal(f.queue.getEvidence(meta.fileId).evidence.fileName, meta.fileName);
+    assert.equal(f.queue.read().items.find(x => x.id === active.id).status, "queued");
+    assert.throws(() => f.queue.addEvidence(inactive.id, { ...meta, fileId: "44444444-4444-4444-8444-444444444444", fileName: "44444444-4444-4444-8444-444444444444.pdf" }), /فقط برای محصول فعال/);
+    assert.throws(() => f.queue.addEvidence(active.id, { ...meta, fileId: "55555555-5555-4555-8555-555555555555", fileName: "55555555-5555-4555-8555-555555555555.svg", mime: "image/svg+xml" }), /اطلاعات مدرک/);
   } finally { f.cleanup(); }
 });
