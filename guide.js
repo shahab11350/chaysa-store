@@ -31,6 +31,40 @@
     status.textContent = "";
     status.style.color = "#a33";
   }
+
+  // Force same-tab navigation for the validated external-results link.
+  if (answer) {
+    answer.addEventListener("click", function (event) {
+      const href = answer.getAttribute("href");
+      if (answer.hidden || !href) {
+        event.preventDefault();
+        return;
+      }
+      let target;
+      try {
+        target = new URL(href, window.location.href);
+      } catch (_) {
+        event.preventDefault();
+        status.textContent = "نشانی نتایج معتبر نیست.";
+        return;
+      }
+      const allowedHosts = [
+        { hostname: "pubmed.ncbi.nlm.nih.gov", pathname: "/" },
+        { hostname: "www.google.com", pathname: "/search" }
+      ];
+      const valid = target.protocol === "https:" &&
+        allowedHosts.some(function (item) {
+          return target.hostname === item.hostname && target.pathname === item.pathname;
+        });
+      if (!valid) {
+        event.preventDefault();
+        status.textContent = "نشانی نتایج معتبر نیست.";
+        return;
+      }
+      event.preventDefault();
+      window.location.assign(target.toString());
+    });
+  }
   function selectCategory(id) {
     if (!allowedCategories.includes(id)) return;
     if (category !== id && medicine) medicine.value = "";
