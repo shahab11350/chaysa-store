@@ -334,6 +334,20 @@ function renderHealthResearchQueue(){
   const reviewer=document.createElement('input');reviewer.maxLength=120;reviewer.value=item.reviewerName||'';reviewer.placeholder='نام بازبین';field('نام بازبین',reviewer);
   const notes=document.createElement('textarea');notes.rows=2;notes.maxLength=3000;notes.value=item.notes||'';notes.placeholder='یادداشت پژوهش / موارد موردنیاز از تأمین‌کننده';field('یادداشت‌ها',notes);
   const reviewNote=document.createElement('textarea');reviewNote.rows=2;reviewNote.maxLength=2000;reviewNote.value=item.reviewNote||'';reviewNote.placeholder='نتیجه بازبینی';field('یادداشت بازبینی',reviewNote);
+  const searchQuery=document.createElement('input');searchQuery.maxLength=180;searchQuery.value=item.productName||'';field('عبارت جست‌وجوی اولیه (در صورت نیاز نام علمیِ تأییدشده را وارد کنید)',searchQuery);
+  const searchButton=document.createElement('button');searchButton.type='button';searchButton.className='secondary';searchButton.textContent='جست‌وجوی رایگان در PubMed';
+  const searchResults=document.createElement('div');searchResults.style.margin='10px 0';
+  searchButton.onclick=async()=>{searchButton.disabled=true;searchResults.replaceChildren();const loading=document.createElement('p');loading.className='muted';loading.textContent='در حال جست‌وجو در PubMed…';searchResults.append(loading);try{
+   const result=await api('health-research/queue/'+encodeURIComponent(item.id)+'/suggestions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:searchQuery.value})});
+   searchResults.replaceChildren();const notice=document.createElement('p');notice.className='muted';notice.textContent=result.notice||'';searchResults.append(notice);
+   if(!result.candidates||!result.candidates.length){const empty=document.createElement('p');empty.textContent='نتیجه‌ای برای این عبارت پیدا نشد.';searchResults.append(empty)}
+   (result.candidates||[]).forEach(candidate=>{const row=document.createElement('div');row.style.cssText='border:1px solid #e8dfca;border-radius:8px;padding:10px;margin:8px 0';
+    const link=document.createElement('a');link.href=candidate.url;link.target='_blank';link.rel='noopener noreferrer';link.textContent=candidate.title;row.append(link);
+    const details=document.createElement('p');details.className='muted';details.textContent=[candidate.journal,candidate.pubDate,(candidate.authors||[]).join('، ')].filter(Boolean).join(' · ');row.append(details);
+    const add=document.createElement('button');add.type='button';add.className='secondary';add.textContent='افزودن به فهرست منابع';add.onclick=()=>{const line=candidate.title+' | '+candidate.url;const lines=sources.value.split(/\r?\n/).map(x=>x.trim());if(!lines.includes(line))sources.value=sources.value.trim()?(sources.value.trim()+'\n'+line):line;add.disabled=true;add.textContent='به فهرست افزوده شد'};row.append(add);searchResults.append(row);
+   });
+  }catch(e){searchResults.replaceChildren();const error=document.createElement('p');error.textContent=e.message;searchResults.append(error)}finally{searchButton.disabled=false}};
+  card.append(searchButton,searchResults);
   const sources=document.createElement('textarea');sources.rows=3;sources.placeholder='هر منبع در یک خط: عنوان منبع | https://...';sources.value=(item.sources||[]).map(s=>s.title+' | '+s.url).join('\n');field('منابع مستند (هر خط یک منبع با پیوند HTTPS)',sources);
   const save=document.createElement('button');save.type='button';save.textContent='ذخیره پرونده پژوهشی';save.onclick=async()=>{save.disabled=true;try{
    const parsed=sources.value.split(/\r?\n/).map(line=>line.trim()).filter(Boolean).map(line=>{const index=line.indexOf('|');if(index<1)throw Error('قالب منبع باید «عنوان | پیوند HTTPS» باشد.');return {title:line.slice(0,index).trim(),url:line.slice(index+1).trim(),sourceType:'reference'}});
