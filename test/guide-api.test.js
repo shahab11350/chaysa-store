@@ -899,7 +899,7 @@ test("PubMed candidate endpoint is admin-only and never saves candidates automat
 
 
 test("private research evidence upload and retrieval require admin and gate approval", async () => {
-  const unauthorized = await fetch(baseUrl + "/api/admin/health-research/queue/not-real/evidence");
+  const unauthorized = await fetch(baseUrl + "/api/admin/health-research/queue/not-real/evidence", { method: "POST" });
   assert.equal(unauthorized.status, 401);
   const privateUnauthorized = await fetch(baseUrl + "/api/admin/health-research/evidence/11111111-1111-4111-8111-111111111111");
   assert.equal(privateUnauthorized.status, 401);
