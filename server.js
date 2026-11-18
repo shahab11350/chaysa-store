@@ -205,7 +205,7 @@ function readTranslatedHealthSources() {
   } catch (_) { return []; }
 }
 function guideSourceTokens(value) {
-  return guideNormalize(value).split(/\\s+/).filter(word => word.length > 2 &&
+  return guideNormalize(value).split(/\s+/).filter(word => word.length > 2 &&
     !["برای","درباره","این","آن","است","شود","چگونه","چیست","آیا","مقدار","مصرف","محصول","چایسا","دارم","دارد","می‌شود","میشه","کنم","کنید"].includes(word));
 }
 function guideFindInternalSources(question, product) {
@@ -224,8 +224,8 @@ function guideFindInternalSources(question, product) {
     const body = guideNormalize(source.content);
     const botanicalHits = pTerms.filter(term => body.includes(term));
     const questionHits = qTerms.filter(term => body.includes(term));
-    const paragraphs = source.content.split(/\\n\\s*\\n/).map(x => x.trim())
-      .filter(x => x.length > 45 && !/^##|^\\*\\*شناسه/.test(x));
+    const paragraphs = source.content.split(/\n\s*\n/).map(x => x.trim())
+      .filter(x => x.length > 45 && !/^##|^\*\*شناسه/.test(x));
     const ranked = paragraphs.map(text => {
       const normalized = guideNormalize(text);
       const hits = qTerms.filter(term => normalized.includes(term)).length;
