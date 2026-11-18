@@ -2,13 +2,13 @@
   "use strict";
   const root = document.getElementById("chaysaResearchBank");
   if (!root) return;
-  const list = root.querySelector("[data-health-bank-list]");
-  const search = root.querySelector("[data-health-bank-search]");
-  const summary = root.querySelector("[data-health-bank-summary]");
+  let list = null;
+  let search = null;
+  let summary = null;
   const status = root.querySelector("[data-health-bank-status]");
   const tabButtons = Array.from(document.querySelectorAll("[data-health-bank-tab]"));
   const guide = document.getElementById("chaysaGuide");
-  const state = { tab: "botanical", query: "", research: null, liveProducts: [] };
+  const state = { tab: "botanical", query: "", queries: {}, research: null, liveProducts: [] };
 
   function normalize(value) {
     return String(value || "").toLocaleLowerCase("fa").replace(/[يى]/g, "ی").replace(/ك/g, "ک")
@@ -167,12 +167,68 @@
     list.append(make("p", "health-bank-inline-note", "بانک فعلی آنالیز آزمایشگاهی یا درصد مواد مؤثره محصولات چایسا را در اختیار ندارد. اطلاعات ترکیبات باید با اسناد تولیدکننده یا آزمون معتبر تکمیل شود."));
   }
   function renderPreparation() {
-    const item = card("روش آماده‌سازی و مصرف", "وضعیت مستندات");
-    addLine(item, "", "برای هر محصول، دستور دقیق باید از برچسب رسمی یا راهنمای سازنده همان محصول گرفته شود. دما، زمان، نسبت آب به محصول و دفعات دم‌آوری را نمی‌توان از نام گیاه یا محصول حدس زد.");
-    addLine(item, "وضعیت فعلی:", "دستور اختصاصی و تأییدشده سازنده برای همه محصولات در بانک ثبت نشده است.");
-    addList(item, "اطلاعاتی که باید از سازنده دریافت شود:", ["دمای مناسب آب", "زمان دم‌آوری", "نسبت آب به مقدار محصول", "تعداد دفعات قابل دم‌آوری", "محدودیت نگهداری پس از آماده‌سازی"]);
-    list.append(item);
-    summary.textContent = "راهنمای عمومی؛ دستور اختصاصی محصول هنوز نیازمند مدرک سازنده است";
+    const live = state.liveProducts.filter(p => p && p.active !== false && p.name);
+    const visible = state.query ? live.filter(p => matches(p)) : [];
+    summary.textContent = state.query ? visible.length + " محصول مطابق جست‌وجو از " + live.length + " محصول فعال" : "برای یافتن دستور مستند، نام محصول یا شناسه آن را جست‌وجو کنید.";
+    visible.forEach(product => {
+      const item = card(product.name, product.category || "محصول فعال");
+      if (product.sku) addLine(item, "شناسه:", product.sku);
+      addLine(item, "وضعیت دستور آماده‌سازی:", "دستور اختصاصی و تأییدشده سازنده برای این محصول در بانک فعلی ثبت نشده است.");
+      addLine(item, "", "دما، زمان، نسبت آب به محصول و دفعات دم‌آوری بدون مدرک سازنده حدس زده نمی‌شود.");
+      list.append(item);
+    });
+    if (state.query && !visible.length) empty("محصول فعالی با این نام یا شناسه پیدا نشد.");
+    list.append(make("p", "health-bank-inline-note", "برای هر محصول، دستور دقیق باید از برچسب رسمی یا راهنمای سازنده همان محصول دریافت شود. بانک فعلی هنوز دستور اختصاصی تأییدشده همه محصولات را ندارد."));
+  }
+  function renderQaBank() {
+    const profilesVisible = profiles().filter(matches);
+    const sourcesVisible = (state.research.sources || []).filter(matches);
+    const booksVisible = (state.research.bookBibliography || []).filter(matches);
+    summary.textContent = profilesVisible.length + " پرونده گیاهی، " + sourcesVisible.length + " منبع علمی و " + booksVisible.length + " کتاب/مرجع مرتبط";
+    if (profilesVisible.length) {
+      list.append(make("h3", "health-bank-group-title", "پرونده‌های گیاهی مرتبط"));
+      profilesVisible.forEach(profile => {
+        const item = card(profile.commonName || profile.scientificName, "پرونده مرجع");
+        addLine(item, "نام علمی:", profile.scientificName);
+        addLine(item, "خلاصه:", profile.summary);
+        appendSourceRefs(item, profile.sourceIds, sourceMap());
+        list.append(item);
+      });
+    }
+    if (sourcesVisible.length) {
+      list.append(make("h3", "health-bank-group-title", "منابع علمی مرتبط"));
+      sourcesVisible.forEach(source => {
+        const item = card(source.title, source.publisher);
+        addLine(item, "دامنه منبع:", (source.supportsFa || source.supports || []).join("؛ "));
+        addLink(item, "بازکردن منبع اصلی", source.url);
+        list.append(item);
+      });
+    }
+    if (booksVisible.length) {
+      list.append(make("h3", "health-bank-group-title", "کتاب‌ها و مراجع مرتبط"));
+      booksVisible.forEach(book => {
+        const item = card(book.title, book.language || "مرجع");
+        addLine(item, "نویسنده:", book.author);
+        addLine(item, "ناشر:", book.publisher);
+        addLink(item, "مشاهده رکورد کتاب‌شناختی", book.catalogueUrl);
+        list.append(item);
+      });
+    }
+    if (!profilesVisible.length && !sourcesVisible.length && !booksVisible.length)
+      empty(state.query ? "مورد مرتبطی در بانک فعلی پیدا نشد." : "برای جست‌وجوی منابع مرتبط با پرسش خود، عبارت موردنظر را وارد کنید.");
+    list.append(make("p", "health-bank-inline-note", "این جست‌وجو فقط منابع و پرونده‌های ثبت‌شده در بانک داخلی را پیدا می‌کند؛ پاسخ پزشکی یا تشخیص ارائه نمی‌شود."));
+  }
+  function activatePanel(tab) {
+    const panels = Array.from(root.querySelectorAll("[data-health-section-panel]"));
+    panels.forEach(panel => { panel.hidden = panel.dataset.healthSectionPanel !== tab; });
+    const active = panels.find(panel => panel.dataset.healthSectionPanel === tab);
+    if (!active) return;
+    list = active.querySelector("[data-health-bank-list]");
+    summary = active.querySelector("[data-health-bank-summary]");
+    search = active.querySelector("[data-health-bank-search]");
+    state.query = state.queries[tab] || "";
+    search.value = state.query;
+    root.hidden = false;
   }
   function render() {
     if (!state.research) return;
@@ -193,25 +249,30 @@
     else if (state.tab === "properties") renderProperties();
     else if (state.tab === "compounds") renderCompounds();
     else if (state.tab === "preparation") renderPreparation();
+    else if (state.tab === "qa") renderQaBank();
     else if (state.tab === "safety") renderSafety();
     else if (state.tab === "products") renderProducts();
     else if (state.tab === "sources") renderSources();
   }
   tabButtons.forEach(button => button.addEventListener("click", () => {
     const tab = button.dataset.healthBankTab;
+    state.tab = tab;
+    activatePanel(tab);
+    render();
+    root.scrollIntoView({ behavior: "smooth", block: "start" });
     if (tab === "qa") {
-      if (guide) guide.scrollIntoView({ behavior: "smooth", block: "start" });
       const question = document.getElementById("chaysaGuideQuestion");
       if (question) question.focus({ preventScroll: true });
-      return;
     }
-    state.tab = tab;
-    state.query = normalize(search.value);
-    render();
-    root.hidden = false;
-    root.scrollIntoView({ behavior: "smooth", block: "start" });
   }));
-  search.addEventListener("input", () => { state.query = normalize(search.value); render(); });
+  root.querySelectorAll("[data-health-bank-search]").forEach(input => input.addEventListener("input", () => {
+    const tab = input.dataset.healthBankSearch;
+    state.queries[tab] = normalize(input.value);
+    if (state.tab === tab) {
+      state.query = state.queries[tab];
+      render();
+    }
+  }));
   Promise.all([
     fetch("/data/health/health-product-research.json", { cache: "no-store", credentials: "same-origin" }).then(r => {
       if (!r.ok) throw new Error("بانک پژوهشی در دسترس نیست."); return r.json();
@@ -224,6 +285,7 @@
         !Array.isArray(research.bookBibliography) || !Array.isArray(research.botanicalProfiles) || !Array.isArray(products))
       throw new Error("ساختار بانک پژوهشی معتبر نیست.");
     state.research = research; state.liveProducts = products;
+    activatePanel(state.tab);
     const activeCount = products.filter(p => p && p.active !== false).length;
     const inactiveCount = products.filter(p => p && p.active === false).length;
     status.textContent = "بانک پژوهشی در وضعیت پیش‌نویس و اعتبارسنجی است؛ " + activeCount +
