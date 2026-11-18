@@ -19,6 +19,12 @@ test("CHAYSA HEALTH research inventory counts and draft status are explicit", ()
   assert.equal(research.bookBibliography.length, 28);
 });
 
+test("every source has a Persian research-scope summary", () => {
+  for (const source of research.sources) {
+    assert.ok(Array.isArray(source.supportsFa) && source.supportsFa.length, source.id + " must have a Persian summary");
+  }
+});
+
 test("all botanical source references resolve to the registered source catalogue", () => {
   const ids = new Set(research.sources.map(item => item.id));
   for (const profile of research.botanicalProfiles) {
