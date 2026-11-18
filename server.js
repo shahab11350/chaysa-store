@@ -477,6 +477,51 @@ app.post("/rubika/webhook/:key",async(req,res)=>{
  if(!expected||supplied.length!==expected.length||!crypto.timingSafeEqual(Buffer.from(expected),Buffer.from(supplied)))return res.sendStatus(403);
  try{for(const update of extractRubikaUpdates(req.body))await handleRubikaUpdate(update);return res.sendStatus(200)}catch(_){return res.sendStatus(500)}
 });
+const RUBIKA_UPDATES_OFFSET_FILE=path.join(DATA,"rubika-updates-offset.txt");
+function readRubikaUpdatesOffset(){try{return fs.readFileSync(RUBIKA_UPDATES_OFFSET_FILE,"utf8").trim()}catch(_){return""}}
+function saveRubikaUpdatesOffset(offset){
+ const tmp=RUBIKA_UPDATES_OFFSET_FILE+".tmp";
+ fs.writeFileSync(tmp,String(offset),{encoding:"utf8",mode:0o600});
+ fs.renameSync(tmp,RUBIKA_UPDATES_OFFSET_FILE);
+}
+async function startRubikaPolling(token){
+ let offsetId=readRubikaUpdatesOffset();
+ const intervalMs=Math.max(50,Math.min(60000,Number(process.env.RUBIKA_POLL_INTERVAL_MS)||5000));
+ console.log("Rubika polling fallback: started");
+ while(true){
+  try{
+   const payload={limit:50};
+   if(offsetId)payload.offset_id=offsetId;
+   const response=await fetch("https://botapi.rubika.ir/v3/"+token+"/getUpdates",{
+    method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)
+   });
+   let result;
+   try{result=await response.json()}catch(_){
+    console.log("Rubika polling fallback: invalid JSON","http="+response.status);
+    result=null;
+   }
+   if(response.ok&&result&&result.status==="OK"){
+    const data=result.data&&typeof result.data==="object"?result.data:{};
+    const updates=Array.isArray(data.updates)?data.updates:[];
+    for(const update of updates)await handleRubikaUpdate(update);
+    const nextOffset=typeof data.next_offset_id==="string"?data.next_offset_id:"";
+    if(nextOffset&&nextOffset!==offsetId){
+     saveRubikaUpdatesOffset(nextOffset);
+     offsetId=nextOffset;
+    }
+    if(updates.length)console.log("Rubika polling fallback: processed",updates.length,"updates");
+   }else{
+    const apiStatus=safeRubikaDiagnosticValue(result&&result.status);
+    const dataStatus=safeRubikaDiagnosticValue(result&&result.data&&result.data.status);
+    console.log("Rubika polling fallback: request failed","http="+response.status,"api="+apiStatus,"data="+dataStatus);
+   }
+  }catch(error){
+   console.log("Rubika polling fallback: request error","type="+safeRubikaDiagnosticValue(error&&error.name));
+  }
+  await new Promise(resolve=>setTimeout(resolve,intervalMs));
+ }
+}
+
 
 async function sendTelegramText(chatId, text, replyMarkup) {
   const token = process.env.TELEGRAM_BOT_TOKEN || "";
@@ -1827,18 +1872,23 @@ app.listen(port, "0.0.0.0", () => {
         console.log("Rubika webhook registration: failed", "http="+response.status, "reason=invalid_json");
         return;
       }
-      const success=response.ok&&result&&result.status==="OK"&&result.data&&["Done","OK"].includes(result.data.status);
+      const dataStatusValue=typeof(result&&result.data)==="string"?result.data:(result&&result.data&&result.data.status);
+      const success=response.ok&&result&&result.status==="OK"&&["Done","OK"].includes(dataStatusValue);
       if(success){console.log("Rubika webhook registration: ok");return}
       const apiStatus=safeRubikaDiagnosticValue(result&&result.status);
-      const dataStatus=safeRubikaDiagnosticValue(result&&result.data&&result.data.status);
+      const dataStatus=safeRubikaDiagnosticValue(dataStatusValue);
       const errorCode=safeRubikaDiagnosticValue(
         result&&(result.error_code??result.errorCode??(result.data&&(result.data.error_code??result.data.errorCode??result.data.code)))
       );
       const responseKeys=result&&typeof result==="object"?Object.keys(result).map(safeRubikaDiagnosticValue).join(","):"none";
       const dataKeys=result&&result.data&&typeof result.data==="object"?Object.keys(result.data).map(safeRubikaDiagnosticValue).join(","):"none";
       console.log("Rubika webhook registration: failed", "http="+response.status, "api="+apiStatus, "data="+dataStatus, "code="+errorCode, "keys="+responseKeys, "dataKeys="+dataKeys);
+      console.log("Rubika webhook unavailable; switching to official getUpdates polling.");
+      void startRubikaPolling(rubikaToken);
     }).catch(error=>{
       console.log("Rubika webhook registration: failed", "reason=request_error", "type="+safeRubikaDiagnosticValue(error&&error.name));
+      console.log("Rubika webhook unavailable; switching to official getUpdates polling.");
+      void startRubikaPolling(rubikaToken);
     });
   }
   const token = process.env.TELEGRAM_BOT_TOKEN || "";

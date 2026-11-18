@@ -1,5 +1,6 @@
 const fs = require("node:fs");
 const failedCustomerOnce = new Set();
+let rubikaPollingUpdateSent = false;
 const originalFetch = global.fetch.bind(global);
 
 global.fetch = async function (input, init = {}) {
@@ -21,6 +22,17 @@ global.fetch = async function (input, init = {}) {
     const method=String(url).split("/").pop();
     if(method==="updateBotEndpoints"&&process.env.RUBIKA_MOCK_REGISTRATION_MODE==="api-error"){
       return new Response(JSON.stringify({status:"ERROR",data:{status:"Rejected"},error_code:4321,error:"sensitive response text must not be logged"}),{status:200,headers:{"content-type":"application/json"}});
+    }
+    if(method==="updateBotEndpoints"&&process.env.RUBIKA_MOCK_REGISTRATION_MODE==="invalid-url"){
+      return new Response(JSON.stringify({status:"OK",data:{status:"InvalidUrl"}}),{status:200,headers:{"content-type":"application/json"}});
+    }
+    if(method==="getUpdates"){
+      const payload=entry.body?JSON.parse(entry.body):{};
+      if(process.env.RUBIKA_MOCK_UPDATES_JSON&&!rubikaPollingUpdateSent){
+        rubikaPollingUpdateSent=true;
+        return new Response(JSON.stringify({status:"OK",data:JSON.parse(process.env.RUBIKA_MOCK_UPDATES_JSON)}),{status:200,headers:{"content-type":"application/json"}});
+      }
+      return new Response(JSON.stringify({status:"OK",data:{updates:[],next_offset_id:payload.offset_id||"rubika-offset-1"}}),{status:200,headers:{"content-type":"application/json"}});
     }
     const payload=entry.body?JSON.parse(entry.body):{};
     const isCustomerStatus=method==="sendMessage"&&String(payload.text||"").startsWith("به‌روزرسانی سفارش چایسا");
