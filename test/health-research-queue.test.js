@@ -77,3 +77,34 @@ test("unsafe or malformed source URLs are rejected", () => {
     }), /پیوند HTTPS معتبر/);
   } finally { f.cleanup(); }
 });
+
+test("queue cannot advance without a SKU or archive an active product", () => {
+  const f = fixture();
+  try {
+    const state = f.queue.syncCatalog([
+      { sku: "", name: "بدون شناسه", category: "چای", active: true },
+      { sku: "SKU-2", name: "چای فعال", category: "چای", active: true }
+    ]);
+    const missing = state.items.find(x => !x.sku);
+    const active = state.items.find(x => x.sku === "SKU-2");
+    assert.throws(() => f.queue.updateItem(missing.id, { status: "researching" }), /تا زمان ثبت SKU معتبر/);
+    assert.throws(() => f.queue.updateItem(active.id, { status: "archived" }), /محصول فعال را نمی‌توان/);
+    assert.throws(() => f.queue.updateItem(active.id, { status: "needs_sku" }), /محصول SKU دارد/);
+  } finally { f.cleanup(); }
+});
+
+test("a changed product identity reopens an approved record for update", () => {
+  const f = fixture();
+  try {
+    const item = f.queue.syncCatalog([{ sku: "SKU-3", name: "چای سفید", category: "چای", active: true }]).items[0];
+    f.queue.updateItem(item.id, {
+      labelEvidenceStatus: "checked",
+      compositionStatus: "checked",
+      reviewerName: "بازبین",
+      sources: [{ title: "مرجع", url: "https://example.org/ref" }],
+      status: "approved"
+    });
+    const changed = f.queue.syncCatalog([{ sku: "SKU-3", name: "چای سفید و گل", category: "چای", active: true }]);
+    assert.equal(changed.items[0].status, "needs_update");
+  } finally { f.cleanup(); }
+});
