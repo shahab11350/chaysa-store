@@ -28,6 +28,7 @@ on:
       - "guide-bank.json"
       - "test/**"
       - "package.json"
+      - "playwright.config.js"
       - ".github/workflows/guide-check.yml"
 
 jobs:
@@ -81,3 +82,9 @@ jobs:
           node --check /tmp/chaysa-health-approval.js
       - name: Run guide API tests
         run: npm run test:guide
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser UI tests
+        run: npx playwright test --config=playwright.config.js
