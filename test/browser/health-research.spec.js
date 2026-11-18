@@ -48,7 +48,11 @@ test("admin can search PubMed candidates and manually save a selected source", a
   await expect(card.locator("textarea").last()).toHaveValue(/PubMed candidate title for integration test/);
 
   const pdf = Buffer.from("%PDF-1.4\\nCHAYSA TEST EVIDENCE\\n%%EOF");
-  await card.locator('input[type="file"]').nth(0).setInputFiles({ name: "label.pdf", mimeType: "application/pdf", buffer: pdf });
+  await expect(card.locator('input[type="file"]')).toHaveCount(2);
+  const labelInput = card.locator('input[type="file"]').nth(0);
+  await labelInput.setInputFiles({ name: "label.pdf", mimeType: "application/pdf", buffer: pdf });
+  expect(await labelInput.evaluate(input => input.files.length)).toBe(1);
+  expect(await labelInput.evaluate(input => input.files[0].name)).toBe("label.pdf");
   const labelResponsePromise = page.waitForResponse(response => response.url().includes("/evidence") && response.request().method() === "POST");
   await card.getByRole("button", { name: "بارگذاری مدرک برچسب" }).click();
   const labelResponse = await labelResponsePromise;
