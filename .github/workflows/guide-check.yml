@@ -13,6 +13,11 @@ on:
       - chaysa-backup
     paths:
       - "server.js"
+      - "health-advisor.html"
+      - "health-bank.js"
+      - "health-research-queue.js"
+      - "data/health/**"
+      - "content/**"
       - "products.html"
       - "admin.html"
       - "health-approval.html"
@@ -39,6 +44,8 @@ jobs:
         run: npm install --ignore-scripts
       - name: Check server JavaScript syntax
         run: node --check server.js
+      - name: Check health research queue JavaScript syntax
+        run: node --check health-research-queue.js
       - name: Check admin inline JavaScript syntax
         run: |
           python - <<'PY'
