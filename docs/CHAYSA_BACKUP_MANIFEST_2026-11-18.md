@@ -78,3 +78,10 @@ Railway variable names were inventoried. Secret values were intentionally not co
 - This is distinct from the repository's `worker.js` / `wrangler.toml` for the separate `chaysa-backup` Worker. The repository setup document says that separate Worker has not been deployed and its KV namespace ID is still a placeholder.
 - Prior Cloudflare inspection records indicate the actual `black-mud-3a10` Worker was Ready and had a Telegram secret, but its source was not available through the GitHub repository. Its current dashboard state was not rechecked in this backup session.
 - Its deployed source, settings and secure secret-recovery record are not included. Do not treat the Android backend as backed up until its current Worker code/configuration is exported from Cloudflare and safely preserved.
+
+
+## Railway volume backup — next required action
+
+Railway documents manual and scheduled backups in the service's **Backups** tab. The owner must open project `chaysa-backup` → service `chaysa-backup-store` → **Backups** → **Create a backup**. No new volume backup was created or restored during this session, and existing backup inventory was not verified through the connected tools.
+
+Railway's documented manual-backup limit is 50% of volume capacity. The current volume is 500 MB, so the theoretical manual-backup ceiling is 250 MB. Actual used space was not measured in this session. Backups are incremental / Copy-on-Write and incur incremental storage charges. See https://docs.railway.com/volumes/backups.
