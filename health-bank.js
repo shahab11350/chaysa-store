@@ -56,7 +56,7 @@
       if (product.sku) addLine(item, "شناسه:", product.sku);
       if (record && record.nameMentionedIngredients && record.nameMentionedIngredients.length)
         addList(item, "مواد نام‌برده‌شده در عنوان (نه ترکیب تأییدشده):", record.nameMentionedIngredients);
-      addLine(item, "وضعیت بررسی:", "ترکیبات و مقدار مواد این محصول هنوز با برچسب رسمی/مدارک تولیدکننده تطبیق نهایی نشده است.");
+      addLine(item, "وضعیت پرونده:", record ? "پرونده پژوهشی اولیه ثبت شده؛ ترکیبات و مقدار مواد هنوز با برچسب رسمی/مدارک تولیدکننده تطبیق نهایی نشده است." : "برای این محصول هنوز رکورد پژوهشی اختصاصی در بانک ثبت نشده است.");
       addLine(item, "", "نام محصول به‌تنهایی ترکیب، مقدار، خواص یا ایمنی آن را اثبات نمی‌کند.");
       list.append(item);
     });
