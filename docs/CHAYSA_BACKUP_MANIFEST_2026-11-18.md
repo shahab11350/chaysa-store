@@ -70,3 +70,11 @@ Railway variable names were inventoried. Secret values were intentionally not co
 - Open PR head snapshots were created for the listed website and Android PRs.
 - Android Actions artifact ZIP was downloaded; ZIP integrity and APK SHA-256 were checked in the working container.
 - Production Railway service status was checked read-only after the branch snapshots.
+
+
+## External Cloudflare dependency not yet captured
+
+- Android `main.dart` references the live Worker `black-mud-3a10` at `https://black-mud-3a10.faryadereza.workers.dev/` as its question API.
+- This is distinct from the repository's `worker.js` / `wrangler.toml` for the separate `chaysa-backup` Worker. The repository setup document says that separate Worker has not been deployed and its KV namespace ID is still a placeholder.
+- Prior Cloudflare inspection records indicate the actual `black-mud-3a10` Worker was Ready and had a Telegram secret, but its source was not available through the GitHub repository. Its current dashboard state was not rechecked in this backup session.
+- Its deployed source, settings and secure secret-recovery record are not included. Do not treat the Android backend as backed up until its current Worker code/configuration is exported from Cloudflare and safely preserved.
