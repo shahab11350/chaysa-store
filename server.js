@@ -3,6 +3,7 @@ const multer = require("multer");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const { createHealthResearchQueue } = require("./health-research-queue");
 
 const app = express();
 const ROOT = __dirname;
@@ -35,6 +36,9 @@ function saveProducts(items) {
   fs.writeFileSync(tmp, JSON.stringify(items, null, 2), "utf8");
   fs.renameSync(tmp, PRODUCTS_FILE);
 }
+const healthResearchQueue = createHealthResearchQueue(DATA);
+try { healthResearchQueue.syncCatalog(readProducts()); }
+catch (error) { console.error("CHAYSA health research queue initialization failed:", error.message); }
 const secret = process.env.ADMIN_PASSWORD || "";
 function sign(value) { return crypto.createHmac("sha256", secret).update(value).digest("hex"); }
 function isAdmin(req) {
@@ -844,7 +848,24 @@ app.get("/api/admin/products", requireAdmin, (_req, res) => json(res, 200, readP
 app.put("/api/admin/products", requireAdmin, (req, res) => {
   if (!Array.isArray(req.body) || req.body.length > 1000) return json(res, 400, { error: "ساختار اطلاعات معتبر نیست." });
   saveProducts(req.body);
-  return json(res, 200, { ok: true });
+  try {
+    const queue = healthResearchQueue.syncCatalog(req.body);
+    return json(res, 200, { ok: true, researchQueue: { total: queue.items.length, active: queue.items.filter(item => item.catalogActive).length } });
+  } catch (_) {
+    return json(res, 503, { ok: false, productSaved: true, error: "محصول ذخیره شد، اما همگام‌سازی صف پژوهش انجام نشد؛ وضعیت صف باید در پنل بررسی شود." });
+  }
+});
+app.get("/api/admin/health-research/queue", requireAdmin, (_req, res) => {
+  try {
+    const queue = healthResearchQueue.syncCatalog(readProducts());
+    return json(res, 200, queue);
+  } catch (_) { return json(res, 500, { error: "دریافت صف پژوهش انجام نشد." }); }
+});
+app.patch("/api/admin/health-research/queue/:id", requireAdmin, (req, res) => {
+  try {
+    const item = healthResearchQueue.updateItem(req.params.id, req.body || {});
+    return json(res, 200, { ok: true, item });
+  } catch (error) { return json(res, 400, { error: error.message || "ذخیره پرونده پژوهشی انجام نشد." }); }
 });
 
 const upload = multer({
