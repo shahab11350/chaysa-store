@@ -97,3 +97,17 @@ test("free PubMed discovery is admin-only, rate-limited and explicitly non-publi
   assert.match(server, /health-research-suggestions:/);
   assert.match(server, /به‌صورت خودکار به پرونده افزوده یا منتشر نمی‌شوند/);
 });
+
+test("research evidence files are private, size-limited, signature-checked and admin-only", () => {
+  assert.match(server, /HEALTH_RESEARCH_EVIDENCE_DIR/);
+  assert.match(server, /healthResearchEvidenceUpload\.single\("evidence"\)/);
+  assert.match(server, /fileSize: 10 \* 1024 \* 1024/);
+  assert.match(server, /isSupportedResearchEvidence/);
+  assert.match(server, /app\.get\("\/api\/admin\/health-research\/evidence\/:id", requireAdmin/);
+  assert.match(server, /Cache-Control", "no-store"/);
+  assert.match(server, /healthResearchQueue\.addEvidence/);
+  assert.match(queue, /evidence\.some\(row => row\.type === "label"\)/);
+  assert.match(queue, /evidence\.some\(row => row\.type === "composition"\)/);
+  assert.match(adminPage, /بارگذاری مدرک برچسب/);
+  assert.match(adminPage, /بارگذاری مدرک ترکیبات/);
+});
