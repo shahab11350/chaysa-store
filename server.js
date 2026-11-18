@@ -885,6 +885,73 @@ app.patch("/api/admin/health-research/queue/:id", requireAdmin, (req, res) => {
   } catch (error) { return json(res, 400, { error: error.message || "ذخیره پرونده پژوهشی انجام نشد." }); }
 });
 
+const HEALTH_RESEARCH_EVIDENCE_DIR = path.join(DATA, "health-research-evidence");
+fs.mkdirSync(HEALTH_RESEARCH_EVIDENCE_DIR, { recursive: true });
+const healthResearchEvidenceUpload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, HEALTH_RESEARCH_EVIDENCE_DIR),
+    filename: (_req, file, cb) => {
+      const ext = ({ "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "application/pdf": ".pdf" })[file.mimetype] || "";
+      cb(null, crypto.randomUUID() + ext);
+    }
+  }),
+  limits: { fileSize: 10 * 1024 * 1024, files: 1 },
+  fileFilter: (_req, file, cb) => cb(null, ["image/jpeg", "image/png", "image/webp", "application/pdf"].includes(file.mimetype))
+});
+function isSupportedResearchEvidence(file) {
+  const head = fs.readFileSync(file.path).subarray(0, 12);
+  if (file.mimetype === "image/jpeg") return head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff;
+  if (file.mimetype === "image/png") return head.subarray(0, 8).equals(Buffer.from([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]));
+  if (file.mimetype === "image/webp") return head.toString("ascii",0,4) === "RIFF" && head.toString("ascii",8,12) === "WEBP";
+  if (file.mimetype === "application/pdf") return head.toString("ascii",0,5) === "%PDF-";
+  return false;
+}
+app.post("/api/admin/health-research/queue/:id/evidence", requireAdmin, healthResearchEvidenceUpload.single("evidence"), (req, res) => {
+  const file = req.file;
+  const cleanup = () => { if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path); };
+  if (!file) return json(res, 400, { error: "یک فایل JPG، PNG، WebP یا PDF تا ۱۰ مگابایت انتخاب کنید." });
+  if (!isSupportedResearchEvidence(file)) {
+    cleanup();
+    return json(res, 400, { error: "محتوای فایل با فرمت اعلام‌شده مطابقت ندارد." });
+  }
+  const state = healthResearchQueue.read();
+  const allEvidence = state.items.flatMap(item => item.evidence || []);
+  const totalBytes = allEvidence.reduce((sum, item) => sum + Number(item.size || 0), 0);
+  if (allEvidence.length >= 500 || totalBytes + file.size > 100 * 1024 * 1024) {
+    cleanup();
+    return json(res, 413, { error: "ظرفیت بایگانی مدارک پژوهشی به سقف مجاز رسیده است." });
+  }
+  const fileId = crypto.randomUUID();
+  const type = typeof req.body.type === "string" ? req.body.type : "";
+  const metadata = {
+    fileId,
+    fileName: path.basename(file.filename),
+    originalName: path.basename(String(file.originalname || "evidence")).slice(0, 180),
+    mime: file.mimetype,
+    size: file.size,
+    sha256: crypto.createHash("sha256").update(fs.readFileSync(file.path)).digest("hex"),
+    type
+  };
+  try {
+    const item = healthResearchQueue.addEvidence(req.params.id, metadata);
+    return json(res, 201, { ok: true, item });
+  } catch (error) {
+    cleanup();
+    return json(res, 400, { error: error.message || "ثبت مدرک انجام نشد." });
+  }
+});
+app.get("/api/admin/health-research/evidence/:id", requireAdmin, (req, res) => {
+  const found = healthResearchQueue.getEvidence(req.params.id);
+  if (!found || path.basename(found.evidence.fileName) !== found.evidence.fileName) return res.sendStatus(404);
+  const filePath = path.join(HEALTH_RESEARCH_EVIDENCE_DIR, found.evidence.fileName);
+  if (!fs.existsSync(filePath)) return res.sendStatus(404);
+  res.set("X-Content-Type-Options", "nosniff");
+  res.set("Cache-Control", "no-store");
+  res.set("Content-Disposition", "attachment; filename=\"research-evidence\"");
+  res.type(found.evidence.mime);
+  return res.sendFile(filePath);
+});
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: (_req, _file, cb) => cb(null, MEDIA),
