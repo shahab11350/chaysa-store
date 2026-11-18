@@ -22,6 +22,17 @@ global.fetch = async function (input, init = {}) {
     if(method==="updateBotEndpoints"&&process.env.RUBIKA_MOCK_REGISTRATION_MODE==="api-error"){
       return new Response(JSON.stringify({status:"ERROR",data:{status:"Rejected"},error_code:4321,error:"sensitive response text must not be logged"}),{status:200,headers:{"content-type":"application/json"}});
     }
+    const payload=entry.body?JSON.parse(entry.body):{};
+    const isCustomerStatus=method==="sendMessage"&&String(payload.text||"").startsWith("به‌روزرسانی سفارش چایسا");
+    const chatKey=String(payload.chat_id||"");
+    const failAlways=String(process.env.RUBIKA_MOCK_FAIL_CUSTOMER_CHAT_IDS||"").split(",").map(x=>x.trim()).includes(chatKey);
+    const failOnce=String(process.env.RUBIKA_MOCK_FAIL_CUSTOMER_ONCE_CHAT_IDS||"").split(",").map(x=>x.trim()).includes(chatKey);
+    const shouldFail=isCustomerStatus&&(failAlways||(failOnce&&!failedCustomerOnce.has("rubika:"+chatKey)));
+    if(shouldFail&&failOnce)failedCustomerOnce.add("rubika:"+chatKey);
+    if(shouldFail)return new Response(JSON.stringify({
+      status:"ERROR",status_det:"CHAT_NOT_FOUND",error_code:4003,
+      error:"sensitive Rubika response text must never be exposed"
+    }),{status:200,headers:{"content-type":"application/json"}});
     const data=method==="updateBotEndpoints"?{status:"Done"}:{message_id:"rubika-test-message"};
     return new Response(JSON.stringify({status:"OK",data}),{status:200,headers:{"content-type":"application/json"}});
   }
