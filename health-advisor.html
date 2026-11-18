@@ -54,7 +54,14 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
 .chaysa-guide-form select,.chaysa-guide-form input,.chaysa-guide-form textarea{width:100%;min-width:0;border:1px solid #d8d0bd;border-radius:9px;padding:11px;font:13px/1.9 Tahoma;background:#fff;color:var(--ink)}
 .chaysa-guide-form button,.chaysa-guide-answer{display:block;width:100%;border:0;border-radius:9px;background:var(--green);color:#fff;padding:12px;text-align:center;text-decoration:none;font:bold 13px Tahoma;cursor:pointer}
 .chaysa-guide-form button:disabled{opacity:.6;cursor:wait}
-.chaysa-guide-answer{background:var(--gold);margin-top:4px}
+.chaysa-guide-results{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:12px;background:#f9faf6;text-align:right}
+.chaysa-guide-results[hidden]{display:none}
+.chaysa-guide-results h3{margin:0 0 10px;color:var(--green);font-size:17px}
+.chaysa-guide-source{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.chaysa-guide-source h4{margin:0 0 6px;color:var(--green);font-size:14px}
+.chaysa-guide-source p,.chaysa-guide-result-policy{font-size:12px;line-height:2;color:#46564a;overflow-wrap:anywhere}
+.chaysa-guide-citation{font-size:11px!important;color:#315b42!important}
+.chaysa-guide-result-policy{padding:10px;background:#fff4dc;border-right:3px solid var(--gold);border-radius:7px}
 #chaysaGuideStatus{font-size:12px;line-height:1.9;margin:2px 0;color:#a33}
 .chaysa-guide-privacy,.chaysa-guide-health{font-size:11px;line-height:1.9;color:var(--muted);margin:9px 0}
 .chaysa-guide-health{padding:10px;background:#fff8e8;border-right:3px solid var(--gold);border-radius:7px;color:#654f22}
@@ -95,7 +102,7 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
 <div class="eyebrow">KNOWLEDGE • SAFETY • TRUST</div>
 <h1>مشاور سلامت چایسا</h1>
 <p class="subtitle">شناخت آگاهانه محصولات گیاهی و مصرف ایمن</p>
-<p class="intro">فضایی تخصصی برای آشنایی با ویژگی‌های چای و دمنوش، نکات ایمنی مصرف و شناخت علمی تداخل‌های احتمالی با داروها.</p>
+<p class="intro">راهنمایی ساده و کاربردی درباره محصولات چایسا و نکات عمومی مصرف؛ بدون تشخیص، تجویز یا ادعای درمان.</p>
 </section>
 <section class="progress" role="note" aria-label="وضعیت کتابخانه پژوهشی">
 <strong>کتابخانه پژوهشی اولیه در دسترس است</strong>
@@ -110,7 +117,7 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
     <li><strong>در کتابخانه جست‌وجو کنید:</strong> پس از بازشدن بخش انتخابی، نام محصول، گیاه، دارو یا منبع را در کادر جست‌وجو بنویسید. نتایج همان بخش فیلتر می‌شوند؛ برای دیدن همه موارد، عبارت جست‌وجو را پاک کنید.</li>
     <li><strong>پرسش خود را آماده کنید:</strong> در قسمت «پرسش درباره محصولات و ایمنی مصرف»، یکی از دسته‌های پرسش را انتخاب کنید. برای پرسش محصول یا ایمنی، محصول چایسا را از فهرست انتخاب کنید. در دسته ایمنی، اگر پرسش درباره تداخل است، نام دارو را نیز وارد کنید.</li>
     <li><strong>پرسش را بنویسید:</strong> سؤال را کوتاه و روشن و فقط درباره محصول و ایمنی مصرف مطرح کنید. می‌توانید از پیشنهادهای آماده بالای کادر یا پیشنهادهای مرتبط با متن خود استفاده کنید.</li>
-    <li><strong>جست‌وجو را آماده کنید:</strong> دکمه «بررسی و آماده‌سازی پرسش» را بزنید. اگر پرسش در محدوده راهنما باشد، دکمه «مشاهده نتایج منابع بیرونی» نمایش داده می‌شود؛ با انتخاب آن، پرسش‌های ایمنی و تداخل دارویی در PubMed و پرسش‌های اطلاعات محصول در Google جست‌وجو می‌شوند؛ نتایج در همان زبانه باز می‌شوند. منابع را بررسی و برای تصمیم پزشکی با پزشک یا داروساز مشورت کنید.</li>
+    <li><strong>جست‌وجو را آماده کنید:</strong> دکمه «بررسی و آماده‌سازی پرسش» را بزنید. پس از فشردن دکمه، بانک داخلی چایسا بررسی می‌شود و بخش‌های مرتبط از ترجمه منابع، همراه با مشخصات کامل منبع اصلی، در همین صفحه نمایش داده می‌شود.</li>
   </ol>
   <p class="health-howto-warning"><strong>محدودیت مهم:</strong> مشاور سلامت در وضعیت فعلی ابزار پژوهش و راهنمای جست‌وجو است، نه پزشک یا سامانه پاسخ‌گوی پزشکی. اطلاعات کتابخانه اولیه و در حال اعتبارسنجی‌اند؛ ممکن است ناقص باشند و ترکیبات اختصاصی محصولات هنوز با برچسب رسمی تأیید نشده‌اند. این بخش تشخیص، تجویز یا پاسخ پزشکی تأییدشده ارائه نمی‌کند.</p>
   <p class="health-howto-privacy">پرسش ارسالی در بانک اطلاعاتی چایسا ذخیره نمی‌شود؛ اما پس از انتخاب دکمه نتایج بیرونی، عبارت جست‌وجوی محدود و متناسب با موضوع به مقصد مربوط فرستاده می‌شود: پرسش‌های ایمنی و تداخل به PubMed و پرسش‌های اطلاعات محصول به Google. این عبارت ممکن است شامل متن پرسش و نام محصول/دارو باشد. نام، شماره تماس، نشانی، مدارک پزشکی یا اطلاعات هویتی را وارد نکنید. در وضعیت اضطراری یا بروز علائم شدید، منتظر جست‌وجوی اینترنتی نمانید و فوراً از خدمات درمانی کمک بگیرید. داروی تجویزشده را خودسرانه قطع یا تغییر ندهید.</p>
@@ -148,9 +155,10 @@ footer b{font:700 13px Arial,sans-serif;letter-spacing:1.5px;color:var(--green);
     <div id="chaysaGuideSuggestions" class="chaysa-guide-prompts" aria-label="پیشنهادهای جست‌وجو"></div>
     <button id="chaysaGuidePrepare" type="submit">آماده‌سازی جست‌وجوی منابع</button>
     <p id="chaysaGuideStatus" role="status" aria-live="polite"></p>
-    <a id="chaysaGuideAnswer" class="chaysa-guide-answer" hidden rel="noopener noreferrer">مشاهده نتایج بیرونی</a>
+    <section id="chaysaGuideResults" class="chaysa-guide-results" hidden aria-live="polite"></section>
+    
   </form>
-  <p class="chaysa-guide-privacy">پرسش شما در بانک اطلاعاتی چایسا ذخیره نمی‌شود. با انتخاب پیوند نتایج، عبارت جست‌وجوی محدود به مقصد متناسب با موضوع فرستاده می‌شود: پرسش‌های ایمنی و تداخل دارویی به PubMed و پرسش‌های اطلاعات محصول به Google. عبارت جست‌وجو ممکن است متن پرسش و نام محصول/دارو را در بر بگیرد؛ اطلاعات شخصی یا شرح پرونده پزشکی را وارد نکنید.</p>
+  <p class="chaysa-guide-privacy">پرسش شما برای یافتن مطالب مرتبط در بانک داخلی چایسا پردازش می‌شود و برای جست‌وجوی بیرونی به سرویس دیگری فرستاده نمی‌شود. اطلاعات شخصی یا شرح پرونده پزشکی را وارد نکنید.</p>
   <p id="chaysaGuideHealthNotice" class="chaysa-guide-health" role="note" hidden></p>
 </section>
 <aside class="notice">
