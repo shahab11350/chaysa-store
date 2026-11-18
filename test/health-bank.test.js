@@ -124,6 +124,8 @@ test("research evidence files are private, size-limited, signature-checked and a
   assert.match(queue, /evidence\.some\(row => row\.type === "label" && evidenceFileExists\(row\)\)/);
   assert.match(queue, /evidence\.some\(row => row\.type === "composition" && evidenceFileExists\(row\)\)/);
   assert.match(queue, /evidenceFileExists/);
+  assert.match(queue, /محصول غیرفعال یا حذف‌شده وارد مراحل فعال پژوهش نمی‌شود/);
+  assert.match(queue, /SKU تکراری تا زمان رفع تعارض/);
   assert.match(adminPage, /addEvidenceUpload\('label'/);
   assert.match(adminPage, /addEvidenceUpload\('composition'/);
 });
