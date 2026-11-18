@@ -938,7 +938,7 @@ test("private research evidence upload and retrieval require admin and gate appr
   const evidenceId = compositionResult.item.evidence[0].id;
   const download = await fetch(baseUrl + "/api/admin/health-research/evidence/" + evidenceId, { headers: { Cookie: cookie } });
   assert.equal(download.status, 200);
-  assert.match(download.headers.get("content-type") || "", /application\\/pdf/);
+  assert.match(download.headers.get("content-type") || "", /application\/pdf/);
   assert.match(await download.text(), /CHAYSA TEST/);
 
   const approved = await fetch(baseUrl + "/api/admin/health-research/queue/" + encodeURIComponent(item.id), {
