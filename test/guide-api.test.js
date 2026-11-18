@@ -896,3 +896,60 @@ test("PubMed candidate endpoint is admin-only and never saves candidates automat
   const unchanged = after.items.find(row => row.id === item.id);
   assert.equal(unchanged.sources.length, 0);
 });
+
+
+test("private research evidence upload and retrieval require admin and gate approval", async () => {
+  const unauthorized = await fetch(baseUrl + "/api/admin/health-research/queue/not-real/evidence");
+  assert.equal(unauthorized.status, 401);
+  const privateUnauthorized = await fetch(baseUrl + "/api/admin/health-research/evidence/11111111-1111-4111-8111-111111111111");
+  assert.equal(privateUnauthorized.status, 401);
+
+  const login = await fetch(baseUrl + "/api/admin/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ password: "guide-test-only-password" })
+  });
+  assert.equal(login.status, 200);
+  const cookie = (login.headers.get("set-cookie") || "").split(";")[0];
+  const queueResponse = await fetch(baseUrl + "/api/admin/health-research/queue", { headers: { Cookie: cookie } });
+  const queue = await queueResponse.json();
+  const item = queue.items.find(row => row.catalogActive && row.sku && !row.duplicateSku);
+  assert.ok(item);
+
+  async function upload(type, filename) {
+    const form = new FormData();
+    form.append("type", type);
+    form.append("evidence", new Blob([Buffer.from("%PDF-1.4\\nCHAYSA TEST\\n%%EOF")], { type: "application/pdf" }), filename);
+    return fetch(baseUrl + "/api/admin/health-research/queue/" + encodeURIComponent(item.id) + "/evidence", {
+      method: "POST", headers: { Cookie: cookie }, body: form
+    });
+  }
+  const labelUpload = await upload("label", "label.pdf");
+  assert.equal(labelUpload.status, 201);
+  const labelResult = await labelUpload.json();
+  assert.equal(labelResult.item.evidence.length, 1);
+  assert.equal(labelResult.item.labelEvidenceStatus, "received");
+  const compositionUpload = await upload("composition", "composition.pdf");
+  assert.equal(compositionUpload.status, 201);
+  const compositionResult = await compositionUpload.json();
+  assert.equal(compositionResult.item.evidence.length, 2);
+  assert.equal(compositionResult.item.compositionStatus, "received");
+
+  const evidenceId = compositionResult.item.evidence[0].id;
+  const download = await fetch(baseUrl + "/api/admin/health-research/evidence/" + evidenceId, { headers: { Cookie: cookie } });
+  assert.equal(download.status, 200);
+  assert.match(download.headers.get("content-type") || "", /application\\/pdf/);
+  assert.match(await download.text(), /CHAYSA TEST/);
+
+  const approved = await fetch(baseUrl + "/api/admin/health-research/queue/" + encodeURIComponent(item.id), {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", Cookie: cookie },
+    body: JSON.stringify({
+      status: "approved", labelEvidenceStatus: "checked", compositionStatus: "checked",
+      reviewerName: "بازبین آزمون",
+      sources: [{ title: "منبع آزمون", url: "https://example.org/test", sourceType: "official" }]
+    })
+  });
+  assert.equal(approved.status, 200);
+  assert.equal((await approved.json()).item.status, "approved");
+});
