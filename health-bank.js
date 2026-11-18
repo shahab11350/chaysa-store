@@ -181,6 +181,12 @@
     list.append(make("p", "health-bank-inline-note", "برای هر محصول، دستور دقیق باید از برچسب رسمی یا راهنمای سازنده همان محصول دریافت شود. بانک فعلی هنوز دستور اختصاصی تأییدشده همه محصولات را ندارد."));
   }
   function renderQaBank() {
+    if (!state.query) {
+      summary.textContent = "برای یافتن منابع مرتبط با پرسش خود، عبارت موردنظر را جست‌وجو کنید.";
+      empty("جست‌وجوی این بخش، پرونده‌های گیاهی، منابع علمی و کتاب‌های ثبت‌شده در بانک داخلی را بررسی می‌کند.");
+      list.append(make("p", "health-bank-inline-note", "پس از جست‌وجو می‌توانید پرسش خود را در فرم همین بخش ثبت کنید. این بخش پاسخ پزشکی یا تشخیص ارائه نمی‌کند."));
+      return;
+    }
     const profilesVisible = profiles().filter(matches);
     const sourcesVisible = (state.research.sources || []).filter(matches);
     const booksVisible = (state.research.bookBibliography || []).filter(matches);
