@@ -140,11 +140,11 @@
     list.append(make("p", "health-bank-inline-note", state.research.bookBibliographyDisclaimer || ""));
   }
   function renderTea() {
-    renderProfiles("چای", p => normalize(p.scientificName).includes("camellia") || normalize(p.commonName).includes("چای"),
+    renderProfiles("چای", p => normalize(p.scientificName).includes("camellia"),
       [{key:"summary",label:"شناخت و فرآوری:"},{key:"evidence",label:"شواهد و محدودیت‌ها:"},{key:"safety",label:"ایمنی:"},{key:"interaction",label:"تداخل‌های گزارش‌شده:"},{key:"formCaution",label:"نکته درباره شکل فرآورده:"}]);
   }
   function renderInfusions() {
-    renderProfiles("دمنوش‌ها", p => !(normalize(p.scientificName).includes("camellia") || normalize(p.commonName).includes("چای")),
+    renderProfiles("دمنوش‌ها", p => !normalize(p.scientificName).includes("camellia"),
       [{key:"summary",label:"شناخت گیاه:"},{key:"evidence",label:"شواهد و محدودیت‌ها:"},{key:"safety",label:"ایمنی:"},{key:"interaction",label:"تداخل‌های گزارش‌شده:"},{key:"formCaution",label:"نکته درباره شکل فرآورده:"}]);
   }
   function renderProperties() {
@@ -178,6 +178,14 @@
   }
   function render() {
     if (!state.research) return;
+    const headings = {
+      botanical:"دانشنامه گیاهان دارویی", tea:"دنیای چای", infusions:"دنیای دمنوش‌ها",
+      properties:"خواص و کاربردها", compounds:"ترکیبات و مواد مؤثره",
+      preparation:"روش مصرف و آماده‌سازی", safety:"موارد احتیاط و ایمنی",
+      products:"راهنمای انتخاب محصولات چایسا", sources:"کتابخانه منابع و مقالات"
+    };
+    const heading = document.getElementById("healthBankTitle");
+    if (heading) heading.textContent = headings[state.tab] || "بانک موضوعی سلامت چایسا";
     list.replaceChildren();
     tabButtons.forEach(button => button.setAttribute("aria-pressed", String(button.dataset.healthBankTab === state.tab)));
     if (state.tab === "botanical") renderProfiles("دانشنامه گیاهان", () => true,
