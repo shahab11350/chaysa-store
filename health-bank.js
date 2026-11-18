@@ -112,8 +112,9 @@
       list.append(make("h3", "health-bank-group-title", heading));
       rows.forEach(source => {
         const item = card(source.title, source.publisher);
+        addLine(item, "عنوان اصلی:", source.title);
         addLine(item, "نوع منبع:", source.sourceType);
-        addLine(item, "موضوع/دامنه:", (source.supports || []).join("؛ "));
+        addLine(item, "خلاصه فارسی دامنه منبع:", (source.supportsFa || source.supports || []).join("؛ "));
         addLine(item, "آخرین بررسی ثبت‌شده:", source.accessedAt);
         addLink(item, "بازکردن منبع اصلی", source.url); list.append(item);
       });
