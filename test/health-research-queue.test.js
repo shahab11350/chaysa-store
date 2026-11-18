@@ -218,3 +218,28 @@ test("evidence metadata is private to the queue and requires an active unique SK
     assert.throws(() => f.queue.addEvidence(active.id, { ...meta, fileId: "55555555-5555-4555-8555-555555555555", fileName: "55555555-5555-4555-8555-555555555555.svg", mime: "image/svg+xml" }), /اطلاعات مدرک/);
   } finally { f.cleanup(); }
 });
+
+test("approval is blocked if an attached evidence file is missing from private storage", () => {
+  const f = fixture();
+  try {
+    const item = f.queue.syncCatalog([{ sku: "SKU-MISSING-FILE", name: "چای سبز", category: "چای", active: true }]).items[0];
+    const labelName = "88888888-8888-4888-8888-888888888888.pdf";
+    const compositionName = "99999999-9999-4999-8999-999999999999.pdf";
+    f.writeEvidence(labelName);
+    f.writeEvidence(compositionName);
+    f.queue.addEvidence(item.id, {
+      type: "label", fileId: "88888888-8888-4888-8888-888888888888",
+      fileName: labelName, originalName: "label.pdf", mime: "application/pdf", size: 100, sha256: "f".repeat(64)
+    });
+    f.queue.addEvidence(item.id, {
+      type: "composition", fileId: "99999999-9999-4999-8999-999999999999",
+      fileName: compositionName, originalName: "composition.pdf", mime: "application/pdf", size: 100, sha256: "1".repeat(64)
+    });
+    fs.unlinkSync(path.join(f.dir, "health-research-evidence", labelName));
+    assert.throws(() => f.queue.updateItem(item.id, {
+      labelEvidenceStatus: "checked", compositionStatus: "checked",
+      reviewerName: "بازبین", sources: [{ title: "مرجع", url: "https://example.org/ref" }],
+      status: "approved"
+    }), /فایل مدرک برچسب و ترکیبات/);
+  } finally { f.cleanup(); }
+});
