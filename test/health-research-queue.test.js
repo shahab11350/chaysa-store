@@ -108,3 +108,49 @@ test("a changed product identity reopens an approved record for update", () => {
     assert.equal(changed.items[0].status, "needs_update");
   } finally { f.cleanup(); }
 });
+
+test("PubMed search returns bounded candidate metadata without auto-saving it", async () => {
+  const f = fixture();
+  try {
+    const item = f.queue.syncCatalog([{ sku: "SKU-PUBMED", name: "زنجبیل", category: "دمنوش", active: true }]).items[0];
+    const calls = [];
+    const fakeFetch = async url => {
+      calls.push(String(url));
+      if (String(url).includes("esearch.fcgi")) return {
+        ok: true,
+        json: async () => ({ esearchresult: { idlist: ["12345678", "not-a-pmid"] } })
+      };
+      return {
+        ok: true,
+        json: async () => ({ result: { "12345678": {
+          title: "Ginger research title",
+          fulljournalname: "Journal of Test Research",
+          pubdate: "2025 Jan",
+          authors: [{ name: "A. Author" }]
+        } } })
+      };
+    };
+    const result = await f.queue.searchPubMed(item.id, "Zingiber officinale", fakeFetch);
+    assert.equal(result.query, "Zingiber officinale");
+    assert.equal(result.candidates.length, 1);
+    assert.equal(result.candidates[0].pmid, "12345678");
+    assert.equal(result.candidates[0].url, "https://pubmed.ncbi.nlm.nih.gov/12345678/");
+    assert.equal(calls.length, 2);
+    assert.equal(f.queue.read().items[0].sources.length, 0);
+  } finally { f.cleanup(); }
+});
+
+test("PubMed search rejects inactive, missing-SKU and duplicate-SKU products", async () => {
+  const f = fixture();
+  try {
+    const state = f.queue.syncCatalog([
+      { sku: "DUP-PUBMED", name: "گیاه اول", category: "چای", active: true },
+      { sku: "DUP-PUBMED", name: "گیاه دوم", category: "چای", active: true },
+      { sku: "", name: "بدون شناسه", category: "چای", active: true }
+    ]);
+    const duplicate = state.items.find(x => x.duplicateSku);
+    const missing = state.items.find(x => !x.sku);
+    await assert.rejects(() => f.queue.searchPubMed(duplicate.id, "plant"), /فقط برای محصول فعال/);
+    await assert.rejects(() => f.queue.searchPubMed(missing.id, "plant"), /فقط برای محصول فعال/);
+  } finally { f.cleanup(); }
+});
