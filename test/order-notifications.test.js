@@ -66,6 +66,8 @@ before(async () => {
       ORDER_CHAT_IDS: "111111,222222",
       TELEGRAM_MOCK_LOG: telegramLog, RUBIKA_MOCK_LOG: rubikaLog,
       TELEGRAM_MOCK_FAIL_CUSTOMER_ONCE_CHAT_IDS: "666666",
+      RUBIKA_MOCK_FAIL_CUSTOMER_ONCE_CHAT_IDS: "RubikaFailOnce_12345",
+      RUBIKA_MOCK_FAIL_CUSTOMER_CHAT_IDS: "RubikaFailAlways_12345",
       NODE_OPTIONS: "--require " + path.join(__dirname, "mock-telegram-fetch.js")
     },
     stdio: ["ignore", "pipe", "pipe"]
@@ -156,6 +158,43 @@ test("owner and Bostani status changes notify the selected customer channel, sup
       String(payload.text || "").startsWith("به‌روزرسانی سفارش چایسا");
   });
   assert.ok(rubikaCustomerMessage);
+
+  const rubikaRetryOrder = await createOrder("rubika", "RubikaFailOnce_12345", "مشتری روبیکا آزمایشی");
+  const rubikaFailed = await request("/api/admin/orders/" + encodeURIComponent(rubikaRetryOrder) + "/status", {
+    method: "PATCH", headers: { "Content-Type": "application/json", Cookie: adminCookie },
+    body: JSON.stringify({ status: "ارسال‌شده" })
+  });
+  const rubikaFailedBody = await rubikaFailed.json();
+  assert.equal(rubikaFailed.status, 200);
+  assert.equal(rubikaFailedBody.customerNotification.status, "failed");
+  assert.match(rubikaFailedBody.customerNotification.error, /status=ERROR/);
+  assert.match(rubikaFailedBody.customerNotification.error, /error_code=4003/);
+  assert.doesNotMatch(rubikaFailedBody.customerNotification.error, /sensitive Rubika response text/);
+
+  const rubikaRetried = await request("/api/admin/orders/" + encodeURIComponent(rubikaRetryOrder) + "/status-notification/retry", {
+    method: "POST", headers: { Cookie: adminCookie }
+  });
+  const rubikaRetriedBody = await rubikaRetried.json();
+  assert.equal(rubikaRetried.status, 200);
+  assert.equal(rubikaRetriedBody.ok, true);
+  assert.equal(rubikaRetriedBody.customerNotification.status, "sent");
+  assert.equal(rubikaRetriedBody.customerNotification.attempts, 2);
+
+  const rubikaPermanentOrder = await createOrder("rubika", "RubikaFailAlways_12345", "مشتری روبیکا ناموفق");
+  const rubikaPermanentFailed = await request("/api/admin/orders/" + encodeURIComponent(rubikaPermanentOrder) + "/status", {
+    method: "PATCH", headers: { "Content-Type": "application/json", Cookie: adminCookie },
+    body: JSON.stringify({ status: "تحویل‌شده" })
+  });
+  const rubikaPermanentBody = await rubikaPermanentFailed.json();
+  assert.equal(rubikaPermanentBody.customerNotification.status, "failed");
+  const rubikaPermanentRetry = await request("/api/admin/orders/" + encodeURIComponent(rubikaPermanentOrder) + "/status-notification/retry", {
+    method: "POST", headers: { Cookie: adminCookie }
+  });
+  const rubikaPermanentRetryBody = await rubikaPermanentRetry.json();
+  assert.equal(rubikaPermanentRetry.status, 502);
+  assert.equal(rubikaPermanentRetryBody.ok, false);
+  assert.equal(rubikaPermanentRetryBody.customerNotification.status, "failed");
+  assert.doesNotMatch(JSON.stringify(rubikaPermanentRetryBody), /sensitive Rubika response text/);
 });
 
 test("Telegram checkout connection link resolves the bot and /start returns the customer numeric chat ID", async () => {

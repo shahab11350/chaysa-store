@@ -331,7 +331,8 @@ app.post("/api/admin/orders/:id/status-notification/retry",requireAdmin,async(re
  const rows=readOrders(),o=rows.find(x=>x.id===req.params.id);if(!o)return json(res,404,{error:"سفارش پیدا نشد."});
  try {
   const result=await retryOrderStatusNotification(rows,o);
-  if(!result.ok)return json(res,409,{ok:false,error:result.error,customerNotification:o.statusNotification||null});
+  if(!result.eligible)return json(res,409,{ok:false,error:result.error,customerNotification:o.statusNotification||null});
+  if(!result.ok)return json(res,502,{ok:false,error:result.error||"ارسال پیام به مشتری تأیید نشد.",customerNotification:o.statusNotification||null});
   return json(res,200,{ok:true,customerNotification:o.statusNotification});
  } catch (_) { return json(res,500,{ok:false,error:"ثبت نتیجه تلاش مجدد انجام نشد."}); }
 });
@@ -400,10 +401,36 @@ function saveTelegramRecipient(chat) {
   fs.renameSync(tmp, TELEGRAM_RECIPIENTS_FILE);
 }
 
-async function sendRubikaText(chatId, text) {
+async function sendRubikaTextDetailed(chatId, text) {
  const token=process.env.RUBIKA_BOT_TOKEN||"";
- if(!token||typeof chatId!=="string"||!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return false;
- try{const r=await fetch("https://botapi.rubika.ir/v3/"+token+"/sendMessage",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({chat_id:chatId,text,disable_notification:false})});const d=await r.json();return r.ok&&d.status==="OK"&&Boolean(d.data&&d.data.message_id)}catch(_){return false}
+ if(!token)return {ok:false,error:"توکن ربات روبیکا تنظیم نشده است."};
+ if(typeof chatId!=="string"||!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))
+  return {ok:false,error:"شناسه گفت‌وگوی روبیکا معتبر نیست."};
+ try {
+  const response=await fetch("https://botapi.rubika.ir/v3/"+token+"/sendMessage",{
+   method:"POST",headers:{"Content-Type":"application/json"},
+   body:JSON.stringify({chat_id:chatId,text,disable_notification:false})
+  });
+  let data;
+  try { data=await response.json(); }
+  catch (_) { return {ok:false,error:"پاسخ روبیکا JSON معتبر نبود (HTTP "+response.status+")."}; }
+  const messageId=data&&data.data&&data.data.message_id;
+  if(response.ok&&data&&data.status==="OK"&&typeof messageId==="string"&&messageId.trim())
+   return {ok:true,messageId};
+  const details=["HTTP "+response.status];
+  if(data&&data.status)details.push("status="+safeRubikaDiagnosticValue(data.status));
+  if(data&&data.status_det)details.push("status_det="+safeRubikaDiagnosticValue(data.status_det));
+  if(data&&data.error_code!==undefined)details.push("error_code="+safeRubikaDiagnosticValue(data.error_code));
+  if(response.ok&&data&&data.status==="OK"&&!messageId)details.push("message_id=missing");
+  return {ok:false,error:"ارسال روبیکا تأیید نشد ("+details.join("; ")+")."};
+ } catch (error) {
+  const kind=error&&error.name?String(error.name).replace(/[^A-Za-z0-9_-]/g,"").slice(0,32):"NetworkError";
+  return {ok:false,error:"خطای ارتباط با API روبیکا ("+kind+")."};
+ }
+}
+async function sendRubikaText(chatId, text) {
+ const result=await sendRubikaTextDetailed(chatId,text);
+ return result.ok;
 }
 async function notifyBostaniRubika(message) {
  const chatId=String(process.env.CHAYSA_BOSTANI_RUBIKA_CHAT_ID||"").trim();
@@ -491,8 +518,8 @@ async function deliverOrderStatusNotification(order) {
   if (platform === "rubika") {
     if (!process.env.RUBIKA_BOT_TOKEN || !/^[A-Za-z0-9_-]{12,80}$/.test(chatId))
       return { status: "not_configured", platform, error: "شناسه یا اتصال روبیکای مشتری آماده نیست." };
-    const sent = await sendRubikaText(chatId, orderCustomerStatusMessage(order));
-    return { status: sent ? "sent" : "failed", platform, error: sent ? null : "ارسال پیام روبیکا ناموفق بود." };
+    const delivery = await sendRubikaTextDetailed(chatId, orderCustomerStatusMessage(order));
+    return { status: delivery.ok ? "sent" : "failed", platform, error: delivery.ok ? null : delivery.error };
   }
   return { status: "not_configured", platform: "", error: "پیام‌رسان ثبت‌شده مشتری پشتیبانی نمی‌شود." };
 }
@@ -529,7 +556,7 @@ async function retryOrderStatusNotification(rows, order) {
   const delivery = await deliverOrderStatusNotification(order);
   Object.assign(previous, delivery, { attemptedAt: new Date().toISOString() });
   saveOrders(rows);
-  return { ok: true };
+  return { ok: delivery.status === "sent", eligible: true, error: delivery.error || null };
 }
 function buildOwnerProgressReport() {
   const orders = readOrders();
