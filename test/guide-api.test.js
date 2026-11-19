@@ -607,10 +607,9 @@ test("Rubika webhook reveals the real chat ID on /start", async () => {
   });
   assert.equal(webhook.status, 200);
   const calls = readFileSync(rubikaMockLog, "utf8").split("\n").filter(Boolean).map(line => JSON.parse(line));
-  const welcome = calls.find(item => item.url.endsWith("/sendMessage") && JSON.parse(item.body).text.includes("شناسه گفت‌وگوی شما"));
-  assert.ok(welcome);
-  assert.match(JSON.parse(welcome.body).text, /شناسه گفت‌وگوی شما/);
-  assert.match(JSON.parse(welcome.body).text, new RegExp(chatId));
+  const messages = calls.filter(item => item.url.endsWith("/sendMessage")).map(item => JSON.parse(item.body))
+    .filter(payload => payload.chat_id === chatId).map(payload => payload.text);
+  assert.deepEqual(messages, ["شناسه خرید از چایسا", chatId]);
 });
 
 
@@ -636,11 +635,12 @@ test("Rubika webhook handles StartedBot and nested update envelopes", async () =
   assert.equal(nestedMessage.status, 200);
 
   const calls = readFileSync(rubikaMockLog, "utf8").split("\n").filter(Boolean).map(line => JSON.parse(line));
-  const welcomeCalls = calls.slice(before).filter(item =>
-    item.url.endsWith("/sendMessage") && JSON.parse(item.body).text.includes("شناسه گفت‌وگوی شما")
-  );
-  assert.equal(welcomeCalls.length, 2);
-  for (const item of welcomeCalls) assert.match(JSON.parse(item.body).text, new RegExp(chatId));
+  const messages = calls.slice(before).filter(item => item.url.endsWith("/sendMessage"))
+    .map(item => JSON.parse(item.body)).filter(payload => payload.chat_id === chatId).map(payload => payload.text);
+  assert.deepEqual(messages, [
+    "شناسه خرید از چایسا", chatId,
+    "شناسه خرید از چایسا", chatId
+  ]);
 });
 
 test("Rubika webhook registration uses ReceiveUpdate and accepts the documented Done result", async () => {
