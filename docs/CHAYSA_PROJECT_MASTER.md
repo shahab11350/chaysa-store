@@ -2096,3 +2096,4 @@
 - پیاده‌سازی اولیه در شاخه جداگانه `feature/burgundy-gold-app-theme-2026-11-19` در مخزن اپ آغاز شده است.
 - Commitهای پیاده‌سازی تا این ثبت: `6fc184a81ce37adac90f4f427b236bab7fcf1caa` (رنگ‌بندی کد)، `e893e3984c3219f666a6683038472b3d399f7add` (ثبت در revision tracker)، `bfeb4fc27a8679083496204209882f41c263c269` (به‌روزرسانی README).
 - وضعیت فعلی: تغییر کد در شاخه آزمایشی ثبت شده؛ هنوز تحلیل Flutter، آزمون widget، ساخت APK، نصب و تأیید ظاهری روی گوشی انجام نشده است. این تغییر در شاخه اصلی ادغام یا در محیط عملیاتی منتشر نشده است.
+- برای اجرای بررسی CI، PR آزمایشی شماره 7 با عنوان `Apply independent burgundy and gold theme to CHAYSA Android app` از شاخه آزمایشی به `main` به‌صورت Draft باز شد: https://github.com/shahab11350/chaysapp-android/pull/7. PR ادغام نشده است؛ در زمان ثبت این گزارش، برای commit شاخه وضعیت check ثبت‌شده‌ای در GitHub مشاهده نشد.
