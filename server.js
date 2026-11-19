@@ -432,6 +432,11 @@ async function sendRubikaText(chatId, text) {
  const result=await sendRubikaTextDetailed(chatId,text);
  return result.ok;
 }
+async function sendRubikaChatIdReply(chatId) {
+ const titleSent=await sendRubikaText(chatId,"شناسه خرید از چایسا");
+ const idSent=await sendRubikaText(chatId,chatId);
+ return titleSent&&idSent;
+}
 async function notifyBostaniRubika(message) {
  const chatId=String(process.env.CHAYSA_BOSTANI_RUBIKA_CHAT_ID||"").trim();
  if(!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return {status:"not_configured",sent:false};
@@ -459,17 +464,16 @@ async function handleRubikaUpdate(update){
  const msg=update.new_message||update.updated_message||null;
  const chatId=String(update.chat_id||(msg&&msg.chat_id)||"");
  if(!/^[A-Za-z0-9_-]{12,80}$/.test(chatId))return;
- const welcome="به ربات چایسا خوش آمدید.\nشناسه گفت‌وگوی شما برای ثبت سفارش:\n"+chatId+"\nاین شناسه را پس از انتخاب روبیکا در فرم سفارش وارد کنید. فاکتور از همین گفت‌وگو ارسال می‌شود.";
  if(type==="StartedBot"){
-  const sent=await sendRubikaText(chatId,welcome);
-  console.log("Rubika StartedBot response:",sent?"sent":"failed");
+  const sent=await sendRubikaChatIdReply(chatId);
+  console.log("Rubika StartedBot response:",sent?"sent":"partial_or_failed");
   return;
  }
  if(!msg||msg.sender_type!=="User"||typeof msg.text!=="string")return;
  const command=msg.text.trim();
  if(command==="/start"||/^\/start@Chaysa2026bot$/i.test(command)||command==="شروع"){
-  const sent=await sendRubikaText(chatId,welcome);
-  console.log("Rubika /start response:",sent?"sent":"failed");
+  const sent=await sendRubikaChatIdReply(chatId);
+  console.log("Rubika /start response:",sent?"sent":"partial_or_failed");
  }
 }
 app.post("/rubika/webhook/:key",async(req,res)=>{

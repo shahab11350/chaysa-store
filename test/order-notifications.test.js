@@ -1,4 +1,5 @@
 const { test, before, after } = require("node:test");
+const crypto = require("node:crypto");
 const assert = require("node:assert/strict");
 const { spawn } = require("node:child_process");
 const { mkdtempSync, rmSync, readFileSync, writeFileSync } = require("node:fs");
@@ -106,23 +107,36 @@ after(async () => {
   if (dataDir) rmSync(dataDir, { recursive: true, force: true });
 });
 
-test("Rubika InvalidUrl webhook falls back to getUpdates and returns a real chat ID in /start welcome", async () => {
+test("Rubika /start sends the title and copy-only numeric chat ID as separate messages on every entry", async () => {
+  const chatId = "RubikaPollingChat_12345";
   const deadline = Date.now() + 5000;
-  let welcome = null;
-  while (Date.now() < deadline) {
-    const entries = lines(rubikaLog);
-    const sent = entries.filter(entry => entry.url.endsWith("/sendMessage")).map(entry => JSON.parse(entry.body || "{}"));
-    welcome = sent.find(payload =>
-      payload.chat_id === "RubikaPollingChat_12345" &&
-      String(payload.text || "").includes("شناسه گفت‌وگوی شما برای ثبت سفارش")
-    );
-    if (welcome) break;
+  const sentForChat = () => lines(rubikaLog)
+    .filter(entry => entry.url.endsWith("/sendMessage"))
+    .map(entry => JSON.parse(entry.body || "{}"))
+    .filter(payload => payload.chat_id === chatId)
+    .map(payload => payload.text);
+  while (Date.now() < deadline && sentForChat().length < 2) {
     await new Promise(resolve => setTimeout(resolve, 50));
   }
-  assert.ok(welcome, "Rubika polling fallback did not send the /start welcome message");
-  assert.match(welcome.text, /RubikaPollingChat_12345/);
+  assert.deepEqual(sentForChat(), ["شناسه خرید از چایسا", chatId],
+    "Polling StartedBot must send title first and the bare chat ID second");
   assert.ok(lines(rubikaLog).some(entry => entry.url.endsWith("/getUpdates")), "getUpdates was not called");
   assert.equal(readFileSync(path.join(dataDir, "rubika-updates-offset.txt"), "utf8"), "rubika-offset-1");
+
+  const webhookKey = crypto.createHash("sha256")
+    .update("CHAYSA-RUBIKA-WEBHOOK-V1:test-rubika-token").digest("hex").slice(0, 40);
+  const restarted = await request("/rubika/webhook/" + webhookKey, {
+    method: "POST", headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ update: {
+      type: "Message",
+      new_message: { chat_id: chatId, sender_type: "User", text: "/start" }
+    } })
+  });
+  assert.equal(restarted.status, 200);
+  assert.deepEqual(sentForChat(), [
+    "شناسه خرید از چایسا", chatId,
+    "شناسه خرید از چایسا", chatId
+  ], "A later /start must resend both separate messages without a one-time guard");
 });
 
 test("owner and Bostani status changes notify the selected customer channel, suppress duplicates and allow safe retry", async () => {
