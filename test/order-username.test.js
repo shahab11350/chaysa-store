@@ -18,7 +18,9 @@ test("checkout requires a messenger username between platform and chat ID", () =
   assert.match(field, /required/);
   assert.match(field, /maxlength="65"/);
   assert.match(checkout, /آیدی تلگرام \(مثال: @chaysa\)/);
-  assert.match(checkout, /آیدی روبیکا \(مثال: @chaysa\)/);
+  assert.match(checkout, /<option value="telegram">تلگرام<\/option>/);
+  assert.doesNotMatch(checkout, /<option value="rubika">روبیکا<\/option>/);
+  assert.match(checkout, /<p class="messenger-id-help wide rubika-messenger-help" hidden>برای روبیکا:/);
   assert.ok(!checkout.includes("آیدی عمومی مثل @username پذیرفته نیست."));
 });
 
@@ -33,4 +35,11 @@ test("username is previewed, submitted, validated, stored and included in invoic
 test("username is not used as the message delivery destination", () => {
   assert.ok(server.includes('const chatId = String(customer.messengerId || "").trim();'));
   assert.match(server, /customer\.messengerPlatform/);
+});
+
+
+test("Rubika order delivery remains supported by the server although checkout no longer offers it", () => {
+  assert.ok(server.includes('if (platform === "rubika") {'));
+  assert.ok(server.includes('sendRubikaTextDetailed(chatId, orderCustomerStatusMessage(order))'));
+  assert.ok(server.includes('if(!["telegram","rubika"].includes(String(c.messengerPlatform||"")))'));
 });
