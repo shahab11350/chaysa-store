@@ -8,6 +8,7 @@ on:
       - feature/admin-letter-composer-2026-11-16
       - feature/telegram-inline-letter-receipt-2026-11-16
       - feature/rubika-order-messaging-2026-11-17\n      - fix/rubika-webhook-started-event-2026-11-17
+      - fix/telegram-only-checkout-form-2026-11-19
   pull_request:
     branches:
       - chaysa-backup
