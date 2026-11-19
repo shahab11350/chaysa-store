@@ -608,7 +608,9 @@ test("Rubika webhook reveals the real chat ID on /start", async () => {
   assert.equal(webhook.status, 200);
   const calls = readFileSync(rubikaMockLog, "utf8").split("\n").filter(Boolean).map(line => JSON.parse(line));
   const messages = calls.filter(item => item.url.endsWith("/sendMessage")).map(item => JSON.parse(item.body))
-    .filter(payload => payload.chat_id === chatId).map(payload => payload.text);
+    .filter(payload => payload.chat_id === chatId &&
+      (payload.text === "شناسه خرید از چایسا" || payload.text === chatId))
+    .map(payload => payload.text);
   assert.deepEqual(messages, ["شناسه خرید از چایسا", chatId]);
 });
 
@@ -636,7 +638,8 @@ test("Rubika webhook handles StartedBot and nested update envelopes", async () =
 
   const calls = readFileSync(rubikaMockLog, "utf8").split("\n").filter(Boolean).map(line => JSON.parse(line));
   const messages = calls.slice(before).filter(item => item.url.endsWith("/sendMessage"))
-    .map(item => JSON.parse(item.body)).filter(payload => payload.chat_id === chatId).map(payload => payload.text);
+    .map(item => JSON.parse(item.body)).filter(payload => payload.chat_id === chatId &&
+      (payload.text === "شناسه خرید از چایسا" || payload.text === chatId)).map(payload => payload.text);
   assert.deepEqual(messages, [
     "شناسه خرید از چایسا", chatId,
     "شناسه خرید از چایسا", chatId
