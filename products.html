@@ -641,7 +641,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       }else{
         const delivery=result.recipientCount>0?"ارسال موفق به "+result.delivered+" از "+result.recipientCount+" گیرنده":"گیرندگان اعلان سفارش در سامانه تنظیم نشده‌اند";
         const persistence=result.notificationStatusSaved?"":"؛ ذخیره وضعیت ارسال نیز تأیید نشد";
-        status.textContent="سفارش با شناسه "+result.orderId+" در سامانه ثبت شد، اما دریافت پیش‌فاکتور توسط مدیران تأیید نشده است ("+delivery+persistence+"). سفارش را دوباره ثبت نکنید؛ کد رهگیری چایسا و فاکتور را نگه دارید.";
+        status.textContent="سفارش با کد رهگیری چایسا "+result.orderId+" در سامانه ثبت شد، اما دریافت پیش‌فاکتور توسط مدیران تأیید نشده است ("+delivery+persistence+"). سفارش را دوباره ثبت نکنید؛ کد رهگیری چایسا و فاکتور را نگه دارید.";
         status.classList.add("warning");
       }
       const customerDeliveryText=result.customerDeliveryStatus==="sent"?"فاکتور به تلگرام شما ارسال شد.":"ارسال فاکتور به پیام‌رسان تأیید نشد؛ کد رهگیری چایسا را نگه دارید و سفارش را دوباره ثبت نکنید.";
