@@ -134,6 +134,8 @@ test("owner and Bostani status changes notify the selected customer channel, sup
   );
   assert.ok(orderInvoice, "the admin invoice should be sent");
   assert.match(orderInvoice.text, /آیدی عمومی پیام‌رسان: @chaysa/);
+  assert.match(orderInvoice.text, /کد رهگیری چایسا:/);
+  assert.doesNotMatch(orderInvoice.text, /شناسه سفارش:/);
   const ownerUpdate = await request("/api/admin/orders/" + encodeURIComponent(telegramOrder) + "/status", {
     method: "PATCH", headers: { "Content-Type": "application/json", Cookie: adminCookie },
     body: JSON.stringify({ status: "در حال آماده‌سازی" })
@@ -148,7 +150,9 @@ test("owner and Bostani status changes notify the selected customer channel, sup
   });
   assert.equal(customerTelegramMessages().length, 1);
   const sentText = JSON.parse(customerTelegramMessages()[0].body).text;
-  assert.match(sentText, /CH-/);
+  assert.match(sentText, /کد رهگیری چایسا:/);
+  assert.match(sentText, /برای پیگیری، کد رهگیری چایسا را نزد خود نگه دارید/);
+  assert.doesNotMatch(sentText, /شناسه سفارش|شماره سفارش/);
   assert.match(sentText, /در حال آماده‌سازی/);
   assert.doesNotMatch(sentText, /نشانی آزمایشی|1234567890/);
 
