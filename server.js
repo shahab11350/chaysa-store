@@ -545,9 +545,9 @@ function orderCustomerStatusMessage(order) {
   return [
     "به‌روزرسانی سفارش چایسا",
     firstName ? firstName + " عزیز،" : "مشتری گرامی،",
-    "شماره سفارش: " + String(order.id || ""),
+    "کد رهگیری چایسا: " + String(order.id || ""),
     "وضعیت جدید: " + String(order.status || ""),
-    "برای پیگیری، شناسه سفارش را نزد خود نگه دارید."
+    "برای پیگیری، کد رهگیری چایسا را نزد خود نگه دارید."
   ].join("\n");
 }
 async function deliverOrderStatusNotification(order) {
@@ -1772,7 +1772,7 @@ app.get("/api/telegram/customer-bot",async(req,res)=>{
 function buildOrderInvoice(order) {
  const c=order.customer||{};
  const items=Array.isArray(order.items)?order.items:[];
- return ["فاکتور سفارش چایسا","شناسه سفارش: "+order.id,"تاریخ: "+new Date(order.createdAt).toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"وضعیت: "+order.status,"مشخصات خریدار",c.name+" "+c.family,"تماس: "+c.contact,"پیام‌رسان انتخابی: "+(c.messengerPlatform==="rubika"?"روبیکا":"تلگرام"),"آیدی عمومی پیام‌رسان: "+c.messengerUsername,"شناسه گفت‌وگو: "+c.messengerId,"استان/شهر: "+c.province+" / "+c.city,"نشانی: "+c.address,"کد پستی: "+c.postal,"توضیحات: "+c.notes,"اقلام سفارش",...items.map(x=>x.name+" | "+x.sku+" | "+x.qty+" × "+x.unitPrice.toLocaleString("en-US")+" = "+x.lineTotal.toLocaleString("en-US")+" تومان"),"جمع کل: "+Number(order.total||0).toLocaleString("en-US")+" تومان",order.deliveryRule].join("\n");
+ return ["فاکتور سفارش چایسا","کد رهگیری چایسا: "+order.id,"تاریخ: "+new Date(order.createdAt).toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"وضعیت: "+order.status,"مشخصات خریدار",c.name+" "+c.family,"تماس: "+c.contact,"پیام‌رسان انتخابی: "+(c.messengerPlatform==="rubika"?"روبیکا":"تلگرام"),"آیدی عمومی پیام‌رسان: "+c.messengerUsername,"شناسه گفت‌وگو: "+c.messengerId,"استان/شهر: "+c.province+" / "+c.city,"نشانی: "+c.address,"کد پستی: "+c.postal,"توضیحات: "+c.notes,"اقلام سفارش",...items.map(x=>x.name+" | "+x.sku+" | "+x.qty+" × "+x.unitPrice.toLocaleString("en-US")+" = "+x.lineTotal.toLocaleString("en-US")+" تومان"),"جمع کل: "+Number(order.total||0).toLocaleString("en-US")+" تومان",order.deliveryRule].join("\n");
 }
 app.post("/api/orders",async(req,res)=>{
  const key="order:"+(req.ip||"unknown");if(limited(key,5,10*60*1000))return json(res,429,{error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کن."});
@@ -1802,7 +1802,7 @@ app.post("/api/orders",async(req,res)=>{
    return json(res,200,{ok:true,duplicate:true,orderId:existing.id,invoice:buildOrderInvoice(existing),delivered:Number(existing.notification&&existing.notification.delivered||0),recipientCount:Number(existing.notification&&existing.notification.recipientCount||0),notificationStatus:existing.notification&&existing.notification.status||"pending",notificationStatusSaved:Boolean(existing.notification&&existing.notification.status&&existing.notification.status!=="pending"),rubikaNotificationStatus:existing.notification&&existing.notification.rubikaStatus||"unknown",customerDeliveryStatus:existing.customerDelivery&&existing.customerDelivery.status||"unknown",customerDeliveryStatusSaved:Boolean(existing.customerDelivery)});
   }
  }
- const order={id:"CH-"+now.toISOString().slice(0,10).replace(/-/g,"")+"-"+crypto.randomBytes(6).toString("hex").toUpperCase(),createdAt:now.toISOString(),status:"در انتظار بررسی",customer,termsAccepted:true,termsAcceptedAt:b.termsAcceptedAt,items,total,idempotencyKeyHash:idempotencyKeyHash||undefined,idempotencyFingerprint:idempotencyKeyHash?idempotencyFingerprint:undefined,notification:{status:"pending",delivered:0,recipientCount:0,attemptedAt:null},deliveryRule:"تحویل سفارش باید فقط به خریدار و پس از احراز هویت و تطبیق شناسه سفارش انجام شود. خریدار فاکتور و شناسه اختصاصی را تا زمان دریافت نگهداری کند."};
+ const order={id:"CH-"+now.toISOString().slice(0,10).replace(/-/g,"")+"-"+crypto.randomBytes(6).toString("hex").toUpperCase(),createdAt:now.toISOString(),status:"در انتظار بررسی",customer,termsAccepted:true,termsAcceptedAt:b.termsAcceptedAt,items,total,idempotencyKeyHash:idempotencyKeyHash||undefined,idempotencyFingerprint:idempotencyKeyHash?idempotencyFingerprint:undefined,notification:{status:"pending",delivered:0,recipientCount:0,attemptedAt:null},deliveryRule:"تحویل سفارش باید فقط به خریدار و پس از احراز هویت و تطبیق کد رهگیری چایسا انجام شود. خریدار فاکتور و کد رهگیری چایسا را تا زمان دریافت نگهداری کند."};
  rows.push(order);try{saveOrders(rows)}catch(_){return json(res,500,{error:"ذخیره سفارش انجام نشد؛ دوباره تلاش کنید."})}
  const invoice=buildOrderInvoice(order);
  const token=process.env.TELEGRAM_BOT_TOKEN||"",recipients=String(process.env.ORDER_CHAT_IDS||"").split(",").map(x=>x.trim()).filter(x=>/^-?\d+$/.test(x));
