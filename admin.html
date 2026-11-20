@@ -6,6 +6,8 @@
 #letterBody{display:block;width:100%;min-height:190px;padding:13px;border:1px solid #d9d2c2;border-radius:10px;font:14px/2 Tahoma;resize:vertical}
 .letter-brand{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;border-bottom:2px solid #b99b55;padding:4px 0 14px;margin-bottom:14px}.letter-brand img{display:block;width:min(220px,70%);height:auto;object-fit:contain}.letter-brand-caption{font:12px Tahoma,sans-serif;color:#68756b;letter-spacing:0;direction:rtl}.letter-heading{text-align:center;font-weight:bold;color:#173b2b;margin:12px 0}.letter-meta{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:#68756b;border-bottom:1px solid #e8dfca;padding:8px 0 12px;margin-bottom:14px}.letter-content{white-space:pre-wrap;overflow-wrap:anywhere;min-height:80px;line-height:2.2}.letter-signature{border-top:1px solid #e8dfca;margin-top:18px;padding-top:12px;text-align:right;line-height:2;font-weight:bold;color:#244b37}@media print{.letter-preview{border:0;box-shadow:none;border-radius:0;padding:0;background:#fff}}
 .letter-archive-item{padding:12px 0;border-bottom:1px solid #eee8d8;white-space:pre-wrap;overflow-wrap:anywhere}
+
+.check-hero{border-top:4px solid #b4232f}.check-kicker{margin-top:18px;color:#9b2832;font-size:11px;font-weight:bold;letter-spacing:1.5px;direction:ltr;text-align:right}.check-current-status{margin-top:18px;padding:16px;border:1px solid #e4d7b8;border-radius:12px;background:#fffdf7}.check-current-status>span,.check-stat>span{display:block;color:#777;font-size:12px}.check-current-status>strong{display:block;margin:8px 0;font-size:17px;color:#26372b}.check-current-status p{margin:12px 0 0;line-height:2}.check-status-pill{display:inline-block!important;width:max-content;max-width:100%;padding:5px 10px;border-radius:20px;background:#f8e9e9;color:#9d2832!important;font-size:11px!important;font-weight:bold}.check-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.check-stat{margin:0}.check-stat strong{display:block;margin:8px 0;font-size:18px;color:#244b37}.check-stat small{display:block;color:#777;font-size:11px;line-height:1.8}.check-section{margin-top:14px}.check-section h3{margin:0 0 12px}.check-section h4{margin:22px 0 8px;color:#244b37}.check-section p{line-height:2}.check-section-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.check-list{padding-right:22px;line-height:2.1}.check-list li{padding:3px 0}.check-pending li::marker{color:#b4232f}.check-links{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px;padding-top:14px;border-top:1px solid #eee8d8}.check-links a{color:#244b37;font-weight:bold;font-size:12px;text-decoration:underline;text-underline-offset:3px}.check-phase-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.check-phase{display:flex;flex-direction:column;gap:6px;min-height:94px;padding:12px;border:1px solid #e8dfca;border-radius:10px;background:#faf9f5}.check-phase>b{color:#a18a52;font-size:12px}.check-phase strong{font-size:13px}.check-phase small{color:#777;font-size:11px;line-height:1.7}.check-phase.active{border-color:#b4232f;background:#fff8f7}.check-phase.active>b,.check-phase.active small{color:#9d2832}.check-timeline{border-right:2px solid #d8c99f;margin:14px 8px;padding-right:18px}.check-timeline>div{position:relative;padding:0 0 16px}.check-timeline>div:before{content:'';position:absolute;right:-24px;top:5px;width:9px;height:9px;border-radius:50%;background:#b4232f}.check-timeline b{font-size:13px}.check-timeline p{margin:5px 0 0;color:#777;font-size:12px}.check-note{padding:12px;border-radius:9px;background:#f7f5ef;color:#6d6252;font-size:12px}@media(max-width:600px){.check-grid{grid-template-columns:1fr}.check-phase-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.check-stat strong{font-size:16px}.check-current-status>strong{font-size:15px}}
 </style><header><b>CHAYSA</b><div>پنل مدیریت فروشگاه</div></header><main class="wrap">
 <section id="login" class="panel"><h2>ورود مدیر</h2><label>رمز عبور مدیریت</label><input id="password" type="password" autocomplete="current-password" placeholder="رمز عبور"><p class="muted">این صفحه برای مدیریت فروشگاه است و ورود آن با نشست امن سمت سرور انجام می‌شود.</p><button id="loginBtn">ورود به مدیریت</button></section>
 <section id="app" class="hidden">
@@ -106,7 +108,91 @@
 <div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">اتصال تلگرام</h2><p class="muted">برای شناسایی گیرنده‌ها، پیام‌های شروع ربات خوانده می‌شوند؛ فقط شناسه و نام کاربری نمایش داده می‌شود.</p><button id="telegramLookup" class="secondary">شناسایی گیرنده‌های فاکتور</button><div id="telegramResult" class="muted"></div></div>
 </section>
 <section id="checkView" class="admin-view hidden">
-<div class="panel"><button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button><h2 style="margin-top:16px">چِک — مرکز فرماندهی چایسا</h2><p class="muted" role="status">این بخش در مرحله طراحی است. هنوز به سفارش‌ها، پرداخت‌ها، تلگرام، سایت یا اپلیکیشن متصل نیست و هیچ عملیات اجرایی انجام نمی‌دهد.</p></div>
+<div class="panel check-hero">
+<button type="button" class="secondary back-button" data-back aria-label="بازگشت به صفحه قبل">بازگشت</button>
+<div class="check-kicker">CHAYSA CONTROL · CHECK</div>
+<h2 style="margin-top:12px">مرکز فرماندهی چایسا</h2>
+<p class="muted">نمای وضعیت فازها، گزارش‌های ممیزی و سوابق تصمیم‌ها. این صفحه در این نسخه فقط‌خواندنی است و هیچ عملیات فروشگاهی یا تغییری در سفارش‌ها انجام نمی‌دهد.</p>
+<div class="check-current-status">
+<span class="check-status-label">وضعیت فعلی پروژه</span>
+<strong>فاز ۱ — ممیزی وضعیت موجود</strong>
+<span class="check-status-pill">ممیزی مستند شده؛ تأیید نهایی باقی است</span>
+<p>بررسی کد، مستندات، شاخه‌ها، CI، زیرساخت Railway و مسیرهای زنده فقط‌خواندنی انجام شده است. فاز ۱ تا تعیین تکلیف موارد اولویت‌دار و اجرای آزمون‌های ناتمام، تکمیل‌شده محسوب نمی‌شود.</p>
+</div>
+</div>
+
+<div class="check-grid">
+<article class="panel check-stat"><span>دامنه بررسی</span><strong>سایت + اندروید</strong><small>کد، مستندات، شاخه‌ها و زیرساخت</small></article>
+<article class="panel check-stat"><span>آزمون‌های CI سایت</span><strong>۶۴ موفق</strong><small>۶۰ آزمون Node و ۴ آزمون Playwright</small></article>
+<article class="panel check-stat"><span>وضعیت سرویس</span><strong>Online</strong><small>یک replica فعال؛ بدون هشدار فعال در آخرین بررسی</small></article>
+</div>
+
+<section class="panel check-section">
+<div class="check-section-heading"><h3>گزارش فاز ۱</h3><span class="check-status-pill">در انتظار تکمیل</span></div>
+<p>ممیزی اولیه و بازبینی زنده انجام شده؛ نتیجه، ثبت شکاف‌ها و اولویت‌های اصلاح است، نه تأیید سلامت کامل سامانه.</p>
+<h4>موارد بررسی‌شده</h4>
+<ul class="check-list">
+<li>مخزن سایت و شاخه متصل به Railway؛ بررسی فایل پنل، سرور و مسیر سفارش</li>
+<li>مخزن اپ اندروید و شاخه نگهداری آفلاین؛ بررسی وابستگی شبکه و نتایج ساخت APK</li>
+<li>دو سند مرجع پروژه و گزارش مستقل فاز ۱</li>
+<li>وضعیت Railway، Volume و آخرین Deployment موفق</li>
+<li>صفحات اصلی، صفحه محصولات، صفحه ورود پنل و APIهای سلامت و کاتالوگ با درخواست‌های فقط‌خواندنی</li>
+<li>نتایج CI سایت و اپلیکیشن</li>
+</ul>
+<h4>یافته‌های مهم و نیازمند تصمیم/رسیدگی</h4>
+<ol class="check-list">
+<li><strong>پرداخت و آماده‌سازی:</strong> گردش مستقل تأیید واقعی وجه و قفل آماده‌سازی تا تأیید پرداخت در مسیر جاری اثبات نشده است.</li>
+<li><strong>احراز هویت:</strong> ناسازگاری قالب کوکی ورود با رمز در مسیر پنل خانم بستانی در کد مشاهده شده؛ آزمون ورود واقعی هنوز انجام نشده است.</li>
+<li><strong>رهگیری و موجودی:</strong> کد رهگیری مستقل از شناسه سفارش و کنترل عددی/رزرو موجودی در مسیر فعلی مشاهده نشده است.</li>
+<li><strong>پرسش‌وپاسخ:</strong> اتصال پاسخ خصوصی به مشتری به Start اختصاصی برای هر پرسش وابسته است و با سناریوی مرجع تعارض دارد.</li>
+<li><strong>تاب‌آوری و شاخه‌ها:</strong> ذخیره‌سازی JSON بدون قفل/تراکنش هم‌زمان، محدودیت نرخ حافظه‌ای و اختلاف شاخه‌های main و chaysa-backup نیازمند رسیدگی‌اند.</li>
+<li><strong>اپ و وابستگی‌ها:</strong> کلید امضای پایدار APK تنظیم نشده، README اپ عقب‌مانده است و هشدار وابستگی Multer 1.x باید بررسی شود.</li>
+</ol>
+<h4>آزمون‌هایی که هنوز انجام نشده‌اند</h4>
+<ul class="check-list check-pending">
+<li>ورود واقعی مدیر و خانم بستانی و بررسی دسترسی API پس از ورود</li>
+<li>ثبت سفارش آزمایشی کنترل‌شده و بررسی پیام‌های واقعی مشتری و مدیران</li>
+<li>آزمون انتها‌به‌انتهای پرسش‌وپاسخ در تلگرام و روبیکا</li>
+<li>آزمون پرداخت، رهگیری، کنترل موجودی و رزرو</li>
+<li>آزمون هم‌زمانی، بازیابی پشتیبان، بار و امنیت</li>
+<li>تطبیق نسخه APK با دستگاه و آزمون فیزیکی کامل اپ</li>
+</ul>
+<div class="check-links">
+<a href="https://github.com/shahab11350/chaysa-store/blob/feature/chaysa-check-phase1-dashboard-2026-11-20/docs/CHAYSA_CONTROL_PHASE1_AUDIT_2026-11-20.md" target="_blank" rel="noopener noreferrer">مشاهده گزارش مستند کامل فاز ۱ در GitHub</a>
+<a href="https://github.com/shahab11350/chaysa-store/blob/feature/chaysa-check-phase1-dashboard-2026-11-20/docs/CHAYSA_PROJECT_MASTER.md" target="_blank" rel="noopener noreferrer">پرونده مادر پروژه</a>
+<a href="https://github.com/shahab11350/chaysa-store/blob/feature/chaysa-check-phase1-dashboard-2026-11-20/docs/CHAYSA_SYSTEM_SPEC.md" target="_blank" rel="noopener noreferrer">سند مرجع سیستم</a>
+</div>
+</section>
+
+<section class="panel check-section">
+<h3>وضعیت نقشه راه ۱۲ فازی</h3>
+<p class="muted">نمایش وضعیت فعلی است؛ ورود به فاز بعدی یا اجرای هر فاز نیازمند بررسی و تأیید مستقل مالک پروژه است.</p>
+<div class="check-phase-grid">
+<div class="check-phase active"><b>۰۱</b><strong>ممیزی وضعیت موجود</strong><small>در حال تکمیل؛ گزارش ثبت شده</small></div>
+<div class="check-phase"><b>۰۲</b><strong>طراحی مسیر مشتری</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۰۳</b><strong>وظایف و اختیارات چِک</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۰۴</b><strong>هسته مرکزی و پایگاه داده</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۰۵</b><strong>امنیت و کنترل خطا</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۰۶</b><strong>پنل مدیریت</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۰۷</b><strong>ارتباط تلگرام</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۰۸</b><strong>چرخه سفارش</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۰۹</b><strong>کد رهگیری و اعتبار مشتری</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۱۰</b><strong>اتصال سایت و اپ</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۱۱</b><strong>آزمایش جامع</strong><small>شروع نشده</small></div>
+<div class="check-phase"><b>۱۲</b><strong>استقرار کنترل‌شده</strong><small>شروع نشده</small></div>
+</div>
+</section>
+
+<section class="panel check-section">
+<h3>سجل ممیزی و تغییرات</h3>
+<div class="check-timeline">
+<div><b>۲۰۲۶/۱۱/۲۰ — ممیزی مستندات و کد</b><p>بررسی ساختار سایت و اپ، مسیرهای سفارش، پرداخت، پنل، پیام‌رسان‌ها و شکاف‌های فنی.</p></div>
+<div><b>۲۰۲۶/۱۱/۲۰ — راستی‌آزمایی زنده فقط‌خواندنی</b><p>بررسی وضعیت سرویس و endpointهای عمومی/سلامت؛ درخواست تغییردهنده‌ای به Production ارسال نشد.</p></div>
+<div><b>۲۰۲۶/۱۱/۲۰ — بررسی CI</b><p>۶۰ آزمون Node و ۴ آزمون Playwright سایت موفق؛ بررسی‌های CI اپ نیز موفق گزارش شده‌اند.</p></div>
+<div><b>۲۰۲۶/۱۱/۲۰ — ثبت گزارش</b><p>گزارش فاز ۱ در شاخه ممیزی ثبت و در این شاخه برای نمایش داخل پنل همراه شده است.</p></div>
+</div>
+<p class="check-note">این صفحه گزارش و وضعیت را نمایش می‌دهد؛ هنوز سامانه مدیریت فایل/نسخه‌بندی و بارگذاری خودکار فازها یا اتصال اجرایی چِک ایجاد نشده است.</p>
+</section>
 </section>
 </main>
 <script>
