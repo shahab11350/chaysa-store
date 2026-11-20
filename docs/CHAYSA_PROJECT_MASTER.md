@@ -2283,3 +2283,14 @@
 - سند تفصیلی: `docs/CHAYSA_CONTROL_PHASE4_CORE_DATABASE.md` در شاخه `design/chaysa-control-phase4-core-database-2026-11-20`.
 - وضعیت: طراحی فاز ۴ تأیید و نهایی شد؛ هیچ DB، volume، سرویس، migration، API یا کد عملیاتی ایجاد/تغییر نشده است. محیط CHAYSA CHECK هنوز مستقل و قابل اجرا نیست؛ تجربه مشتری و Production بدون تغییر مانده‌اند.
 - شروع فاز ۵ و هر اقدام اجرایی نیازمند مجوز جداگانه مالک است.
+
+
+## شروع فاز ۵ چِک — امنیت و کنترل خطا — 2026-11-20
+- مالک شروع فاز ۵ را تأیید کرد؛ اقدام انجام‌شده در این مرحله ممیزی read-only و تدوین پیش‌نویس طراحی است.
+- سند تفصیلی: `docs/CHAYSA_CONTROL_PHASE5_SECURITY_ERROR_CONTROL.md` در شاخه `design/chaysa-control-phase5-security-error-control-2026-11-20`.
+- مبنای ممیزی شاخه عملیاتی: `server.js` SHA `d3b50a464a4ad6848c8b68dd0136b8d7a5667405`، `package.json` SHA `10bb2557cf8e767e7fb891939859cc865f9078e4` و `admin.html` SHA `4bccab88fdc38b666b350c87b1e3272e80b0dba1`.
+- موارد نیازمند کنترل: عمومی بودن فایل استاتیک admin.html، rate limit درون‌حافظه‌ای، کنترل CSRF/Origin، نشست stateless، denylist فایل‌های static، نسخه وابستگی Multer، سیاست یکپارچه آپلود، ثبت رخداد و اعتماد به proxy.
+- کنترل‌های هدف: احراز هویت و نشست قابل ابطال، deny-by-default و مجوز سمت سرور، ضد-CSRF، محدودسازی قابل اتکا، جداسازی فایل‌ها و محیط‌ها، مدیریت secret، لاگ امن و پاسخ خطای بدون افشا.
+- وضعیت: پیش‌نویس برای بازبینی مالک؛ هیچ کد، dependency، secret، دسترسی، API، webhook، تنظیم Railway یا Production تغییر نکرده است.
+- هیچ آزمون نفوذ یا درخواست تغییردهنده روی Production انجام نشده؛ محیط مستقل CHAYSA CHECK هنوز ایجاد نشده است.
+- تجربه خرید مشتری تا انتشار نهایی باید بدون تغییر باقی بماند.
