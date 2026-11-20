@@ -617,6 +617,8 @@ document.addEventListener("DOMContentLoaded", async function () {
     return true;
   }
 
+  let activeOrderIdempotencyKey = "";
+  try { activeOrderIdempotencyKey = sessionStorage.getItem("chaysa-order-idempotency-key") || ""; } catch (_) {}
   checkout.querySelector(".checkout-send").addEventListener("click", async function() {
     if (cart.size === 0) { alert("سبد خرید خالی است."); return; }
     if (!validateCheckout()) return;
@@ -627,8 +629,9 @@ document.addEventListener("DOMContentLoaded", async function () {
     const customer={name:checkoutValue(".customer-name"),family:checkoutValue(".customer-family"),contact:checkoutValue(".customer-contact"),messengerPlatform:checkoutValue(".customer-messenger"),messengerUsername:checkoutValue(".customer-messenger-username"),messengerId:checkoutValue(".customer-id"),province:checkoutValue(".customer-province"),city:checkoutValue(".customer-city"),address:checkoutValue(".customer-address"),postal:checkoutValue(".customer-postal"),notes:checkoutValue(".customer-notes")};
     const items=Array.from(cart.entries()).map(([sku,item])=>({sku,qty:item.qty}));
     button.disabled=true;button.textContent="در حال ثبت سفارش...";status.hidden=true;
+    if(!activeOrderIdempotencyKey){const bytes=new Uint8Array(16);crypto.getRandomValues(bytes);activeOrderIdempotencyKey=Array.from(bytes).map(value=>value.toString(16).padStart(2,"0")).join("");try{sessionStorage.setItem("chaysa-order-idempotency-key",activeOrderIdempotencyKey)}catch(_){}}
     try{
-      const response=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer,items,termsAccepted:true,termsAcceptedAt:new Date().toISOString()})});
+      const response=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json","Idempotency-Key":activeOrderIdempotencyKey},body:JSON.stringify({customer,items,termsAccepted:true,termsAcceptedAt:new Date().toISOString()})});
       let result={};try{result=await response.json()}catch(_){}
       if(!response.ok||!result.ok)throw new Error(result.error||"ثبت سفارش انجام نشد.");
       status.classList.remove("success","warning","error");
@@ -646,7 +649,7 @@ document.addEventListener("DOMContentLoaded", async function () {
       status.hidden=false;
       checkout.querySelector(".issued-invoice-text").textContent=result.invoice;
       checkout.querySelector(".issued-invoice").hidden=false;
-      button.textContent="سفارش ثبت شد";button.disabled=true;
+      button.textContent="سفارش ثبت شد";button.disabled=true;activeOrderIdempotencyKey="";try{sessionStorage.removeItem("chaysa-order-idempotency-key")}catch(_){}
     }catch(error){status.textContent=error.message||"ثبت سفارش ناموفق بود.";status.classList.add("error");status.hidden=false;button.disabled=false;button.textContent="تلاش دوباره برای ثبت سفارش";}
   });
   checkout.querySelector(".copy-issued-invoice").addEventListener("click",async function(){
