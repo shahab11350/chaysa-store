@@ -1769,6 +1769,11 @@ app.get("/api/telegram/customer-bot",async(req,res)=>{
   return json(res,200,{username,url:"https://t.me/"+username+"?start=order"});
  }catch(_){return json(res,503,{error:"ارتباط با تلگرام برقرار نشد."});}
 });
+function buildOrderInvoice(order) {
+ const c=order.customer||{};
+ const items=Array.isArray(order.items)?order.items:[];
+ return ["فاکتور سفارش چایسا","شناسه سفارش: "+order.id,"تاریخ: "+new Date(order.createdAt).toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"وضعیت: "+order.status,"مشخصات خریدار",c.name+" "+c.family,"تماس: "+c.contact,"پیام‌رسان انتخابی: "+(c.messengerPlatform==="rubika"?"روبیکا":"تلگرام"),"آیدی عمومی پیام‌رسان: "+c.messengerUsername,"شناسه گفت‌وگو: "+c.messengerId,"استان/شهر: "+c.province+" / "+c.city,"نشانی: "+c.address,"کد پستی: "+c.postal,"توضیحات: "+c.notes,"اقلام سفارش",...items.map(x=>x.name+" | "+x.sku+" | "+x.qty+" × "+x.unitPrice.toLocaleString("en-US")+" = "+x.lineTotal.toLocaleString("en-US")+" تومان"),"جمع کل: "+Number(order.total||0).toLocaleString("en-US")+" تومان",order.deliveryRule].join("\n");
+}
 app.post("/api/orders",async(req,res)=>{
  const key="order:"+(req.ip||"unknown");if(limited(key,5,10*60*1000))return json(res,429,{error:"تعداد درخواست‌ها زیاد است. چند دقیقه بعد دوباره تلاش کن."});
  const b=req.body||{},c=b.customer||{},fields=["name","family","contact","messengerPlatform","messengerUsername","messengerId","province","city","address","postal","notes"];
@@ -1784,9 +1789,22 @@ app.post("/api/orders",async(req,res)=>{
  if(c.messengerPlatform==="telegram"&&!/^-?\d{5,20}$/.test(customerId))return json(res,400,{error:"شناسه گفت‌وگوی تلگرام معتبر نیست؛ ربات را Start کنید و شناسه عددی را وارد کنید."});
  if(c.messengerPlatform==="rubika"&&!/^[A-Za-z0-9_-]{12,80}$/.test(customerId))return json(res,400,{error:"شناسه گفت‌وگوی روبیکا معتبر نیست؛ ربات چایسا را Start کنید و شناسه ارسالی را وارد کنید."});
  const total=items.reduce((n,x)=>n+x.lineTotal,0),now=new Date();
- const order={id:"CH-"+now.toISOString().slice(0,10).replace(/-/g,"")+"-"+crypto.randomBytes(6).toString("hex").toUpperCase(),createdAt:now.toISOString(),status:"در انتظار بررسی",customer:Object.fromEntries(fields.map(k=>[k,String(c[k]).trim()])),termsAccepted:true,termsAcceptedAt:b.termsAcceptedAt,items,total,notification:{status:"pending",delivered:0,recipientCount:0,attemptedAt:null},deliveryRule:"تحویل سفارش باید فقط به خریدار و پس از احراز هویت و تطبیق شناسه سفارش انجام شود. خریدار فاکتور و شناسه اختصاصی را تا زمان دریافت نگهداری کند."};
- const rows=readOrders();rows.push(order);try{saveOrders(rows)}catch(_){return json(res,500,{error:"ذخیره سفارش انجام نشد؛ دوباره تلاش کنید."})}
- const invoice=["فاکتور سفارش چایسا","شناسه سفارش: "+order.id,"تاریخ: "+now.toLocaleString("fa-IR",{timeZone:"Asia/Tehran"}),"وضعیت: "+order.status,"مشخصات خریدار",c.name+" "+c.family,"تماس: "+c.contact,"پیام‌رسان انتخابی: "+(c.messengerPlatform==="rubika"?"روبیکا":"تلگرام"),"آیدی عمومی پیام‌رسان: "+c.messengerUsername,"شناسه گفت‌وگو: "+c.messengerId,"استان/شهر: "+c.province+" / "+c.city,"نشانی: "+c.address,"کد پستی: "+c.postal,"توضیحات: "+c.notes,"اقلام سفارش",...items.map(x=>x.name+" | "+x.sku+" | "+x.qty+" × "+x.unitPrice.toLocaleString("en-US")+" = "+x.lineTotal.toLocaleString("en-US")+" تومان"),"جمع کل: "+total.toLocaleString("en-US")+" تومان",order.deliveryRule].join("\n");
+ const idempotencyKey=String(req.get("Idempotency-Key")||"").trim();
+ if(idempotencyKey&&!/^[A-Za-z0-9_-]{16,128}$/.test(idempotencyKey))return json(res,400,{error:"کلید جلوگیری از ثبت تکراری معتبر نیست."});
+ const idempotencyKeyHash=idempotencyKey?crypto.createHash("sha256").update(idempotencyKey).digest("hex"):"";
+ const customer=Object.fromEntries(fields.map(k=>[k,String(c[k]).trim()]));
+ const idempotencyFingerprint=crypto.createHash("sha256").update(JSON.stringify({customer,items,termsAccepted:true})).digest("hex");
+ const rows=readOrders();
+ if(idempotencyKeyHash){
+  const existing=rows.find(x=>x.idempotencyKeyHash===idempotencyKeyHash);
+  if(existing){
+   if(existing.idempotencyFingerprint!==idempotencyFingerprint)return json(res,409,{ok:false,error:"این کلید ثبت سفارش قبلاً برای اطلاعات متفاوتی استفاده شده است؛ سفارش قبلی را بررسی کنید."});
+   return json(res,200,{ok:true,duplicate:true,orderId:existing.id,invoice:buildOrderInvoice(existing),delivered:Number(existing.notification&&existing.notification.delivered||0),recipientCount:Number(existing.notification&&existing.notification.recipientCount||0),notificationStatus:existing.notification&&existing.notification.status||"pending",notificationStatusSaved:true,rubikaNotificationStatus:existing.notification&&existing.notification.rubikaStatus||"unknown",customerDeliveryStatus:existing.customerDelivery&&existing.customerDelivery.status||"unknown",customerDeliveryStatusSaved:true});
+  }
+ }
+ const order={id:"CH-"+now.toISOString().slice(0,10).replace(/-/g,"")+"-"+crypto.randomBytes(6).toString("hex").toUpperCase(),createdAt:now.toISOString(),status:"در انتظار بررسی",customer,termsAccepted:true,termsAcceptedAt:b.termsAcceptedAt,items,total,idempotencyKeyHash:idempotencyKeyHash||undefined,idempotencyFingerprint:idempotencyKeyHash?idempotencyFingerprint:undefined,notification:{status:"pending",delivered:0,recipientCount:0,attemptedAt:null},deliveryRule:"تحویل سفارش باید فقط به خریدار و پس از احراز هویت و تطبیق شناسه سفارش انجام شود. خریدار فاکتور و شناسه اختصاصی را تا زمان دریافت نگهداری کند."};
+ rows.push(order);try{saveOrders(rows)}catch(_){return json(res,500,{error:"ذخیره سفارش انجام نشد؛ دوباره تلاش کنید."})}
+ const invoice=buildOrderInvoice(order);
  const token=process.env.TELEGRAM_BOT_TOKEN||"",recipients=String(process.env.ORDER_CHAT_IDS||"").split(",").map(x=>x.trim()).filter(x=>/^-?\d+$/.test(x));
  const configured=Boolean(token&&recipients.length===2&&new Set(recipients).size===2);
  const [telegramResults,rubikaNotice]=await Promise.all([
