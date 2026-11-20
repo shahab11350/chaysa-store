@@ -23,9 +23,11 @@ function lines(file) {
 async function request(pathname, options = {}) {
   return fetch(baseUrl + pathname, options);
 }
-async function createOrder(platform, messengerId, name) {
+async function createOrder(platform, messengerId, name, idempotencyKey) {
+  const headers = { "Content-Type": "application/json" };
+  if (idempotencyKey) headers["Idempotency-Key"] = idempotencyKey;
   const response = await request("/api/orders", {
-    method: "POST", headers: { "Content-Type": "application/json" },
+    method: "POST", headers,
     body: JSON.stringify({
       customer: {
         name, family: "آزمایشی", contact: "0000000000", messengerPlatform: platform,
@@ -262,4 +264,36 @@ test("Telegram generic /start still returns a chat ID without a deep-link payloa
   );
   assert.ok(welcome);
   assert.match(welcome.text, /555555/);
+});
+
+
+test("checkout idempotency replays the existing order without repeating notifications", async () => {
+  const key = "phase1-idempotency-test-0001";
+  const orderId = await createOrder("telegram", "777777", "مشتری تکرارنشدنی", key);
+  const sentForOrder = () => lines(telegramLog).filter(entry => {
+    if (!entry.url.endsWith("/sendMessage")) return false;
+    const payload = JSON.parse(entry.body || "{}");
+    return String(payload.text || "").includes(orderId);
+  });
+  const before = sentForOrder().length;
+  assert.ok(before >= 3, "initial order should send the invoice to admin recipients and customer");
+  const replayedId = await createOrder("telegram", "777777", "مشتری تکرارنشدنی", key);
+  assert.equal(replayedId, orderId, "retry must return the original order ID");
+  assert.equal(sentForOrder().length, before, "idempotent replay must not send duplicate messages");
+
+  const conflictResponse = await request("/api/orders", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "Idempotency-Key": key },
+    body: JSON.stringify({
+      customer: {
+        name: "نام متفاوت", family: "آزمایشی", contact: "0000000000",
+        messengerPlatform: "telegram", messengerUsername: "@chaysa", messengerId: "777777",
+        province: "آزمایش", city: "آزمایش", address: "نشانی آزمایشی",
+        postal: "1234567890", notes: "داده آزمایشی"
+      },
+      termsAccepted: true, termsAcceptedAt: new Date().toISOString(),
+      items: [{ sku: "TEST-TEA", qty: 1 }]
+    })
+  });
+  assert.equal(conflictResponse.status, 409, "reusing a key with a different payload must be rejected");
 });
