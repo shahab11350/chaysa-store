@@ -137,6 +137,18 @@ footer#contact .chaysa-credit{margin:14px 0 0;color:#d9c89d;font-size:11px;lette
 }
 @media(prefers-reduced-motion:reduce){.hero .btn{transition:none}}
 </style>
+
+<style id="chaysa-launch-countdown-style">
+.chaysa-launch-countdown{width:min(620px,94%);margin:12px auto 4px;padding:14px 16px 12px;border:1px solid #c5a45b;border-radius:18px;background:linear-gradient(145deg,#0b0d0b,#17251b);box-shadow:0 8px 24px #0004;color:#f2dfad;direction:rtl}
+.chaysa-launch-countdown .clc-label{margin:0 0 10px;color:#e7cf91;font:bold 12px Tahoma,sans-serif;letter-spacing:.4px}
+.chaysa-launch-countdown .clc-units{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.chaysa-launch-countdown .clc-unit{padding:8px 4px;border:1px solid #806a39;border-radius:10px;background:#ffffff08}
+.chaysa-launch-countdown .clc-value{display:block;color:#f5d98e;font:bold clamp(22px,5vw,32px) Tahoma,sans-serif;font-variant-numeric:tabular-nums;line-height:1.35}
+.chaysa-launch-countdown .clc-name{display:block;margin-top:2px;color:#d7c18a;font:11px Tahoma,sans-serif}
+.chaysa-launch-countdown .clc-caption{margin:10px 0 0;color:#e7d8b5;font:13px/1.9 Tahoma,sans-serif}
+.chaysa-launch-countdown .clc-note{margin:3px 0 0;color:#b8a77e;font:10px/1.8 Tahoma,sans-serif}
+@media(max-width:420px){.chaysa-launch-countdown{padding:11px 9px}.chaysa-launch-countdown .clc-units{gap:5px}.chaysa-launch-countdown .clc-unit{padding:7px 2px}.chaysa-launch-countdown .clc-name{font-size:10px}}
+</style>
 </head>
 <body>
 
@@ -165,6 +177,49 @@ footer#contact .chaysa-credit{margin:14px 0 0;color:#d9c89d;font-size:11px;lette
   <div class="cc-zone">وقت محلی</div>
 </div>
 <img class="chaysa-brand-logo" src="chaysa-logo-option4.svg" alt="لوگوی اصلی چایسا" width="300" height="158">
+<div class="chaysa-launch-countdown" id="chaysaLaunchCountdown" role="timer" aria-live="off" aria-label="شمارش معکوس آغاز چایسا">
+  <p class="clc-label">شمارش معکوس آغاز چایسا</p>
+  <div class="clc-units">
+    <div class="clc-unit"><span class="clc-value" data-unit="days">۲۰</span><span class="clc-name">روز</span></div>
+    <div class="clc-unit"><span class="clc-value" data-unit="hours">۰۰</span><span class="clc-name">ساعت</span></div>
+    <div class="clc-unit"><span class="clc-value" data-unit="minutes">۰۰</span><span class="clc-name">دقیقه</span></div>
+    <div class="clc-unit"><span class="clc-value" data-unit="seconds">۰۰</span><span class="clc-name">ثانیه</span></div>
+  </div>
+  <p class="clc-caption">بزودی در <bdi dir="ltr">chaysa.ir</bdi></p>
+  <p class="clc-note" data-countdown-status>شمارش از زمان آغاز رسمی فعال می‌شود.</p>
+</div>
+<script>
+(function(){
+  "use strict";
+  // زمان شروع رسمی باید پیش از انتشار عمومی و با تأیید مالک تعیین شود.
+  // قالب: ISO 8601 همراه منطقه زمانی؛ برای نمونه 2026-12-01T12:00:00+03:30
+  const COUNTDOWN_START_AT = null;
+  const root = document.getElementById("chaysaLaunchCountdown");
+  if (!root) return;
+  const fields = Object.fromEntries(["days","hours","minutes","seconds"].map(name => [name,root.querySelector('[data-unit="'+name+'"]')]));
+  const status = root.querySelector("[data-countdown-status]");
+  const digits = value => String(value).padStart(2,"0").replace(/\d/g,d=>"۰۱۲۳۴۵۶۷۸۹"[Number(d)]);
+  if (!COUNTDOWN_START_AT) return;
+  const start = Date.parse(COUNTDOWN_START_AT);
+  if (!Number.isFinite(start)) { status.textContent = "زمان آغاز شمارش معتبر نیست."; return; }
+  const end = start + 20 * 24 * 60 * 60 * 1000;
+  function update(){
+    const remaining = Math.max(0,end-Date.now());
+    const seconds = Math.floor(remaining/1000);
+    fields.days.textContent = digits(Math.floor(seconds/86400));
+    fields.hours.textContent = digits(Math.floor(seconds%86400/3600));
+    fields.minutes.textContent = digits(Math.floor(seconds%3600/60));
+    fields.seconds.textContent = digits(seconds%60);
+    if (remaining <= 0) {
+      status.textContent = "به آغاز چایسا خوش آمدید.";
+      clearInterval(timer);
+    }
+  }
+  update();
+  const timer = setInterval(update,1000);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)update();});
+})();
+</script>
 <h1>چایسا</h1>
 <p>فروشگاهی برای طعم‌های تازه</p>
 </header>
