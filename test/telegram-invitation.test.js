@@ -1,0 +1,6 @@
+"use strict";
+const test=require("node:test"),assert=require("node:assert/strict");
+const {escapeHtml,buildInvitationUrl,buildInvitationHtml,STYLES}=require("../telegram-invitation");
+test("HTML-sensitive recipient characters are escaped",()=>assert.equal(escapeHtml('<img src=x onerror="x"> & \'x\''),"&lt;img src=x onerror=&quot;x&quot;&gt; &amp; &#39;x&#39;"));
+test("canonical HTTPS invitation URL encodes recipient fields",()=>{const u=new URL(buildInvitationUrl("https://chaysa.up.railway.app/invitation.html",{name:"علی",surname:"رضایی",title:"جان"},"friendly","test-ref"));assert.equal(u.origin,"https://chaysa.up.railway.app");assert.equal(u.searchParams.get("name"),"علی");assert.equal(u.searchParams.get("surname"),"رضایی");assert.equal(u.searchParams.get("style"),"friendly");assert.throws(()=>buildInvitationUrl("http://example.com/a",{name:"x"},"luxury"));});
+test("card HTML escapes guest text and rejects invalid styles",()=>{const h=buildInvitationHtml({name:"<script>alert(1)</script>"},"luxury","data:image/svg+xml;base64,PHN2Zy8+");assert.match(h,/&lt;script&gt;/);assert.doesNotMatch(h,/<script>alert/);assert.match(h,/data:image\/svg\+xml;base64/);assert.throws(()=>buildInvitationHtml({name:"A"},"invalid",""));assert.equal(Object.keys(STYLES).length,7);});
