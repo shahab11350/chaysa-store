@@ -203,6 +203,7 @@ footer#contact .chaysa-credit{margin:14px 0 0;color:#d9c89d;font-size:11px;lette
   const start = Date.parse(COUNTDOWN_START_AT);
   if (!Number.isFinite(start)) { status.textContent = "زمان آغاز شمارش معتبر نیست."; return; }
   const end = start + 20 * 24 * 60 * 60 * 1000;
+  let timer = null;
   function update(){
     const remaining = Math.max(0,end-Date.now());
     const seconds = Math.floor(remaining/1000);
@@ -212,11 +213,11 @@ footer#contact .chaysa-credit{margin:14px 0 0;color:#d9c89d;font-size:11px;lette
     fields.seconds.textContent = digits(seconds%60);
     if (remaining <= 0) {
       status.textContent = "به آغاز چایسا خوش آمدید.";
-      clearInterval(timer);
+      if (timer !== null) clearInterval(timer);
     }
   }
   update();
-  const timer = setInterval(update,1000);
+  if (end > Date.now()) timer = setInterval(update,1000);
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)update();});
 })();
 </script>
