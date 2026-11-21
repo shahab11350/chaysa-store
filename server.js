@@ -4,12 +4,14 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { createHealthResearchQueue } = require("./health-research-queue");
+const { createInvitationBot } = require("./telegram-invitation");
 
 const app = express();
 const ROOT = __dirname;
 const DATA = process.env.DATA_DIR || "/data";
 const MEDIA = path.join(DATA, "media");
 const PRODUCTS_FILE = path.join(DATA, "products.json");
+const invitationBot = createInvitationBot({ dataDir: DATA, rootDir: ROOT });
 fs.mkdirSync(MEDIA, { recursive: true });
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
@@ -817,6 +819,7 @@ app.post("/telegram/webhook", async (req, res) => {
   if (!expected || supplied !== expected) return res.sendStatus(403);
   try {
     const update = req.body || {};
+    if (await invitationBot.handle(update)) return res.sendStatus(200);
     if (update.callback_query && typeof update.callback_query.data === "string" && update.callback_query.data.startsWith("lr:")) {
       await handleTelegramLetterReceipt(update.callback_query);
       return res.sendStatus(200);
@@ -1900,7 +1903,7 @@ app.listen(port, "0.0.0.0", () => {
     fetch("https://api.telegram.org/bot" + token + "/setWebhook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url: webhookUrl, secret_token: webhookSecret, allowed_updates: ["message"], drop_pending_updates: false })
+      body: JSON.stringify({ url: webhookUrl, secret_token: webhookSecret, allowed_updates: ["message", "callback_query"], drop_pending_updates: false })
     }).then(r => r.json()).then(result => console.log("Telegram webhook registration:", result.ok ? "ok" : "failed"))
       .catch(() => console.log("Telegram webhook registration failed"));
   }
