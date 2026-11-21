@@ -193,7 +193,7 @@ footer#contact .chaysa-credit{margin:14px 0 0;color:#d9c89d;font-size:11px;lette
   "use strict";
   // زمان شروع رسمی باید پیش از انتشار عمومی و با تأیید مالک تعیین شود.
   // قالب: ISO 8601 همراه منطقه زمانی؛ برای نمونه 2026-12-01T12:00:00+03:30
-  const COUNTDOWN_START_AT = null;
+  const COUNTDOWN_START_AT = "2026-11-21T16:54:36+03:30";
   const root = document.getElementById("chaysaLaunchCountdown");
   if (!root) return;
   const fields = Object.fromEntries(["days","hours","minutes","seconds"].map(name => [name,root.querySelector('[data-unit="'+name+'"]')]));
