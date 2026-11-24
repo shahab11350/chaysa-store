@@ -278,7 +278,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     if (response.ok) {
       const liveProducts = await response.json();
       if (Array.isArray(liveProducts) && liveProducts.length) {
-        const categories = ["چای","دمنوش","ادویه","عسل","سایر"];
+        const categories = ["چای","دمنوش","ادویه","سایر"];
         categories.forEach(function(name) {
           let card = Array.from(categoryGrid.querySelectorAll(".category-card")).find(function(item) {
             return item.querySelector("summary h3")?.textContent.trim() === name;
