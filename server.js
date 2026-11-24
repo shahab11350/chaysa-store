@@ -24,18 +24,52 @@ function limited(key, max, windowMs) {
   return old.count > max;
 }
 function json(res, status, data) { return res.status(status).set("Cache-Control", "no-store").json(data); }
+const DISCONTINUED_PRODUCT_CATEGORIES = new Set(["عسل", "قهوه", "coffee", "honey"]);
+function normalizeProductCategory(value) {
+  return String(value || "").toLowerCase().normalize("NFKC")
+    .replace(/[\\u064B-\\u065F\\u0670\\u0640]/g, "")
+    .replace(/[يى]/g, "ی").replace(/ك/g, "ک").replace(/ة/g, "ه")
+    .replace(/[\\u200c\\u200f\\u200e]/g, " ")
+    .replace(/\\s+/g, " ").trim();
+}
+function isDiscontinuedProduct(product) {
+  return Boolean(product && DISCONTINUED_PRODUCT_CATEGORIES.has(normalizeProductCategory(product.category)));
+}
+function filterDiscontinuedProducts(items) {
+  return (Array.isArray(items) ? items : []).filter(item => !isDiscontinuedProduct(item));
+}
 function readProducts() {
-  try { const v = JSON.parse(fs.readFileSync(PRODUCTS_FILE, "utf8")); return Array.isArray(v) ? v : []; }
+  try { const v = JSON.parse(fs.readFileSync(PRODUCTS_FILE, "utf8")); return filterDiscontinuedProducts(v); }
   catch (_) {
-    try { const seed = JSON.parse(fs.readFileSync(path.join(ROOT, "products-seed.json"), "utf8")); return Array.isArray(seed) ? seed : []; }
+    try { const seed = JSON.parse(fs.readFileSync(path.join(ROOT, "products-seed.json"), "utf8")); return filterDiscontinuedProducts(seed); }
     catch (_) { return []; }
   }
 }
 function saveProducts(items) {
   const tmp = PRODUCTS_FILE + ".tmp";
-  fs.writeFileSync(tmp, JSON.stringify(items, null, 2), "utf8");
+  fs.writeFileSync(tmp, JSON.stringify(filterDiscontinuedProducts(items), null, 2), "utf8");
   fs.renameSync(tmp, PRODUCTS_FILE);
 }
+function migrateDiscontinuedProducts() {
+  let existing;
+  try { existing = JSON.parse(fs.readFileSync(PRODUCTS_FILE, "utf8")); }
+  catch (_) { return; }
+  if (!Array.isArray(existing)) return;
+  const retained = filterDiscontinuedProducts(existing);
+  if (retained.length === existing.length) return;
+  const backup = PRODUCTS_FILE + ".pre-discontinued-2026-11-24.bak";
+  const temporary = PRODUCTS_FILE + ".tmp";
+  try {
+    if (!fs.existsSync(backup)) fs.copyFileSync(PRODUCTS_FILE, backup);
+    fs.writeFileSync(temporary, JSON.stringify(retained, null, 2), "utf8");
+    fs.renameSync(temporary, PRODUCTS_FILE);
+    console.log("CHAYSA discontinued catalogue migration: removed " + (existing.length - retained.length) + " honey/coffee product(s) from the active catalogue; pre-migration backup retained.");
+  } catch (error) {
+    try { if (fs.existsSync(temporary)) fs.unlinkSync(temporary); } catch (_) {}
+    console.error("CHAYSA discontinued catalogue migration failed:", error.message);
+  }
+}
+migrateDiscontinuedProducts();
 const healthResearchQueue = createHealthResearchQueue(DATA);
 try { healthResearchQueue.syncCatalog(readProducts()); }
 catch (error) { console.error("CHAYSA health research queue initialization failed:", error.message); }
