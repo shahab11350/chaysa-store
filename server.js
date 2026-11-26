@@ -115,7 +115,7 @@ function sign(value) { return crypto.createHmac("sha256", secret).update(value).
 function isAdmin(req) {
   if (!secret) return false;
   const raw = req.headers.cookie || "";
-  const token = (raw.match(new RegExp("(?:^|;\\\\s*)" + ADMIN_COOKIE + "=([^;]+)")) || [])[1];
+  const token = raw.split(";").map(part => part.trim()).find(part => part.startsWith(ADMIN_COOKIE + "="))?.slice(ADMIN_COOKIE.length + 1);
   if (!token) return false;
   const [exp, sig] = token.split(".");
   if (!exp || !sig || !/^\d+$/.test(exp) || Number(exp) < Date.now()) return false;
@@ -132,7 +132,7 @@ function requireAdmin(req, res, next) {
 function signBostani(value) { return crypto.createHmac("sha256", bostaniSecret).update(value).digest("hex"); }
 function isBostani(req) {
   const raw = req.headers.cookie || "";
-  const supplied = (raw.match(new RegExp("(?:^|;\\\\s*)" + BOSTANI_COOKIE + "=([^;]+)")) || [])[1];
+  const supplied = raw.split(";").map(part => part.trim()).find(part => part.startsWith(BOSTANI_COOKIE + "="))?.slice(BOSTANI_COOKIE.length + 1);
   if (!supplied) return false;
   let decoded;
   try { decoded = decodeURIComponent(supplied); } catch (_) { return false; }
