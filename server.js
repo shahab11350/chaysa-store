@@ -4,13 +4,20 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { createHealthResearchQueue } = require("./health-research-queue");
+const { createPatternAuth, verifySecret } = require("./panel-pattern-auth");
 
 const app = express();
 const ROOT = __dirname;
+const PREVIEW_MODE = process.env.CHAYSA_PREVIEW_MODE === "1";
+const ADMIN_COOKIE = PREVIEW_MODE ? "chaysa_admin_preview" : "chaysa_admin";
+const BOSTANI_COOKIE = PREVIEW_MODE ? "chaysa_bostani_preview" : "chaysa_bostani";
 const DATA = process.env.DATA_DIR || "/data";
 const MEDIA = path.join(DATA, "media");
 const PRODUCTS_FILE = path.join(DATA, "products.json");
 fs.mkdirSync(MEDIA, { recursive: true });
+if (PREVIEW_MODE && !fs.existsSync(PRODUCTS_FILE)) {
+  fs.writeFileSync(PRODUCTS_FILE, "[]", { encoding: "utf8", mode: 0o600 });
+}
 app.disable("x-powered-by");
 app.set("trust proxy", 1);
 app.use(express.json({ limit: "1mb" }));
@@ -24,6 +31,34 @@ function limited(key, max, windowMs) {
   return old.count > max;
 }
 function json(res, status, data) { return res.status(status).set("Cache-Control", "no-store").json(data); }
+app.use((req, res, next) => {
+  if (PREVIEW_MODE) {
+    const queryAt = req.url.indexOf("?");
+    const pathname = queryAt < 0 ? req.url : req.url.slice(0, queryAt);
+    const search = queryAt < 0 ? "" : req.url.slice(queryAt);
+    let prefix = null, page = null;
+    if (pathname === "/admin-preview" || pathname.startsWith("/admin-preview/")) {
+      prefix = "/admin-preview"; page = "/admin.html";
+    } else if (pathname === "/bostani-preview" || pathname.startsWith("/bostani-preview/")) {
+      prefix = "/bostani-preview"; page = "/bostani.html";
+    }
+    if (prefix) {
+      const remainder = pathname.slice(prefix.length);
+      req.url = (remainder && remainder !== "/" ? remainder : page) + search;
+    }
+  }
+  if (PREVIEW_MODE && req.path === "/products-seed.json") return res.sendStatus(404);
+  if (PREVIEW_MODE && !["GET", "HEAD"].includes(req.method.toUpperCase())) {
+    const allowed = new Set([
+      "/api/admin/login", "/api/admin/pattern/setup", "/api/admin/logout",
+      "/api/bostani/login", "/api/bostani/pattern/setup", "/api/bostani/logout"
+    ]);
+    if (req.method.toUpperCase() !== "POST" || !allowed.has(req.path)) {
+      return json(res, 403, { error: "در محیط پیش‌نمایش، عملیات تغییردهنده غیرفعال است." });
+    }
+  }
+  next();
+});
 const DISCONTINUED_PRODUCT_CATEGORIES = new Set(["عسل", "قهوه", "coffee", "honey"]);
 function normalizeProductCategory(value) {
   return String(value || "").toLowerCase().normalize("NFKC")
@@ -41,6 +76,7 @@ function filterDiscontinuedProducts(items) {
 function readProducts() {
   try { const v = JSON.parse(fs.readFileSync(PRODUCTS_FILE, "utf8")); return filterDiscontinuedProducts(v); }
   catch (_) {
+    if (PREVIEW_MODE) return [];
     try { const seed = JSON.parse(fs.readFileSync(path.join(ROOT, "products-seed.json"), "utf8")); return filterDiscontinuedProducts(seed); }
     catch (_) { return []; }
   }
@@ -74,11 +110,13 @@ const healthResearchQueue = createHealthResearchQueue(DATA);
 try { healthResearchQueue.syncCatalog(readProducts()); }
 catch (error) { console.error("CHAYSA health research queue initialization failed:", error.message); }
 const secret = process.env.ADMIN_PASSWORD || "";
+const bostaniSecret = process.env.BOSTANI_ACCESS_PASSWORD || "";
+const panelPatternAuth = createPatternAuth(DATA);
 function sign(value) { return crypto.createHmac("sha256", secret).update(value).digest("hex"); }
 function isAdmin(req) {
   if (!secret) return false;
   const raw = req.headers.cookie || "";
-  const token = (raw.match(/(?:^|;\s*)chaysa_admin=([^;]+)/) || [])[1];
+  const token = raw.split(";").map(part => part.trim()).find(part => part.startsWith(ADMIN_COOKIE + "="))?.slice(ADMIN_COOKIE.length + 1);
   if (!token) return false;
   const [exp, sig] = token.split(".");
   if (!exp || !sig || !/^\d+$/.test(exp) || Number(exp) < Date.now()) return false;
@@ -92,16 +130,18 @@ function requireAdmin(req, res, next) {
   if (origin && origin !== req.protocol + "://" + req.get("host")) return json(res, 403, { error: "درخواست نامعتبر است." });
   next();
 }
-const bostaniSecret = process.env.BOSTANI_ACCESS_PASSWORD || "";
 function signBostani(value) { return crypto.createHmac("sha256", bostaniSecret).update(value).digest("hex"); }
 function isBostani(req) {
-  const access = process.env.BOSTANI_ACCESS_TOKEN || "";
-  if (!access) return false;
   const raw = req.headers.cookie || "";
-  const supplied = (raw.match(/(?:^|;\s*)chaysa_bostani=([^;]+)/) || [])[1];
+  const supplied = raw.split(";").map(part => part.trim()).find(part => part.startsWith(BOSTANI_COOKIE + "="))?.slice(BOSTANI_COOKIE.length + 1);
   if (!supplied) return false;
-  const expected = Buffer.from(access), actual = Buffer.from(decodeURIComponent(supplied));
-  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+  let decoded;
+  try { decoded = decodeURIComponent(supplied); } catch (_) { return false; }
+  const access = process.env.BOSTANI_ACCESS_TOKEN || "";
+  if (!panelPatternAuth.configured("bostani") && access && verifySecret(decoded, access)) return true;
+  const parts = decoded.split(".");
+  if (parts.length !== 2 || !/^\d+$/.test(parts[0]) || Number(parts[0]) < Date.now() || !bostaniSecret) return false;
+  return verifySecret(parts[1], signBostani(parts[0]));
 }
 function requireBostani(req,res,next) {
   if(!isBostani(req)) return json(res,401,{error:"برای ورود به صفحهٔ اختصاصی خانم بستانی، رمز دسترسی را وارد کنید."});
@@ -332,19 +372,26 @@ app.post("/api/guide/resolve", (req, res) => {
 
 app.get("/api/products", (_req, res) => json(res, 200, readProducts()));
 
+app.get("/api/admin/pattern/status", (_req, res) => json(res, 200, { configured: panelPatternAuth.configured("admin") }));
 app.post("/api/admin/login", (req, res) => {
   const key = req.ip || "unknown";
-  if (limited("login:" + key, 8, 15 * 60 * 1000)) return json(res, 429, { error: "تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کن." });
-  if (!secret || typeof req.body.password !== "string" || req.body.password.length !== secret.length ||
-      !crypto.timingSafeEqual(Buffer.from(req.body.password), Buffer.from(secret))) {
-    return json(res, 401, { error: "رمز عبور نادرست است." });
-  }
+  if (limited("login:" + key, 6, 15 * 60 * 1000)) return json(res, 429, { error: "تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کنید." });
+  const configured = panelPatternAuth.configured("admin");
+  const valid = configured ? panelPatternAuth.authenticate("admin", req.body.pattern) : verifySecret(req.body.password, secret);
+  if (!valid) return json(res, 401, { error: configured ? "الگوی ورود نادرست است." : "رمز راه‌اندازی نادرست است." });
   const exp = String(Date.now() + 8 * 60 * 60 * 1000);
-  res.cookie("chaysa_admin", exp + "." + sign(exp), { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 8 * 60 * 60 * 1000 });
+  res.cookie(ADMIN_COOKIE, exp + "." + sign(exp), { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 8 * 60 * 60 * 1000 });
+  return json(res, 200, { ok: true, patternConfigured: configured });
+});
+app.post("/api/admin/pattern/setup", requireAdmin, (req, res) => {
+  if (!verifySecret(req.body.password, secret)) return json(res, 401, { error: "رمز فعلی مالک برای راه‌اندازی الگو صحیح نیست." });
+  const result = panelPatternAuth.setup("admin", req.body.pattern);
+  if (result === false) return json(res, 409, { error: "الگوی مالک قبلاً ثبت شده است." });
+  if (result === null) return json(res, 400, { error: "الگو باید دست‌کم ۵ نقطهٔ متفاوت داشته باشد." });
   return json(res, 200, { ok: true });
 });
 app.all("/api/admin/logout", (_req, res) => {
-  res.clearCookie("chaysa_admin", { httpOnly: true, secure: true, sameSite: "strict", path: "/" });
+  res.clearCookie(ADMIN_COOKIE, { httpOnly: true, secure: true, sameSite: "strict", path: "/" });
   return json(res, 200, { ok: true });
 });
 const ORDERS_FILE = path.join(DATA, "orders.json");
@@ -1690,25 +1737,36 @@ app.post("/api/admin/questions/:id/reply",requireAdmin,async(req,res)=>{
   return json(res,200,{ok:true,status:q.status,repliedAt:q.repliedAt});
 });
 app.get("/bostani.html", (req, res, next) => {
+   if (PREVIEW_MODE && req.query.key) return res.sendStatus(404);
+  if (panelPatternAuth.configured("bostani") && req.query.key) return res.sendStatus(404);
   const access = process.env.BOSTANI_ACCESS_TOKEN || "";
   const supplied = typeof req.query.key === "string" ? req.query.key : "";
   if (access && supplied) {
     const expected = Buffer.from(access), actual = Buffer.from(supplied);
     if (expected.length === actual.length && crypto.timingSafeEqual(expected, actual)) {
-      res.cookie("chaysa_bostani", access, { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 30 * 24 * 60 * 60 * 1000 });
+      res.cookie(BOSTANI_COOKIE, access, { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 30 * 24 * 60 * 60 * 1000 });
       return res.redirect(302, "/bostani.html");
     }
     return res.sendStatus(404);
   }
   next();
 });
+app.get("/api/bostani/pattern/status", (_req,res)=>json(res,200,{configured:panelPatternAuth.configured("bostani")}));
 app.post("/api/bostani/login",(req,res)=>{
  const key=req.ip||"unknown";if(limited("bostani-login:"+key,6,15*60*1000))return json(res,429,{error:"تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کنید."});
- const supplied=typeof req.body.password==="string"?req.body.password:"";
- if(!bostaniSecret||supplied.length!==bostaniSecret.length||!crypto.timingSafeEqual(Buffer.from(supplied),Buffer.from(bostaniSecret)))return json(res,401,{error:"رمز دسترسی نادرست است."});
- const exp=String(Date.now()+8*60*60*1000);res.cookie("chaysa_bostani",exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true});
+ const configured=panelPatternAuth.configured("bostani");
+ const valid=configured?panelPatternAuth.authenticate("bostani",req.body.pattern):verifySecret(req.body.password,bostaniSecret);
+ if(!valid)return json(res,401,{error:configured?"الگوی ورود نادرست است.":"رمز راه‌اندازی نادرست است."});
+ const exp=String(Date.now()+8*60*60*1000);res.cookie(BOSTANI_COOKIE,exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true,patternConfigured:configured});
 });
-app.post("/api/bostani/logout",(_req,res)=>{res.clearCookie("chaysa_bostani",{httpOnly:true,secure:true,sameSite:"strict",path:"/"});return json(res,200,{ok:true});});
+app.post("/api/bostani/pattern/setup",requireBostani,(req,res)=>{
+ if(!verifySecret(req.body.password,bostaniSecret))return json(res,401,{error:"رمز فعلی برای راه‌اندازی الگو صحیح نیست."});
+ const result=panelPatternAuth.setup("bostani",req.body.pattern);
+ if(result===false)return json(res,409,{error:"الگوی ورود قبلاً ثبت شده است."});
+ if(result===null)return json(res,400,{error:"الگو باید دست‌کم ۵ نقطهٔ متفاوت داشته باشد."});
+ return json(res,200,{ok:true});
+});
+app.post("/api/bostani/logout",(_req,res)=>{res.clearCookie(BOSTANI_COOKIE,{httpOnly:true,secure:true,sameSite:"strict",path:"/"});return json(res,200,{ok:true});});
 app.get("/api/bostani/orders",requireBostani,(_req,res)=>{
  const allowedCustomerFields=["name","family","contact","messengerPlatform","messengerId","province","city","address","postal","notes"];
  const rows=readOrders().map(o=>({
