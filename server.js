@@ -98,14 +98,14 @@ function requireAdmin(req, res, next) {
 function signBostani(value) { return crypto.createHmac("sha256", bostaniSecret).update(value).digest("hex"); }
 function isBostani(req) {
   const raw = req.headers.cookie || "";
-  const supplied = (raw.match(/(?:^|;\\s*)chaysa_bostani=([^;]+)/) || [])[1];
+  const supplied = (raw.match(/(?:^|;\s*)chaysa_bostani=([^;]+)/) || [])[1];
   if (!supplied) return false;
   let decoded;
   try { decoded = decodeURIComponent(supplied); } catch (_) { return false; }
   const access = process.env.BOSTANI_ACCESS_TOKEN || "";
   if (access && verifySecret(decoded, access)) return true;
   const parts = decoded.split(".");
-  if (parts.length !== 2 || !/^\\d+$/.test(parts[0]) || Number(parts[0]) < Date.now() || !bostaniSecret) return false;
+  if (parts.length !== 2 || !/^\d+$/.test(parts[0]) || Number(parts[0]) < Date.now() || !bostaniSecret) return false;
   return verifySecret(parts[1], signBostani(parts[0]));
 }
 function requireBostani(req,res,next) {
