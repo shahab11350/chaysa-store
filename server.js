@@ -4,6 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const { createHealthResearchQueue } = require("./health-research-queue");
+const { createPatternAuth, verifySecret } = require("./panel-pattern-auth");
 
 const app = express();
 const ROOT = __dirname;
@@ -74,6 +75,8 @@ const healthResearchQueue = createHealthResearchQueue(DATA);
 try { healthResearchQueue.syncCatalog(readProducts()); }
 catch (error) { console.error("CHAYSA health research queue initialization failed:", error.message); }
 const secret = process.env.ADMIN_PASSWORD || "";
+const bostaniSecret = process.env.BOSTANI_ACCESS_PASSWORD || "";
+const panelPatternAuth = createPatternAuth(DATA);
 function sign(value) { return crypto.createHmac("sha256", secret).update(value).digest("hex"); }
 function isAdmin(req) {
   if (!secret) return false;
@@ -95,13 +98,16 @@ function requireAdmin(req, res, next) {
 const bostaniSecret = process.env.BOSTANI_ACCESS_PASSWORD || "";
 function signBostani(value) { return crypto.createHmac("sha256", bostaniSecret).update(value).digest("hex"); }
 function isBostani(req) {
-  const access = process.env.BOSTANI_ACCESS_TOKEN || "";
-  if (!access) return false;
   const raw = req.headers.cookie || "";
-  const supplied = (raw.match(/(?:^|;\s*)chaysa_bostani=([^;]+)/) || [])[1];
+  const supplied = (raw.match(/(?:^|;\\s*)chaysa_bostani=([^;]+)/) || [])[1];
   if (!supplied) return false;
-  const expected = Buffer.from(access), actual = Buffer.from(decodeURIComponent(supplied));
-  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual);
+  let decoded;
+  try { decoded = decodeURIComponent(supplied); } catch (_) { return false; }
+  const access = process.env.BOSTANI_ACCESS_TOKEN || "";
+  if (access && verifySecret(decoded, access)) return true;
+  const parts = decoded.split(".");
+  if (parts.length !== 2 || !/^\\d+$/.test(parts[0]) || Number(parts[0]) < Date.now() || !bostaniSecret) return false;
+  return verifySecret(parts[1], signBostani(parts[0]));
 }
 function requireBostani(req,res,next) {
   if(!isBostani(req)) return json(res,401,{error:"برای ورود به صفحهٔ اختصاصی خانم بستانی، رمز دسترسی را وارد کنید."});
@@ -332,15 +338,22 @@ app.post("/api/guide/resolve", (req, res) => {
 
 app.get("/api/products", (_req, res) => json(res, 200, readProducts()));
 
+app.get("/api/admin/pattern/status", (_req, res) => json(res, 200, { configured: panelPatternAuth.configured("admin") }));
 app.post("/api/admin/login", (req, res) => {
   const key = req.ip || "unknown";
-  if (limited("login:" + key, 8, 15 * 60 * 1000)) return json(res, 429, { error: "تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کن." });
-  if (!secret || typeof req.body.password !== "string" || req.body.password.length !== secret.length ||
-      !crypto.timingSafeEqual(Buffer.from(req.body.password), Buffer.from(secret))) {
-    return json(res, 401, { error: "رمز عبور نادرست است." });
-  }
+  if (limited("login:" + key, 6, 15 * 60 * 1000)) return json(res, 429, { error: "تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کنید." });
+  const configured = panelPatternAuth.configured("admin");
+  const valid = configured ? panelPatternAuth.authenticate("admin", req.body.pattern) : verifySecret(req.body.password, secret);
+  if (!valid) return json(res, 401, { error: configured ? "الگوی ورود نادرست است." : "رمز راه‌اندازی نادرست است." });
   const exp = String(Date.now() + 8 * 60 * 60 * 1000);
   res.cookie("chaysa_admin", exp + "." + sign(exp), { httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: 8 * 60 * 60 * 1000 });
+  return json(res, 200, { ok: true, patternConfigured: configured });
+});
+app.post("/api/admin/pattern/setup", requireAdmin, (req, res) => {
+  if (!verifySecret(req.body.password, secret)) return json(res, 401, { error: "رمز فعلی مالک برای راه‌اندازی الگو صحیح نیست." });
+  const result = panelPatternAuth.setup("admin", req.body.pattern);
+  if (result === false) return json(res, 409, { error: "الگوی مالک قبلاً ثبت شده است." });
+  if (result === null) return json(res, 400, { error: "الگو باید دست‌کم ۵ نقطهٔ متفاوت داشته باشد." });
   return json(res, 200, { ok: true });
 });
 app.all("/api/admin/logout", (_req, res) => {
@@ -1702,11 +1715,20 @@ app.get("/bostani.html", (req, res, next) => {
   }
   next();
 });
+app.get("/api/bostani/pattern/status", (_req,res)=>json(res,200,{configured:panelPatternAuth.configured("bostani")}));
 app.post("/api/bostani/login",(req,res)=>{
  const key=req.ip||"unknown";if(limited("bostani-login:"+key,6,15*60*1000))return json(res,429,{error:"تعداد تلاش زیاد است؛ کمی بعد دوباره امتحان کنید."});
- const supplied=typeof req.body.password==="string"?req.body.password:"";
- if(!bostaniSecret||supplied.length!==bostaniSecret.length||!crypto.timingSafeEqual(Buffer.from(supplied),Buffer.from(bostaniSecret)))return json(res,401,{error:"رمز دسترسی نادرست است."});
- const exp=String(Date.now()+8*60*60*1000);res.cookie("chaysa_bostani",exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true});
+ const configured=panelPatternAuth.configured("bostani");
+ const valid=configured?panelPatternAuth.authenticate("bostani",req.body.pattern):verifySecret(req.body.password,bostaniSecret);
+ if(!valid)return json(res,401,{error:configured?"الگوی ورود نادرست است.":"رمز راه‌اندازی نادرست است."});
+ const exp=String(Date.now()+8*60*60*1000);res.cookie("chaysa_bostani",exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true,patternConfigured:configured});
+});
+app.post("/api/bostani/pattern/setup",requireBostani,(req,res)=>{
+ if(!verifySecret(req.body.password,bostaniSecret))return json(res,401,{error:"رمز فعلی برای راه‌اندازی الگو صحیح نیست."});
+ const result=panelPatternAuth.setup("bostani",req.body.pattern);
+ if(result===false)return json(res,409,{error:"الگوی ورود قبلاً ثبت شده است."});
+ if(result===null)return json(res,400,{error:"الگو باید دست‌کم ۵ نقطهٔ متفاوت داشته باشد."});
+ return json(res,200,{ok:true});
 });
 app.post("/api/bostani/logout",(_req,res)=>{res.clearCookie("chaysa_bostani",{httpOnly:true,secure:true,sameSite:"strict",path:"/"});return json(res,200,{ok:true});});
 app.get("/api/bostani/orders",requireBostani,(_req,res)=>{
