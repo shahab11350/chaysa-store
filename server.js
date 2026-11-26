@@ -1757,7 +1757,7 @@ app.post("/api/bostani/login",(req,res)=>{
  const configured=panelPatternAuth.configured("bostani");
  const valid=configured?panelPatternAuth.authenticate("bostani",req.body.pattern):verifySecret(req.body.password,bostaniSecret);
  if(!valid)return json(res,401,{error:configured?"الگوی ورود نادرست است.":"رمز راه‌اندازی نادرست است."});
- const exp=String(Date.now()+8*60*60*1000);res.cookie("chaysa_bostani",exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true,patternConfigured:configured});
+ const exp=String(Date.now()+8*60*60*1000);res.cookie(BOSTANI_COOKIE,exp+"."+signBostani(exp),{httpOnly:true,secure:true,sameSite:"strict",path:"/",maxAge:8*60*60*1000});return json(res,200,{ok:true,patternConfigured:configured});
 });
 app.post("/api/bostani/pattern/setup",requireBostani,(req,res)=>{
  if(!verifySecret(req.body.password,bostaniSecret))return json(res,401,{error:"رمز فعلی برای راه‌اندازی الگو صحیح نیست."});
