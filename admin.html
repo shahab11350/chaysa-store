@@ -199,9 +199,10 @@
 <script>
 document.addEventListener('click',event=>{const back=event.target.closest('#checkPhaseBack');if(back){const root=back.closest('#checkView');if(!root)return;root.querySelector('.check-phase-grid')?.classList.remove('hidden');back.classList.add('hidden');root.querySelectorAll('[data-phase-panel]').forEach(panel=>panel.classList.add('hidden'));root.querySelectorAll('[data-phase-open]').forEach(item=>item.setAttribute('aria-expanded','false'));root.scrollIntoView({behavior:'smooth',block:'start'});return;}const button=event.target.closest('[data-phase-open]');if(!button)return;const root=button.closest('#checkView');if(!root)return;const phase=button.dataset.phaseOpen;root.querySelector('.check-phase-grid')?.classList.add('hidden');root.querySelector('#checkPhaseBack')?.classList.remove('hidden');root.querySelectorAll('[data-phase-panel]').forEach(panel=>panel.classList.toggle('hidden',panel.dataset.phasePanel!==phase));root.querySelectorAll('[data-phase-open]').forEach(item=>item.setAttribute('aria-expanded',String(item===button)));const panel=root.querySelector('[data-phase-panel="'+phase+'"]');if(panel)panel.scrollIntoView({behavior:'smooth',block:'start'});});
 let products=[];
+const PANEL_PREFIX = location.pathname.startsWith('/admin-preview') ? '/admin-preview' : '';
 const $=id=>document.getElementById(id), status=m=>$('status').textContent=m;
 function showDashboard(){ showAdminView('adminHome'); }
-async function api(path,opts={}){const r=await fetch('/api/admin/'+path,{credentials:'same-origin',...opts});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'خطا در ارتباط با سرور');return d}
+async function api(path,opts={}){const r=await fetch(PANEL_PREFIX+'/api/admin/'+path,{credentials:'same-origin',...opts});let d={};try{d=await r.json()}catch{}if(!r.ok)throw Error(d.error||'خطا در ارتباط با سرور');return d}
 function render(){ $('items').innerHTML='';products.forEach((p,i)=>{const el=document.createElement('div');el.className='product';const img=document.createElement('img');img.src=p.image||'';img.alt='';const info=document.createElement('div');const title=document.createElement('b');title.textContent=p.name;const meta=document.createElement('small');meta.textContent=(p.category||'')+' · '+(p.price||0).toLocaleString('fa-IR')+' تومان · '+(p.sku||'بدون شناسه')+' · '+(p.active===false?'غیرفعال':'فعال');info.append(title,meta);const actions=document.createElement('div');actions.className='actions';const edit=document.createElement('button');edit.textContent='ویرایش';edit.onclick=()=>fill(i);const del=document.createElement('button');del.textContent='حذف';del.className='danger';del.onclick=async()=>{if(confirm('این محصول حذف شود؟')){products.splice(i,1);await saveAll()}};const toggle=document.createElement('button');toggle.textContent=p.active===false?'فعال‌سازی':'غیرفعال‌سازی';toggle.className='secondary';toggle.onclick=async()=>{products[i].active=products[i].active===false;await saveAll()};actions.append(edit,toggle,del);el.append(img,info,actions);$('items').append(el)})}
 async function load(){products=await api('products');render();status('تعداد محصولات: '+products.length)}
 
@@ -292,7 +293,7 @@ async function loadHealthArchive(){
    const note=document.createElement('p');note.style.whiteSpace='pre-wrap';note.textContent=row.note||'بدون توضیحات';
    const evidence=document.createElement('div');evidence.className='muted';evidence.textContent=row.evidenceType==='online_decision'?'مدرک: ثبت مستقیم نتیجه از طریق لینک اختصاصی (بدون تصویر اسکرین‌شات)':row.hasEvidence?'مدرک تصویری در بایگانی خصوصی ثبت شده است.':'مدرک تصویری ثبت نشده است.';
    box.append(title,meta,note,evidence);
-   if(row.hasEvidence){const view=document.createElement('button');view.className='secondary';view.textContent='نمایش تصویر مدرک';view.onclick=()=>window.open('/api/admin/health-archive/'+encodeURIComponent(row.id)+'/evidence','_blank','noopener');box.append(view)}
+   if(row.hasEvidence){const view=document.createElement('button');view.className='secondary';view.textContent='نمایش تصویر مدرک';view.onclick=()=>window.open(PANEL_PREFIX+'/api/admin/health-archive/'+encodeURIComponent(row.id)+'/evidence','_blank','noopener');box.append(view)}
    if(row.telegramNotification){const delivery=document.createElement('div');delivery.className='muted';delivery.textContent='وضعیت اعلان تلگرام: '+row.telegramNotification.status;box.append(delivery)}
    host.append(box);
   });
@@ -403,7 +404,7 @@ function bindPatternPad(id){
 }
 async function initPatternLogin(){
  adminLoginPad=bindPatternPad("patternLoginPad");adminFirstPad=bindPatternPad("patternFirstPad");adminSecondPad=bindPatternPad("patternSecondPad");
- try{const r=await fetch("/api/admin/pattern/status",{credentials:"same-origin"});const d=await r.json();
+ try{const r=await fetch(PANEL_PREFIX+"/api/admin/pattern/status",{credentials:"same-origin"});const d=await r.json();
   if(d.configured){$("passwordStage").classList.add("hidden");$("patternLoginStage").classList.remove("hidden");$("patternHint").textContent="ورود مالک با الگوی ترسیمی فعال است."}
   else{$("patternHint").textContent="برای راه‌اندازی اولیه، رمز فعلی مدیریت را وارد کنید."}
  }catch{$("patternHint").textContent="وضعیت ورود دریافت نشد؛ اتصال سرور را بررسی کنید."}
@@ -447,7 +448,7 @@ function renderHealthResearchQueue(){
   const compositionSelect=document.createElement('select');[['missing','دریافت نشده'],['received','دریافت شده'],['checked','بررسی شده']].forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;compositionSelect.append(o)});compositionSelect.value=item.compositionStatus||'missing';field('وضعیت مدرک ترکیبات',compositionSelect);
   const evidenceList=document.createElement('div');evidenceList.style.margin='10px 0';
   const evidenceHeading=document.createElement('strong');evidenceHeading.textContent='مدارک بارگذاری‌شده (فقط مدیر دسترسی دارد)';evidenceList.append(evidenceHeading);
-  (item.evidence||[]).forEach(doc=>{const row=document.createElement('p');row.className='muted';const link=document.createElement('a');link.href='/api/admin/health-research/evidence/'+encodeURIComponent(doc.id);link.target='_blank';link.rel='noopener noreferrer';link.textContent=(doc.type==='label'?'مدرک برچسب':doc.type==='composition'?'مدرک ترکیبات':'مدرک تکمیلی')+' · '+doc.originalName;row.append(link);const detail=document.createTextNode(' · '+Math.ceil(Number(doc.size||0)/1024)+' KB · '+(doc.uploadedAt||''));row.append(detail);evidenceList.append(row)});
+  (item.evidence||[]).forEach(doc=>{const row=document.createElement('p');row.className='muted';const link=document.createElement('a');link.href=PANEL_PREFIX+'/api/admin/health-research/evidence/'+encodeURIComponent(doc.id);link.target='_blank';link.rel='noopener noreferrer';link.textContent=(doc.type==='label'?'مدرک برچسب':doc.type==='composition'?'مدرک ترکیبات':'مدرک تکمیلی')+' · '+doc.originalName;row.append(link);const detail=document.createTextNode(' · '+Math.ceil(Number(doc.size||0)/1024)+' KB · '+(doc.uploadedAt||''));row.append(detail);evidenceList.append(row)});
   if(!(item.evidence||[]).length){const empty=document.createElement('p');empty.className='muted';empty.textContent='هنوز مدرکی بارگذاری نشده است.';evidenceList.append(empty)}
   card.append(evidenceList);
   const addEvidenceUpload=(type,label)=>{
