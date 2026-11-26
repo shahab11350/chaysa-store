@@ -103,7 +103,7 @@ function isBostani(req) {
   let decoded;
   try { decoded = decodeURIComponent(supplied); } catch (_) { return false; }
   const access = process.env.BOSTANI_ACCESS_TOKEN || "";
-  if (access && verifySecret(decoded, access)) return true;
+  if (!panelPatternAuth.configured("bostani") && access && verifySecret(decoded, access)) return true;
   const parts = decoded.split(".");
   if (parts.length !== 2 || !/^\d+$/.test(parts[0]) || Number(parts[0]) < Date.now() || !bostaniSecret) return false;
   return verifySecret(parts[1], signBostani(parts[0]));
@@ -1702,6 +1702,7 @@ app.post("/api/admin/questions/:id/reply",requireAdmin,async(req,res)=>{
   return json(res,200,{ok:true,status:q.status,repliedAt:q.repliedAt});
 });
 app.get("/bostani.html", (req, res, next) => {
+  if (panelPatternAuth.configured("bostani") && req.query.key) return res.sendStatus(404);
   const access = process.env.BOSTANI_ACCESS_TOKEN || "";
   const supplied = typeof req.query.key === "string" ? req.query.key : "";
   if (access && supplied) {
