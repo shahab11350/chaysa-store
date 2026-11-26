@@ -95,7 +95,6 @@ function requireAdmin(req, res, next) {
   if (origin && origin !== req.protocol + "://" + req.get("host")) return json(res, 403, { error: "درخواست نامعتبر است." });
   next();
 }
-const bostaniSecret = process.env.BOSTANI_ACCESS_PASSWORD || "";
 function signBostani(value) { return crypto.createHmac("sha256", bostaniSecret).update(value).digest("hex"); }
 function isBostani(req) {
   const raw = req.headers.cookie || "";
