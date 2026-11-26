@@ -47,6 +47,7 @@ app.use((req, res, next) => {
       req.url = (remainder && remainder !== "/" ? remainder : page) + search;
     }
   }
+  if (PREVIEW_MODE && req.path === "/products-seed.json") return res.sendStatus(404);
   if (PREVIEW_MODE && !["GET", "HEAD"].includes(req.method.toUpperCase())) {
     const allowed = new Set([
       "/api/admin/login", "/api/admin/pattern/setup", "/api/admin/logout",
